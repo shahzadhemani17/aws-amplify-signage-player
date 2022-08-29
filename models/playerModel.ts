@@ -1,0 +1,20 @@
+export enum EntryType {
+  IS_WEB = "is_web_url",
+  IS_MENU = "is_menu",
+  IS_AD_SLOT = "is_ad_slot",
+  IS_RSS_FEED = "is_rss_feed",
+}
+
+export enum HtmlEnum {
+  IMAGE = "image",
+  iFRAME = "iframe",
+  VIDEO = "video",
+}
+
+export interface PlayerModel {
+  id: number;
+  tag: string;
+  url: string;
+  duration: number;
+  visibility: boolean;
+}
