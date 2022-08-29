@@ -55,11 +55,13 @@ export const getServerSideProps = async (context: NextPageContext) => {
         },
       };
     } catch (err) {
+      console.log("crash ");
       return {
         props: { playlistData: { status: ResponseType.ERROR, data: {} } },
       };
     }
   }
+  console.log("No playlist id ");
 
   return {
     props: { playlistData: { status: ResponseType.SUCCESS, data: {} } },
