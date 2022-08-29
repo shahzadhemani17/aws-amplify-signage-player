@@ -31,6 +31,7 @@ const Home: NextPage = (props: any) => {
 export default Home;
 
 export const getServerSideProps = async (context: NextPageContext) => {
+  console.log("Request for playlist ");
   if (context.query?.playlist_id) {
     try {
       const res = await fetch(
