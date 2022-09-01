@@ -1,3 +1,5 @@
+import { LegacyRef } from "react";
+
 export enum EntryType {
   IS_WEB = "is_web_url",
   IS_MENU = "is_menu",
@@ -17,4 +19,10 @@ export interface PlayerModel {
   url: string;
   duration: number;
   visibility: boolean;
+}
+
+export interface PlayerPropsModel {
+  index: number,
+  playlist: PlayerModel,
+  vidRef?: LegacyRef<HTMLVideoElement>
 }

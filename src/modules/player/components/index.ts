@@ -1,2 +1,2 @@
 export * from  "./EmptyPlayer";
-export * from  "./SKPlayer";
+export * from  "./SKPlayer/SKPlayer";
