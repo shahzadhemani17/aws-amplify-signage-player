@@ -1,19 +1,18 @@
 import React from "react";
 import { PlayerPropsModel } from "@models/playerModel";
+import styles from "../../../../../../styles/Home.module.css";
 
 export const SKVideo = (props: PlayerPropsModel) => {
-  const { vidRef, index, playlist } = props;
+  const { videoRef, index, playlist } = props;
   return (
     <video
-      ref={vidRef}
+      className={styles.player}
+      ref={videoRef}
       autoPlay
       loop
       muted
       key={index}
       style={{
-        height: "99vh",
-        objectFit: "cover",
-        width: "100%",
         display: playlist.visibility ? "" : "none",
       }}
     >

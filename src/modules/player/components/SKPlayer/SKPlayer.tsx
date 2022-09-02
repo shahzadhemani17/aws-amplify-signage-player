@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { sleep } from "../../helpers/player.helper";
+import { HtmlEnum, PlayerModel, EntriesModel } from "@models/playerModel";
 import { SKImage, SKIframe, SKVideo } from "@playerComponents/SKPlayer/components/index";
 
-export const SKPlayer = (props: any) => {
-  const [playlists, setPlaylists] = useState([...props.entries]);
+export const SKPlayer = ({ entries }: EntriesModel) => {
+  const [playlists, setPlaylists] = useState([...entries]);
 
   const vidRef = useRef(null);
 
@@ -34,24 +35,23 @@ export const SKPlayer = (props: any) => {
   return (
     <div>
       {playlists?.map((playlist, index) => {
-        if (playlist.tag === "video") {
-          <SKVideo
-            vidRef={vidRef}
-            playlist={playlist}
-            index={index}
-          />
-        } else if (playlist.tag === "image") {
-          <SKImage
-            playlist={playlist}
-            index={index}
-          />
-        } else if (playlist.tag === "iframe") {
-          return (
-            <SKIframe
+        switch (playlist.tag) {
+          case HtmlEnum.VIDEO:
+            return <SKVideo
+              videoRef={vidRef}
               playlist={playlist}
               index={index}
             />
-          );
+          case HtmlEnum.iFRAME:
+            return <SKIframe
+              playlist={playlist}
+              index={index}
+            />
+          default:
+            return <SKImage
+              playlist={playlist}
+              index={index}
+            />
         }
       })}
     </div>

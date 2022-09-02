@@ -21,8 +21,12 @@ export interface PlayerModel {
   visibility: boolean;
 }
 
+export interface EntriesModel {
+  entries: PlayerModel[]
+}
+
 export interface PlayerPropsModel {
   index: number,
   playlist: PlayerModel,
-  vidRef?: LegacyRef<HTMLVideoElement>
+  videoRef?: LegacyRef<HTMLVideoElement>
 }
