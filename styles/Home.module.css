@@ -103,6 +103,12 @@
   margin-left: 0.5rem;
 }
 
+.player {
+  height: 99vh;
+  object-fit: contain;
+  width: 100%;
+}
+
 @media (max-width: 600px) {
   .grid {
     width: 100%;
