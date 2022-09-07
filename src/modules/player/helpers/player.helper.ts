@@ -20,6 +20,7 @@ const populatePlayer = (
 
 export const convertJSON = (playlist: any) => {
   const result: PlayerModel[] = [];
+  playlist.entries.sort((a:any, b:any) => parseFloat(a.position) - parseFloat(b.position));
   playlist?.entries.map((entry: any) => {
     if (entry.is_web_url === true || entry.is_menu === true) {
       result.push(
