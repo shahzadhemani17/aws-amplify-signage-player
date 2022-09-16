@@ -24,7 +24,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "env-cmd -f .env next build",
     "build:production": "env-cmd -f .env next build",
     "start": "next start",
     "lint": "next lint"
