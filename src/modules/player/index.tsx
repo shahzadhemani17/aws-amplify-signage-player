@@ -7,7 +7,7 @@ export const Player = ({ playlistData }: any) => {
   return (
     <Fragment>
       {playlistData.data.entries && playlistData.data.entries.length ? (
-        <SKPlayer entries={response.convertedPlaylist} />
+        <SKPlayer entries={response.convertedPlaylist} transition={response.transition} />
       ) : (
         <EmptyPlayer message={response.message} />
       )}
