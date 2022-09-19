@@ -20,7 +20,7 @@ const populatePlayer = (
 
 export const convertJSON = (playlist: any) => {
   const result: PlayerModel[] = [];
-  playlist.entries.sort((a:any, b:any) => parseFloat(a.position) - parseFloat(b.position));
+  playlist.entries.sort((a: any, b: any) => parseFloat(a.position) - parseFloat(b.position));
   playlist?.entries.map((entry: any) => {
     if (entry.is_web_url === true || entry.is_menu === true) {
       result.push(
@@ -50,6 +50,7 @@ export const convertJSON = (playlist: any) => {
 
 export const getPlaylistEntries = (playlistData: any) => {
   let convertedPlaylist: PlayerModel[] = [];
+  let transition: string = "";
   let message: string = "";
 
   if (playlistData.data.code === "not-found") {
@@ -63,10 +64,11 @@ export const getPlaylistEntries = (playlistData: any) => {
     message = PlaylistMessages.PROVIDE_PLAYLIST_ID;
   } else if (playlistData.data.entries.length !== 0) {
     convertedPlaylist = convertJSON(playlistData.data);
+    transition = playlistData.data.transition;
   } else {
     message = PlaylistMessages.ENTRIES_NOT_FOUND;
   }
-  return { convertedPlaylist, message };
+  return { convertedPlaylist, message, transition };
 };
 
 export const sleep = (ms: number) => {

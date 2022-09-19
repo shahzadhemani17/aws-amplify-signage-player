@@ -22,11 +22,13 @@ export interface PlayerModel {
 }
 
 export interface EntriesModel {
-  entries: PlayerModel[]
+  entries: PlayerModel[];
+  transition: string;
 }
 
 export interface PlayerPropsModel {
-  index: number,
-  playlist: PlayerModel,
-  videoRef?: LegacyRef<HTMLVideoElement>
+  index: number;
+  playlist: PlayerModel;
+  videoRef?: LegacyRef<HTMLVideoElement>;
+  transition: string;
 }
