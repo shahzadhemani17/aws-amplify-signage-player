@@ -19,7 +19,7 @@ export const SKTransition = (props: any) => {
     )
   } else {
     return (
-      <Flip>
+      <Flip left>
         {props.children}
       </Flip>
     )
