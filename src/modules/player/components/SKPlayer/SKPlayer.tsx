@@ -1,9 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { sleep } from "../../helpers/player.helper";
-import { HtmlEnum, PlayerModel, EntriesModel } from "@models/playerModel";
+import { HtmlEnum, EntriesModel } from "@models/playerModel";
 import { SKImage, SKIframe, SKVideo } from "@playerComponents/SKPlayer/components/index";
-import Fade from 'react-reveal/Fade';
-import Flip from 'react-reveal/Flip';
 
 export const SKPlayer = ({ entries, transition }: EntriesModel) => {
   const [playlists, setPlaylists] = useState([...entries]);
@@ -44,18 +42,21 @@ export const SKPlayer = ({ entries, transition }: EntriesModel) => {
               playlist={playlist}
               index={index}
               transition={transition}
+              key={index}
             />
           case HtmlEnum.iFRAME:
             return <SKIframe
               playlist={playlist}
               index={index}
               transition={transition}
+              key={index}
             />
           default:
             return <SKImage
               playlist={playlist}
               index={index}
               transition={transition}
+              key={index}
             />
         }
       })}
