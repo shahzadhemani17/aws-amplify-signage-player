@@ -35,7 +35,7 @@ export const SKPlayer = ({ entries, transition }: EntriesModel) => {
   };
 
   return (
-    <div >
+    <div>
       {playlists?.map((playlist, index) => {
         switch (playlist.tag) {
           case HtmlEnum.VIDEO:
