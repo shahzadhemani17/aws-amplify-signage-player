@@ -5,6 +5,7 @@ import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { Player } from "src/modules/player";
 import Amplify from 'aws-amplify';
 import awsConfig from '../src/aws-exports';
+import {getPlaylistData} from '../lib/scoop.repo';
 
 
 // configure amplify for cloud communication
@@ -34,16 +35,7 @@ export const getServerSideProps = async (context: NextPageContext) => {
   console.log("Request for playlist ");
   if (context.query?.playlist_id) {
     try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/playlists/${context.query?.playlist_id}/entries`,
-        {
-          method: "GET",
-          headers: new Headers({
-            Authorization: "Bearer ghfutrd754d6ufiytfg97tf968",
-            "Content-Type": "application/json",
-          }),
-        }
-      );
+      const res = await getPlaylistData(context?.query.playlist_id);
       const apiResponse = await res.json();
       const playlistResponse: PlaylistResponse = {
         status: ResponseType.SUCCESS,
