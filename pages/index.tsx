@@ -5,15 +5,15 @@ import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { Player } from "src/modules/player";
 import Amplify from 'aws-amplify';
 import awsConfig from '../src/aws-exports';
-import {getPlaylistData} from '../lib/scoop.repo';
+import { getPlaylistData, getScreenDetails } from '../lib/scoop.repo';
 
 
 // configure amplify for cloud communication
 Amplify.configure(awsConfig);
 
 const Home: NextPage = (props: any) => {
-  console.log("Props Response", props.playlistData);
-  
+  //console.log("Props Response", props.playlistData);
+
   return (
     <div>
       <Head>
@@ -31,21 +31,27 @@ const Home: NextPage = (props: any) => {
 
 export default Home;
 
+const playlistResponse = async (playlistDataRsponse) => {
+  const apiResponse = await playlistDataRsponse.json();
+  const playlistResponse: PlaylistResponse = {
+    status: ResponseType.SUCCESS,
+    data: apiResponse,
+  };
+  return {
+    props: {
+      playlistData: playlistResponse,
+    },
+  };
+}
+
 export const getServerSideProps = async (context: NextPageContext) => {
   console.log("Request for playlist ");
-  if (context.query?.playlist_id) {
+  if (context?.query.screen_id) {
     try {
-      const res = await getPlaylistData(context?.query.playlist_id);
-      const apiResponse = await res.json();
-      const playlistResponse: PlaylistResponse = {
-        status: ResponseType.SUCCESS,
-        data: apiResponse,
-      };
-      return {
-        props: {
-          playlistData: playlistResponse,
-        },
-      };
+      const screenDetailResponse = await getScreenDetails(context?.query.screen_id);
+      const apiResponse = await screenDetailResponse.json();
+      const playlistDataRsponse = await getPlaylistData(apiResponse.playlist_id);
+      return playlistResponse(playlistDataRsponse)
     } catch (err) {
       console.log("crash ");
       return {
@@ -53,8 +59,17 @@ export const getServerSideProps = async (context: NextPageContext) => {
       };
     }
   }
-  console.log("No playlist id ");
-
+  else if (context.query?.playlist_id && !context.query.screen_id) {
+    try {
+      const playlistDataResponse = await getPlaylistData(context?.query.playlist_id);
+      return playlistResponse(playlistDataResponse)
+    } catch (err) {
+      console.log("crash ");
+      return {
+        props: { playlistData: { status: ResponseType.ERROR, data: {} } },
+      };
+    }
+  }
   return {
     props: { playlistData: { status: ResponseType.SUCCESS, data: {} } },
   };
