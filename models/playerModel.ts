@@ -24,6 +24,8 @@ export interface PlayerModel {
 export interface EntriesModel {
   entries: PlayerModel[];
   transition: string;
+  refresh_duration: number;
+  playlist_id: number;
 }
 
 export interface PlayerPropsModel {
