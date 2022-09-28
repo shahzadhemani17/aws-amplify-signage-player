@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { sleep } from "../../helpers/player.helper";
+import { sleep, fetchScreenDetailsByDuration } from "../../helpers/player.helper";
 import { HtmlEnum, EntriesModel } from "@models/playerModel";
 import { SKImage, SKIframe, SKVideo } from "@playerComponents/SKPlayer/components/index";
+import InlineWorker from "../../../../../lib/InlineWorker";
 
-export const SKPlayer = ({ entries, transition }: EntriesModel) => {
+export const SKPlayer = ({ entries, transition, refresh_duration, playlist_id }: EntriesModel) => {
   const [playlists, setPlaylists] = useState([...entries]);
 
   const vidRef = useRef(null);
@@ -14,6 +15,15 @@ export const SKPlayer = ({ entries, transition }: EntriesModel) => {
 
   useEffect(() => {
     setVisiblePlaylist();
+    localStorage.setItem('playlist', JSON.stringify(entries));
+    if (window.Worker && navigator.onLine) {
+      const inlineWorker = new InlineWorker(
+        fetchScreenDetailsByDuration(
+          playlist_id,
+          refresh_duration
+        )
+      );
+    }
   }, []);
 
   const setVisiblePlaylist = async () => {

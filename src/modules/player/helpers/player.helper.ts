@@ -1,7 +1,9 @@
 import { HtmlEnum, PlayerModel } from "@models/playerModel";
-import { ResponseType } from "@models/playlistResponseModel";
+import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { PlaylistMessages } from "../player.constant";
 import moment from "moment";
+import { getScreenDetails, getPlaylistData } from "lib/scoop.repo";
+import { sectionBody } from "aws-amplify";
 
 const populatePlayer = (
   duration: number,
@@ -14,7 +16,7 @@ const populatePlayer = (
     tag: tag,
     url: url,
     duration: duration * 1000,
-    visibility: false,
+    visibility: true,
   };
   return player;
 };
@@ -55,7 +57,8 @@ export const getPlaylistEntries = (playlistData: any) => {
   let convertedPlaylist: PlayerModel[] = [];
   let transition: string = "";
   let message: string = "";
-
+  let is_edited: number = 0;
+  let refresh_duration: number = 0;
   if (playlistData.data.code === "not-found") {
     message = PlaylistMessages.PLAYLIST_NOT_EXISTS;
   } else if (
@@ -70,10 +73,12 @@ export const getPlaylistEntries = (playlistData: any) => {
     const scheduledEntries = checkScheduledPlayList(playlistClone);
     convertedPlaylist = convertJSON(scheduledEntries.playListWithValidEntries);
     transition = playlistData.data.transition;
+    is_edited = playlistData.data.is_edited;
+    refresh_duration = playlistData.data.default_duration_sec;
   } else {
     message = PlaylistMessages.ENTRIES_NOT_FOUND;
   }
-  return { convertedPlaylist, message, transition };
+  return { convertedPlaylist, message, transition, is_edited, refresh_duration };
 };
 
 export const sleep = (ms: number) => {
@@ -107,7 +112,7 @@ const checkValidMomentDates = (type: string, dates: any) => {
 };
 
 function checkScheduledPlayList(playList: any) {
-  const entries = playList.map((entry: any) => {
+  const entries = playList?.map((entry: any) => {
     const { scheduled_criteria } = entry;
     if (scheduled_criteria === "") {
       entry.isValidScheduled = true;
@@ -228,4 +233,39 @@ function checkScheduledPlayList(playList: any) {
   });
   playList.entries = scheduledEntries;
   return { playListWithValidEntries: playList, notValidScheduleFound };
+}
+
+export async function fetchScreenDetailsByDuration(
+  playlist_id: number,
+	duration: number = 5000
+): Promise<any> {
+	await wait(10 * 1000);
+  let playListRes;
+  if (playlist_id){
+    playListRes = await getPlaylistData(playlist_id);
+  }
+	if (playListRes) {
+		const playListLatest = await playListRes.json();
+    const playlistResponse: PlaylistResponse = {
+      status: ResponseType.SUCCESS,
+      data: playListLatest,
+    };
+    const latestPlaylist = getPlaylistEntries(playlistResponse);
+    const playlist = localStorage.getItem('playlist');
+   let existingPlayList =[];
+		if (playlist){
+       existingPlayList = JSON.parse(playlist); 
+    }
+		if ((latestPlaylist.convertedPlaylist?.length !== existingPlayList?.length) && latestPlaylist.is_edited === 0) {
+			window.location.reload();
+		}
+		if ((JSON.stringify(existingPlayList) != JSON.stringify(latestPlaylist.convertedPlaylist)) && latestPlaylist.is_edited === 0) {
+			window.location.reload();
+		}
+	}
+	return fetchScreenDetailsByDuration(playlist_id, duration);
+}
+
+export async function wait(ms: number) {
+	return new Promise((res) => setTimeout(res, ms));
 }
