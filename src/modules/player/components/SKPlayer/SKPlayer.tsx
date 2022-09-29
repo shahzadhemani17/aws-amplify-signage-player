@@ -15,15 +15,21 @@ export const SKPlayer = ({ entries, transition, refresh_duration, playlist_id }:
 
   useEffect(() => {
     setVisiblePlaylist();
-    localStorage.setItem('playlist', JSON.stringify(entries));
-    if (window.Worker && navigator.onLine) {
-      const inlineWorker = new InlineWorker(
-        fetchScreenDetailsByDuration(
-          playlist_id,
-          refresh_duration
-        )
-      );
+    if (navigator.cookieEnabled && typeof window.localStorage !== 'undefined') {
+      localStorage.setItem('playlist', JSON.stringify(entries));
+      if (window.Worker && navigator.onLine) {
+        const inlineWorker = new InlineWorker(
+          fetchScreenDetailsByDuration(
+            playlist_id,
+            refresh_duration
+          )
+        );
+      }
+    } else {
+      setPlaylists([]);
+      alert("No Playlist Available");
     }
+
   }, []);
 
   const setVisiblePlaylist = async () => {
