@@ -4,6 +4,7 @@ import { sleep, fetchScreenDetailsByDuration } from "../../helpers/player.helper
 import { HtmlEnum, EntriesModel } from "@models/playerModel";
 import { SKImage, SKIframe, SKVideo } from "@playerComponents/SKPlayer/components/index";
 import InlineWorker from "../../../../../lib/InlineWorker";
+/* @ts-ignore */
 import Modal from 'react-modal';
 import cookie from '../../../../../public/cookie.png';
 import { styles } from "../../../../../styles/player";
