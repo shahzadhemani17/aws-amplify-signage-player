@@ -1,11 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { sleep, fetchScreenDetailsByDuration } from "../../helpers/player.helper";
 import { HtmlEnum, EntriesModel } from "@models/playerModel";
 import { SKImage, SKIframe, SKVideo } from "@playerComponents/SKPlayer/components/index";
 import InlineWorker from "../../../../../lib/InlineWorker";
+import Modal from 'react-modal';
+import cookie from '../../../../../public/cookie.png';
+import { styles } from "../../../../../styles/player";
 
 export const SKPlayer = ({ entries, transition, refresh_duration, playlist_id }: EntriesModel) => {
   const [playlists, setPlaylists] = useState([...entries]);
+  const [modalIsOpen, setIsOpen] = useState(false);
 
   const vidRef = useRef(null);
 
@@ -14,8 +19,8 @@ export const SKPlayer = ({ entries, transition, refresh_duration, playlist_id }:
   };
 
   useEffect(() => {
-    setVisiblePlaylist();
     if (navigator.cookieEnabled && typeof window.localStorage !== 'undefined') {
+      setVisiblePlaylist();
       localStorage.setItem('playlist', JSON.stringify(entries));
       if (window.Worker && navigator.onLine) {
         const inlineWorker = new InlineWorker(
@@ -27,7 +32,10 @@ export const SKPlayer = ({ entries, transition, refresh_duration, playlist_id }:
       }
     } else {
       setPlaylists([]);
-      alert("No Playlist Available");
+      //alert("No Playlist Available");
+      //playlists.length = 0;
+      console.log("pl", playlists)
+      setIsOpen(true);
     }
 
   }, []);
@@ -76,6 +84,17 @@ export const SKPlayer = ({ entries, transition, refresh_duration, playlist_id }:
             />
         }
       })}
+      <Modal
+        isOpen={modalIsOpen}
+        style={styles.modalStyles}
+        contentLabel="Example Modal"
+      >
+        <div style={styles.container}>
+          <Image width="150px" height="150px" src={cookie} alt="as" />
+          <h1 style={{ color: "black" }}>We use cookies</h1>
+          <h3 style={styles.h3}>This website uses cookies to ensure you get the best experience on our website. So please enable cookies to continue.</h3>
+        </div>
+      </Modal>
     </div>
   );
 };
