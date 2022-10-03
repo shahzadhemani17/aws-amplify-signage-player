@@ -23,7 +23,7 @@ export const SKPlayer = ({ entries, transition, refresh_duration, playlist_id, s
           refresh_duration
         )
       );
-      const pulse = new InlineWorker(uplodPulse(screen_id));
+      const pulse = screen_id && new InlineWorker(uplodPulse(screen_id));
     }
   }, []);
 
