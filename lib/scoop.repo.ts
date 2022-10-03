@@ -22,3 +22,20 @@ export const getScreenDetails = (screen_id) => {
     }
   );
 }
+
+export async function postPulse(screenId: number) {console.log("pulse")
+	try {
+		const response = await fetch(
+			`${process.env.NEXT_PUBLIC_API_URL}/pulse/record/${screenId}`,
+			{
+				method: "PATCH",
+				headers: headers
+			}
+		);
+		console.log("response",response);
+		return response;
+	} catch (err) {
+		console.log("Unexpected error occured during fetch",err);
+		return err;
+	}
+}

@@ -23,7 +23,7 @@ const Home: NextPage = (props: any) => {
       </Head>
 
       <main className={styles.main}>
-        <Player playlistData={props.playlistData} />
+        <Player playlistData={props.playlistData} screenId={props.screen_id} />
       </main>
     </div>
   );
@@ -31,7 +31,7 @@ const Home: NextPage = (props: any) => {
 
 export default Home;
 
-const playlistResponse = async (playlistDataRsponse) => {
+const playlistResponse = async (playlistDataRsponse, screen_id) => {
   const apiResponse = await playlistDataRsponse.json();
   const playlistResponse: PlaylistResponse = {
     status: ResponseType.SUCCESS,
@@ -40,6 +40,7 @@ const playlistResponse = async (playlistDataRsponse) => {
   return {
     props: {
       playlistData: playlistResponse,
+      screen_id
     },
   };
 }
@@ -51,7 +52,7 @@ export const getServerSideProps = async (context: NextPageContext) => {
       const screenDetailResponse = await getScreenDetails(context?.query.screen_id);
       const apiResponse = await screenDetailResponse.json();
       const playlistDataRsponse = await getPlaylistData(apiResponse.playlist_id);
-      return playlistResponse(playlistDataRsponse)
+      return playlistResponse(playlistDataRsponse, context.query.screen_id)
     } catch (err) {
       console.log("crash ");
       return {
@@ -62,7 +63,7 @@ export const getServerSideProps = async (context: NextPageContext) => {
   else if (context.query?.playlist_id && !context.query.screen_id) {
     try {
       const playlistDataResponse = await getPlaylistData(context?.query.playlist_id);
-      return playlistResponse(playlistDataResponse)
+      return playlistResponse(playlistDataResponse, null)
     } catch (err) {
       console.log("crash ");
       return {
