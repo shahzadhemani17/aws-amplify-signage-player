@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
-import { sleep, fetchScreenDetailsByDuration } from "../../helpers/player.helper";
+import { sleep, fetchScreenDetailsByDuration, uplodPulse } from "../../helpers/player.helper";
 import { HtmlEnum, EntriesModel } from "@models/playerModel";
 import { SKImage, SKIframe, SKVideo } from "@playerComponents/SKPlayer/components/index";
 import InlineWorker from "../../../../../lib/InlineWorker";
 
-export const SKPlayer = ({ entries, transition, refresh_duration, playlist_id }: EntriesModel) => {
+export const SKPlayer = ({ entries, transition, refresh_duration, playlist_id, screen_id }: EntriesModel) => {
   const [playlists, setPlaylists] = useState([...entries]);
 
   const vidRef = useRef(null);
@@ -23,6 +23,7 @@ export const SKPlayer = ({ entries, transition, refresh_duration, playlist_id }:
           refresh_duration
         )
       );
+      const pulse = new InlineWorker(uplodPulse(screen_id));
     }
   }, []);
 

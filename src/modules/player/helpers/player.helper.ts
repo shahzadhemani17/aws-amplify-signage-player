@@ -2,7 +2,7 @@ import { HtmlEnum, PlayerModel } from "@models/playerModel";
 import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { PlaylistMessages } from "../player.constant";
 import moment from "moment";
-import { getScreenDetails, getPlaylistData } from "lib/scoop.repo";
+import { getPlaylistData, postPulse } from "lib/scoop.repo";
 import { sectionBody } from "aws-amplify";
 
 const populatePlayer = (
@@ -268,4 +268,10 @@ export async function fetchScreenDetailsByDuration(
 
 export async function wait(ms: number) {
 	return new Promise((res) => setTimeout(res, ms));
+}
+
+export async function uplodPulse(screenId: number): Promise<any> {console.log("uploadpulse")
+	await wait(60000);
+	await postPulse(screenId);
+	return uplodPulse(screenId);
 }
