@@ -165,7 +165,25 @@ function checkScheduledPlayList(playList: any) {
           }
         }
         if (time_from && time_to) {
-          if (!date_from || date_from === "" || date_from === "" || !date_to) {
+          if (
+            (!day || !day.length) &&
+            (!date_from || date_from === "" || !date_to || date_to === "")
+          ) {
+            const withinTime = checkValidMomentDates("withinTime", {
+              time_from,
+              time_to,
+            });
+            if (withinTime) {
+              entry.isValidScheduled = true;
+            } else {
+              entry.isValidScheduled = false;
+            }
+          } else if (
+            !date_from ||
+            date_from === "" ||
+            date_from === "" ||
+            !date_to
+          ) {
             if (day && day.length) {
               const weekDayName = moment().format("dddd");
               const withinTime = checkValidMomentDates("withinTime", {
