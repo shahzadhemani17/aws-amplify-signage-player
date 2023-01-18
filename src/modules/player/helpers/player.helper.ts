@@ -2,7 +2,7 @@ import { HtmlEnum, PlayerModel } from "@models/playerModel";
 import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { PlaylistMessages } from "../player.constant";
 import moment from "moment";
-import { getScreenDetails, getPlaylistData } from "lib/scoop.repo";
+import { getScreenDetails, getPlaylistData, getBackendUrl, getQueryParams } from "lib/scoop.repo";
 import { sectionBody } from "aws-amplify";
 
 const populatePlayer = (
@@ -260,7 +260,9 @@ export async function fetchScreenDetailsByDuration(
 	await wait(10 * 1000);
   let playListRes;
   if (playlist_id){
-    playListRes = await getPlaylistData(playlist_id);
+    const params = getQueryParams();
+    const backendUrl = getBackendUrl(params.backendUrl);
+    playListRes = await getPlaylistData(playlist_id, backendUrl);
   }
 	if (playListRes) {
 		const playListLatest = await playListRes.json();

@@ -5,7 +5,7 @@ import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { Player } from "src/modules/player";
 import Amplify from 'aws-amplify';
 import awsConfig from '../src/aws-exports';
-import { getPlaylistData, getScreenDetails } from '../lib/scoop.repo';
+import { getBackendUrl, getPlaylistData, getScreenDetails } from '../lib/scoop.repo';
 
 
 // configure amplify for cloud communication
@@ -46,11 +46,13 @@ const playlistResponse = async (playlistDataRsponse) => {
 
 export const getServerSideProps = async (context: NextPageContext) => {
   console.log("Request for playlist ");
+  const backendUrl = getBackendUrl(context?.query.backend_url);
+  console.log("backendurl", backendUrl);
   if (context?.query.screen_id) {
     try {
-      const screenDetailResponse = await getScreenDetails(context?.query.screen_id);
+      const screenDetailResponse = await getScreenDetails(context?.query.screen_id, backendUrl);
       const apiResponse = await screenDetailResponse.json();
-      const playlistDataRsponse = await getPlaylistData(apiResponse.playlist_id);
+      const playlistDataRsponse = await getPlaylistData(apiResponse.playlist_id, backendUrl);
       return playlistResponse(playlistDataRsponse)
     } catch (err) {
       console.log("crash ");
@@ -61,7 +63,7 @@ export const getServerSideProps = async (context: NextPageContext) => {
   }
   else if (context.query?.playlist_id && !context.query.screen_id) {
     try {
-      const playlistDataResponse = await getPlaylistData(context?.query.playlist_id);
+      const playlistDataResponse = await getPlaylistData(context?.query.playlist_id, backendUrl);
       return playlistResponse(playlistDataResponse)
     } catch (err) {
       console.log("crash ");
