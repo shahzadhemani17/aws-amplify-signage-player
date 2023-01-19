@@ -30,11 +30,3 @@ export const getQueryParams = () => {
     backendUrl
   };
 };
-
-
-export const getBackendUrl = (backendUrl) => {
-  if (backendUrl) {
-    return backendUrl
-  }
-  return process.env.NEXT_PUBLIC_API_URL;
-}
