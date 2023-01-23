@@ -45,13 +45,13 @@ const playlistResponse = async (playlistDataRsponse) => {
 }
 
 export const getServerSideProps = async (context: NextPageContext) => {
-  console.log("Request for playlist ");
-  console.log("backendurl", context?.query.backend_url);
+  const backendUrl = context?.query.backend_url ? context?.query.backend_url : process.env.NEXT_PUBLIC_API_URL;
+  console.log("backendurl", "public-url", backendUrl);
   if (context?.query.screen_id) {
     try {
-      const screenDetailResponse = await getScreenDetails(context?.query.screen_id, context?.query.backend_url);
+      const screenDetailResponse = await getScreenDetails(context?.query.screen_id, backendUrl);
       const apiResponse = await screenDetailResponse.json();
-      const playlistDataRsponse = await getPlaylistData(apiResponse.playlist_id, context?.query.backend_url);
+      const playlistDataRsponse = await getPlaylistData(apiResponse.playlist_id, backendUrl);
       return playlistResponse(playlistDataRsponse)
     } catch (err) {
       console.log("crash ");
@@ -62,7 +62,7 @@ export const getServerSideProps = async (context: NextPageContext) => {
   }
   else if (context.query?.playlist_id && !context.query.screen_id) {
     try {
-      const playlistDataResponse = await getPlaylistData(context?.query.playlist_id, context?.query.backend_url);
+      const playlistDataResponse = await getPlaylistData(context?.query.playlist_id, backendUrl);
       return playlistResponse(playlistDataResponse)
     } catch (err) {
       console.log("crash ");
