@@ -46,11 +46,12 @@ const playlistResponse = async (playlistDataRsponse) => {
 
 export const getServerSideProps = async (context: NextPageContext) => {
   console.log("Request for playlist ");
+  console.log("backendurl", context?.query.backend_url);
   if (context?.query.screen_id) {
     try {
-      const screenDetailResponse = await getScreenDetails(context?.query.screen_id);
+      const screenDetailResponse = await getScreenDetails(context?.query.screen_id, context?.query.backend_url);
       const apiResponse = await screenDetailResponse.json();
-      const playlistDataRsponse = await getPlaylistData(apiResponse.playlist_id);
+      const playlistDataRsponse = await getPlaylistData(apiResponse.playlist_id, context?.query.backend_url);
       return playlistResponse(playlistDataRsponse)
     } catch (err) {
       console.log("crash ");
@@ -61,7 +62,7 @@ export const getServerSideProps = async (context: NextPageContext) => {
   }
   else if (context.query?.playlist_id && !context.query.screen_id) {
     try {
-      const playlistDataResponse = await getPlaylistData(context?.query.playlist_id);
+      const playlistDataResponse = await getPlaylistData(context?.query.playlist_id, context?.query.backend_url);
       return playlistResponse(playlistDataResponse)
     } catch (err) {
       console.log("crash ");

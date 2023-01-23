@@ -3,9 +3,9 @@ const headers = new Headers({
   "Content-Type": "application/json",
 })
 
-export const getPlaylistData = (playlist_id) => {
+export const getPlaylistData = (playlist_id, backendUrl) => {
   return fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/playlists/${playlist_id}/entries`,
+    `${backendUrl}/playlists/${playlist_id}/entries`,
     {
       method: "GET",
       headers: headers
@@ -13,12 +13,20 @@ export const getPlaylistData = (playlist_id) => {
   );
 };
 
-export const getScreenDetails = (screen_id) => {
+export const getScreenDetails = (screen_id, backendUrl) => {
   return fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/screens/${screen_id}`,
+    `${backendUrl}/screens/${screen_id}`,
     {
       method: "GET",
       headers: headers
     }
   );
 }
+
+export const getQueryParams = () => {
+  const params = new URL(location.href).searchParams;
+  const backendUrl = params.get("backend_url");
+  return {
+    backendUrl
+  };
+};
