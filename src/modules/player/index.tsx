@@ -3,6 +3,7 @@ import { EmptyPlayer, SKPlayer } from "@playerComponents/index";
 import { getPlaylistEntries } from "./helpers/player.helper";
 
 export const Player = ({ playlistData }: any) => {
+  console.log("PLAYER PLAYLISTdATA", playlistData);
   const response = getPlaylistEntries(playlistData);
   return (
     <Fragment>

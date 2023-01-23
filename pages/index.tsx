@@ -13,6 +13,7 @@ Amplify.configure(awsConfig);
 
 const Home: NextPage = (props: any) => {
   //console.log("Props Response", props.playlistData);
+  console.log("Props Response", props);
 
   return (
     <div>
