@@ -9,7 +9,7 @@ import { getPlaylistData, getScreenDetails } from '../lib/scoop.repo';
 
 
 // configure amplify for cloud communication
-Amplify.configure(awsConfig);
+// Amplify.configure(awsConfig);
 
 const Home: NextPage = (props: any) => {
   //console.log("Props Response", props.playlistData);
