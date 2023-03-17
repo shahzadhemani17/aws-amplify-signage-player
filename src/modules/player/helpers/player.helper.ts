@@ -28,7 +28,7 @@ export const convertJSON = (playlist: any) => {
   );
   playlist?.entries.map((entry: any) => {
     if (entry.is_web_url === true || entry.is_menu === true) {
-      entry.weburl.url = entry.weburl.url + "&refresh=true";
+      entry.weburl.url = entry.is_menu ? entry.weburl.url + "&refresh=true" : entry.weburl.url;
       result.push(
         populatePlayer(
           entry.duration_in_seconds,
