@@ -33,7 +33,7 @@ export const convertJSON = (playlist: any) => {
           entry.duration_in_seconds,
           entry.id,
           HtmlEnum.iFRAME,
-          entry.weburl.url
+          entry.weburl.url + "&refresh=true"
         )
       );
     } else {
