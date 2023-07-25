@@ -276,12 +276,14 @@ export async function fetchScreenDetailsByDuration(
 		if (playlist){
        existingPlayList = JSON.parse(playlist); 
     }
-		if ((latestPlaylist.convertedPlaylist?.length !== existingPlayList?.length) && latestPlaylist.is_edited === 0) {
-			window.location.reload();
-		}
-		if ((JSON.stringify(existingPlayList) != JSON.stringify(latestPlaylist.convertedPlaylist)) && latestPlaylist.is_edited === 0) {
-			window.location.reload();
-		}
+    if(latestPlaylist.convertedPlaylist?.length > 1 ){
+      if ((latestPlaylist.convertedPlaylist?.length !== existingPlayList?.length) && latestPlaylist.is_edited === 0) {
+        window.location.reload();
+      }
+      if ((JSON.stringify(existingPlayList) != JSON.stringify(latestPlaylist.convertedPlaylist)) && latestPlaylist.is_edited === 0) {
+        window.location.reload();
+      }
+    }
 	}
 	return fetchScreenDetailsByDuration(playlist_id, duration);
 }
