@@ -104,7 +104,8 @@
 }
 
 .player {
-  height: 99vh;
+  height: 100vh;
+  overflow: hidden!important;
   border: none!important;
   object-fit: contain;
   width: 100%;
