@@ -25,7 +25,7 @@ export const SKTransition = (props: any) => {
     )
   } else {
     return (
-       <>{props.children}</>
+      <>{props.children}</>
     )
   }
 
