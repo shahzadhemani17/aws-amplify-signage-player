@@ -13,15 +13,19 @@ export const SKTransition = (props: any) => {
     )
   } else if (transition == "FADE") {
     return (
-      <Fade speed={3000}>
+      <Fade duration={3000}>
         {props.children}
       </Fade>
     )
-  } else {
+  } else if (transition == "FLIP") {
     return (
       <Flip left>
         {props.children}
       </Flip>
+    )
+  } else {
+    return (
+      <>{props.children}</>
     )
   }
 
