@@ -11,11 +11,16 @@ export const SKIframe = (props: PlayerPropsModel) => {
         className={styles.player}
         title="sample"
         src={playlist.url}
-        name="myFrame"
-        key={index}
+        scrolling="no"
         style={{
+          border: 0,
+          overflow: "hidden",
+          overflowX: "hidden",
+          overflowY: "hidden",
           display: playlist.visibility ? "" : "none",
         }}
+        name="myFrame"
+        key={index}
       /></SKTransition>
   )
 }
