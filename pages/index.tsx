@@ -35,12 +35,12 @@ const playlistResponse = async (playlistDataRsponse) => {
   const apiResponse = await playlistDataRsponse.json();
   const playlistResponse: PlaylistResponse = {
     status: ResponseType.SUCCESS,
-    data: apiResponse,
+    data: apiResponse
   };
   return {
     props: {
-      playlistData: playlistResponse,
-    },
+      playlistData: playlistResponse
+    }
   };
 };
 
@@ -65,7 +65,7 @@ export const getServerSideProps = async (context: NextPageContext) => {
     } catch (err) {
       console.log("crash ");
       return {
-        props: { playlistData: { status: ResponseType.ERROR, data: {} } },
+        props: { playlistData: { status: ResponseType.ERROR, data: {} } }
       };
     }
   } else if (context.query?.playlist_id && !context.query.screen_id) {
@@ -78,11 +78,11 @@ export const getServerSideProps = async (context: NextPageContext) => {
     } catch (err) {
       console.log("crash ");
       return {
-        props: { playlistData: { status: ResponseType.ERROR, data: {} } },
+        props: { playlistData: { status: ResponseType.ERROR, data: {} } }
       };
     }
   }
   return {
-    props: { playlistData: { status: ResponseType.SUCCESS, data: {} } },
+    props: { playlistData: { status: ResponseType.SUCCESS, data: {} } }
   };
 };

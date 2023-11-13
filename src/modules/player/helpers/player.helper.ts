@@ -5,7 +5,7 @@ import moment from "moment";
 import {
   getScreenDetails,
   getPlaylistData,
-  getQueryParams,
+  getQueryParams
 } from "lib/scoop.repo";
 import { sectionBody } from "aws-amplify";
 
@@ -20,7 +20,7 @@ const populatePlayer = (
     tag: tag,
     url: url,
     duration: duration * 1000,
-    visibility: true,
+    visibility: true
   };
   return player;
 };
@@ -93,7 +93,7 @@ export const getPlaylistEntries = (playlistData: any) => {
     message,
     transition,
     is_edited,
-    refresh_duration,
+    refresh_duration
   };
 };
 
@@ -141,11 +141,11 @@ function checkScheduledPlayList(playList: any) {
         if (date_from && date_to && (day === "" || !day.length)) {
           const inBetween = checkValidMomentDates("inBetween", {
             date_from,
-            date_to,
+            date_to
           });
           const isSame = checkValidMomentDates("isSame", {
             date_from,
-            date_to,
+            date_to
           });
           entry.isValidScheduled = inBetween || isSame ? true : false;
         }
@@ -169,11 +169,11 @@ function checkScheduledPlayList(playList: any) {
         ) {
           const inBetween = checkValidMomentDates("inBetween", {
             date_from,
-            date_to,
+            date_to
           });
           const isSame = checkValidMomentDates("isSame", {
             date_from,
-            date_to,
+            date_to
           });
           const weekDayName = moment().format("dddd");
           if (day.includes(weekDayName) && (inBetween || isSame)) {
@@ -187,7 +187,7 @@ function checkScheduledPlayList(playList: any) {
           ) {
             const withinTime = checkValidMomentDates("withinTime", {
               time_from,
-              time_to,
+              time_to
             });
             if (withinTime) {
               entry.isValidScheduled = true;
@@ -204,7 +204,7 @@ function checkScheduledPlayList(playList: any) {
               const weekDayName = moment().format("dddd");
               const withinTime = checkValidMomentDates("withinTime", {
                 time_from,
-                time_to,
+                time_to
               });
               if (day.includes(weekDayName) && withinTime) {
                 entry.isValidScheduled = true;
@@ -215,16 +215,16 @@ function checkScheduledPlayList(playList: any) {
           } else if (day && day.length) {
             const inBetween = checkValidMomentDates("inBetween", {
               date_from,
-              date_to,
+              date_to
             });
             const isSame = checkValidMomentDates("isSame", {
               date_from,
-              date_to,
+              date_to
             });
             const weekDayName = moment().format("dddd");
             const withinTime = checkValidMomentDates("withinTime", {
               time_from,
-              time_to,
+              time_to
             });
             if (
               day.includes(weekDayName) &&
@@ -236,15 +236,15 @@ function checkScheduledPlayList(playList: any) {
           } else if (!day || !day.length) {
             const inBetween = checkValidMomentDates("inBetween", {
               date_from,
-              date_to,
+              date_to
             });
             const isSame = checkValidMomentDates("isSame", {
               date_from,
-              date_to,
+              date_to
             });
             const withinTime = checkValidMomentDates("withinTime", {
               time_from,
-              time_to,
+              time_to
             });
             if ((inBetween || isSame) && withinTime) {
               entry.isValidScheduled = true;
@@ -283,7 +283,7 @@ export async function fetchScreenDetailsByDuration(
     const playListLatest = await playListRes.json();
     const playlistResponse: PlaylistResponse = {
       status: ResponseType.SUCCESS,
-      data: playListLatest,
+      data: playListLatest
     };
     const latestPlaylist = getPlaylistEntries(playlistResponse);
     const playlist = localStorage.getItem("playlist");
