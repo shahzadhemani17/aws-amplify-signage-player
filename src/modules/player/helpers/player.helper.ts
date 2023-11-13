@@ -2,7 +2,11 @@ import { HtmlEnum, PlayerModel } from "@models/playerModel";
 import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { PlaylistMessages } from "../player.constant";
 import moment from "moment";
-import { getScreenDetails, getPlaylistData, getQueryParams } from "lib/scoop.repo";
+import {
+  getScreenDetails,
+  getPlaylistData,
+  getQueryParams,
+} from "lib/scoop.repo";
 import { sectionBody } from "aws-amplify";
 
 const populatePlayer = (
@@ -28,7 +32,10 @@ export const convertJSON = (playlist: any) => {
   );
   playlist?.entries.map((entry: any) => {
     if (entry.is_web_url === true || entry.is_menu === true) {
-      entry.weburl.url = entry.is_menu && !entry.weburl.url.includes("&refresh=true") ? entry.weburl.url + "&refresh=true" : entry.weburl.url;
+      entry.weburl.url =
+        entry.is_menu && !entry.weburl.url.includes("&refresh=true")
+          ? entry.weburl.url + "&refresh=true"
+          : entry.weburl.url;
       result.push(
         populatePlayer(
           entry.duration_in_seconds,
@@ -69,8 +76,10 @@ export const getPlaylistEntries = (playlistData: any) => {
     message = PlaylistMessages.SOMETHING_WENT_WRONG;
   } else if (Object.keys(playlistData.data).length === 0) {
     message = PlaylistMessages.PROVIDE_PLAYLIST_ID;
-  } else if (playlistData.data.entries.length !== 0) {
-    const playlistClone = [...playlistData.data.entries];
+  } else if (playlistData.data.entries?.length !== 0) {
+    const playlistClone = playlistData?.data?.entries
+      ? [...playlistData.data.entries]
+      : [];
     const scheduledEntries = checkScheduledPlayList(playlistClone);
     convertedPlaylist = convertJSON(scheduledEntries.playListWithValidEntries);
     transition = playlistData.data.transition;
@@ -79,7 +88,13 @@ export const getPlaylistEntries = (playlistData: any) => {
   } else {
     message = PlaylistMessages.ENTRIES_NOT_FOUND;
   }
-  return { convertedPlaylist, message, transition, is_edited, refresh_duration };
+  return {
+    convertedPlaylist,
+    message,
+    transition,
+    is_edited,
+    refresh_duration,
+  };
 };
 
 export const sleep = (ms: number) => {
@@ -256,38 +271,45 @@ function checkScheduledPlayList(playList: any) {
 
 export async function fetchScreenDetailsByDuration(
   playlist_id: number,
-	duration: number = 5000
+  duration: number = 5000
 ): Promise<any> {
-	await wait(10 * 1000);
+  await wait(10 * 1000);
   let playListRes;
-  if (playlist_id){
+  if (playlist_id) {
     const params = getQueryParams();
     playListRes = await getPlaylistData(playlist_id, params.backendUrl);
   }
-	if (playListRes) {
-		const playListLatest = await playListRes.json();
+  if (playListRes) {
+    const playListLatest = await playListRes.json();
     const playlistResponse: PlaylistResponse = {
       status: ResponseType.SUCCESS,
       data: playListLatest,
     };
     const latestPlaylist = getPlaylistEntries(playlistResponse);
-    const playlist = localStorage.getItem('playlist');
-   let existingPlayList =[];
-		if (playlist){
-       existingPlayList = JSON.parse(playlist); 
+    const playlist = localStorage.getItem("playlist");
+    let existingPlayList = [];
+    if (playlist) {
+      existingPlayList = JSON.parse(playlist);
     }
-    if(latestPlaylist.convertedPlaylist?.length > 1 ){
-      if ((latestPlaylist.convertedPlaylist?.length !== existingPlayList?.length) && latestPlaylist.is_edited === 0) {
+    if (latestPlaylist.convertedPlaylist?.length > 1) {
+      if (
+        latestPlaylist.convertedPlaylist?.length !== existingPlayList?.length &&
+        latestPlaylist.is_edited === 0
+      ) {
         window.location.reload();
       }
-      if ((JSON.stringify(existingPlayList) != JSON.stringify(latestPlaylist.convertedPlaylist)) && latestPlaylist.is_edited === 0) {
+      if (
+        JSON.stringify(existingPlayList) !=
+          JSON.stringify(latestPlaylist.convertedPlaylist) &&
+        latestPlaylist.is_edited === 0
+      ) {
         window.location.reload();
       }
     }
-	}
-	return fetchScreenDetailsByDuration(playlist_id, duration);
+  }
+  return fetchScreenDetailsByDuration(playlist_id, duration);
 }
 
 export async function wait(ms: number) {
-	return new Promise((res) => setTimeout(res, ms));
+  return new Promise((res) => setTimeout(res, ms));
 }
