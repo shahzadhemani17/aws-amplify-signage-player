@@ -1,14 +1,15 @@
 import React, { Fragment, useEffect } from "react";
 import { EmptyPlayer, SKPlayer, SplashScreen } from "@playerComponents/index";
 import { getPlaylistEntries } from "./helpers/player.helper";
-
+import { ErrorTypes } from "../../../pages";
 export const Player = ({ playlistData }: any) => {
   console.log("PLAYER PLAYLISTdATA", playlistData);
   const response = getPlaylistEntries(playlistData);
   return (
     <Fragment>
-      <SplashScreen screenId="ABC123" />
-      {/* {playlistData.data.entries && playlistData.data.entries.length ? (
+      {ErrorTypes.Playlist_Not_Attached_Error === playlistData.message ? (
+        <SplashScreen />
+      ) : playlistData.data.entries && playlistData.data.entries.length ? (
         <SKPlayer
           entries={response.convertedPlaylist}
           transition={response.transition}
@@ -17,7 +18,7 @@ export const Player = ({ playlistData }: any) => {
         />
       ) : (
         <EmptyPlayer message={response.message} />
-      )} */}
+      )}
     </Fragment>
   );
 };

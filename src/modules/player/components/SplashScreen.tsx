@@ -1,7 +1,7 @@
 import styles from "../../../../styles/Home.module.css";
 import { labels } from "./labels";
 
-export const SplashScreen = ({ screenId }) => {
+export const SplashScreen = () => {
   return (
     <div style={{ backgroundColor: "#1e1e2c" }} className={styles.container}>
       <div className={styles.main}>
