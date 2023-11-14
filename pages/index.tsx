@@ -5,7 +5,11 @@ import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { Player } from "src/modules/player";
 import Amplify from "aws-amplify";
 import awsConfig from "../src/aws-exports";
-import { getPlaylistData, getScreenDetails } from "../lib/scoop.repo";
+import {
+  getPlaylistData,
+  getQueryParams,
+  getScreenDetails,
+} from "../lib/scoop.repo";
 
 // configure amplify for cloud communication
 // Amplify.configure(awsConfig);
@@ -47,6 +51,9 @@ const playlistResponse = async (playlistDataRsponse, screen_id) => {
 };
 
 export const getServerSideProps = async (context: NextPageContext) => {
+  const params = getQueryParams();
+
+  console.log("parametic |||||||||||||", params);
   const backendUrl = context?.query.backend_url
     ? context?.query.backend_url
     : process.env.NEXT_PUBLIC_API_URL;

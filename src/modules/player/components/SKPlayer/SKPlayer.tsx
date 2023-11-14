@@ -34,8 +34,7 @@ export const SKPlayer = ({
     vidRef?.current?.play();
   };
 
-  const params = getQueryParams();
-
+  // kdflsdjlj
   useEffect(() => {
     if (navigator.cookieEnabled && typeof window.localStorage !== "undefined") {
       setVisiblePlaylist();
@@ -44,7 +43,8 @@ export const SKPlayer = ({
         const inlineWorker = new InlineWorker(
           fetchScreenDetailsByDuration(playlist_id, refresh_duration)
         );
-        const pulse = screen_id && new InlineWorker(uplodPulse(screen_id));
+        const pulse =
+          screen_id && new InlineWorker(uplodPulse(screen_id, "lsdjlfjljsd"));
       }
     } else {
       setPlaylists([]);

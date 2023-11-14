@@ -25,16 +25,13 @@ export const getQueryParams = () => {
   };
 };
 
-export async function postPulse(screenId: number) {
+export async function postPulse(screenId: number, backend_url: string) {
   console.log("pulse");
   try {
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/pulse/record/${screenId}`,
-      {
-        method: "PATCH",
-        headers: headers,
-      }
-    );
+    const response = await fetch(`${backend_url}/pulse/record/${screenId}`, {
+      method: "PATCH",
+      headers: headers,
+    });
     console.log("response", response);
     return response;
   } catch (err) {

@@ -315,9 +315,12 @@ export async function wait(ms: number) {
   return new Promise((res) => setTimeout(res, ms));
 }
 
-export async function uplodPulse(screenId: number): Promise<any> {
+export async function uplodPulse(
+  screenId: number,
+  backend_url: string
+): Promise<any> {
   console.log("uploadpulse");
   await wait(60000);
-  await postPulse(screenId);
-  return uplodPulse(screenId);
+  await postPulse(screenId, backend_url);
+  return uplodPulse(screenId, backend_url);
 }
