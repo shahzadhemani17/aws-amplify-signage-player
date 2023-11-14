@@ -60,17 +60,8 @@ export const getServerSideProps = async (context: NextPageContext) => {
       );
 
       const apiResponse = await screenDetailResponse.json();
-      if (!apiResponse.data) {
-        return {
-          props: {
-            playlistData: {
-              status: ResponseType.ERROR,
-              data: {},
-              message: "Screen does not exist",
-            },
-          },
-        };
-      } else if (!apiResponse?.data?.playlist_id) {
+
+      if (!apiResponse?.data?.playlist_id && !apiResponse?.playlist_id) {
         return {
           props: {
             playlistData: {
