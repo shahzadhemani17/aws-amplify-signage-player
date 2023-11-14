@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect } from "react";
-import { EmptyPlayer, SKPlayer } from "@playerComponents/index";
+import { EmptyPlayer, SKPlayer, SplashScreen } from "@playerComponents/index";
 import { getPlaylistEntries } from "./helpers/player.helper";
 
 export const Player = ({ playlistData }: any) => {
@@ -7,7 +7,8 @@ export const Player = ({ playlistData }: any) => {
   const response = getPlaylistEntries(playlistData);
   return (
     <Fragment>
-      {playlistData.data.entries && playlistData.data.entries.length ? (
+      <SplashScreen screenId="ABC123" />
+      {/* {playlistData.data.entries && playlistData.data.entries.length ? (
         <SKPlayer
           entries={response.convertedPlaylist}
           transition={response.transition}
@@ -16,7 +17,7 @@ export const Player = ({ playlistData }: any) => {
         />
       ) : (
         <EmptyPlayer message={response.message} />
-      )}
+      )} */}
     </Fragment>
   );
 };
