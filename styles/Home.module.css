@@ -102,13 +102,48 @@
   height: 1em;
   margin-left: 0.5rem;
 }
+.inlineDisplay {
+  margin: auto;
+  display: inline-block;
+}
+.flexGrid24 {
+  display: flex;
+  padding-top: 24px;
+}
+.welcomeText {
+  text-align: center;
+  font-weight: lighter;
+  color: #00b7af;
+  font-size: 75px;
+  margin-top: 0;
+}
+.step {
+  color: #00b7af;
+  padding-top: 8px;
+}
 
 .player {
   height: 100vh;
-  overflow: hidden!important;
-  border: none!important;
+  overflow: hidden !important;
+  border: none !important;
   object-fit: contain;
   width: 100%;
+}
+.textPadding {
+  padding-left: 10px;
+  padding-top: 8px;
+}
+
+@media (max-width: 768px) {
+  .flexGrid24 {
+    display: block;
+    flex-direction: column;
+    text-align: left;
+    padding-left: 0;
+  }
+  .textPadding {
+    padding-left: 0;
+  }
 }
 
 @media (max-width: 600px) {

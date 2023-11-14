@@ -1,2 +1,3 @@
-export * from  "./EmptyPlayer";
-export * from  "./SKPlayer/SKPlayer";
+export * from "./EmptyPlayer";
+export * from "./SplashScreen";
+export * from "./SKPlayer/SKPlayer";
