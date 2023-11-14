@@ -26,6 +26,7 @@ export interface EntriesModel {
   transition: string;
   refresh_duration: number;
   playlist_id: number;
+  screen_id: number;
 }
 
 export interface PlayerPropsModel {

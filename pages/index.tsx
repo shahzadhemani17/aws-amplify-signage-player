@@ -23,7 +23,8 @@ const Home: NextPage = (props: any) => {
       </Head>
 
       <main className={styles.main}>
-        <Player playlistData={props.playlistData} />
+        {/* <Player playlistData={props.playlistData} /> */}
+        <Player playlistData={props.playlistData} screenId={props.screen_id} />
       </main>
     </div>
   );
@@ -31,16 +32,17 @@ const Home: NextPage = (props: any) => {
 
 export default Home;
 
-const playlistResponse = async (playlistDataRsponse) => {
+const playlistResponse = async (playlistDataRsponse, screen_id) => {
   const apiResponse = await playlistDataRsponse.json();
   const playlistResponse: PlaylistResponse = {
     status: ResponseType.SUCCESS,
-    data: apiResponse
+    data: apiResponse,
   };
   return {
     props: {
-      playlistData: playlistResponse
-    }
+      playlistData: playlistResponse,
+      screen_id,
+    },
   };
 };
 
@@ -61,11 +63,11 @@ export const getServerSideProps = async (context: NextPageContext) => {
         apiResponse?.playlist_id ?? apiResponse?.data?.playlist_id,
         backendUrl
       );
-      return playlistResponse(playlistDataRsponse);
+      return playlistResponse(playlistDataRsponse, context.query.screen_id);
     } catch (err) {
       console.log("crash ");
       return {
-        props: { playlistData: { status: ResponseType.ERROR, data: {} } }
+        props: { playlistData: { status: ResponseType.ERROR, data: {} } },
       };
     }
   } else if (context.query?.playlist_id && !context.query.screen_id) {
@@ -74,15 +76,15 @@ export const getServerSideProps = async (context: NextPageContext) => {
         context?.query.playlist_id,
         backendUrl
       );
-      return playlistResponse(playlistDataResponse);
+      return playlistResponse(playlistDataResponse, null);
     } catch (err) {
       console.log("crash ");
       return {
-        props: { playlistData: { status: ResponseType.ERROR, data: {} } }
+        props: { playlistData: { status: ResponseType.ERROR, data: {} } },
       };
     }
   }
   return {
-    props: { playlistData: { status: ResponseType.SUCCESS, data: {} } }
+    props: { playlistData: { status: ResponseType.SUCCESS, data: {} } },
   };
 };
