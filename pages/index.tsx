@@ -79,6 +79,8 @@ export const getServerSideProps = async (context: NextPageContext) => {
       if (!apiResponse?.data?.playlist_id && !apiResponse?.playlist_id) {
         return {
           props: {
+            screen_id: context.query.screen_id,
+            backend_url: backendUrl,
             playlistData: {
               status: ResponseType.ERROR,
               data: {},
@@ -102,6 +104,8 @@ export const getServerSideProps = async (context: NextPageContext) => {
       if (typeof playlistJsonResponse.props.playlistData?.data === "string") {
         return {
           props: {
+            screen_id: context.query.screen_id,
+            backend_url: backendUrl,
             playlistData: {
               status: ResponseType.ERROR,
               data: {},
@@ -114,7 +118,11 @@ export const getServerSideProps = async (context: NextPageContext) => {
     } catch (err) {
       console.log("crash ");
       return {
-        props: { playlistData: { status: ResponseType.ERROR, data: {} } },
+        props: {
+          screen_id: context.query.screen_id,
+          backend_url: backendUrl,
+          playlistData: { status: ResponseType.ERROR, data: {} },
+        },
       };
     }
   } else if (context.query?.playlist_id && !context.query.screen_id) {
