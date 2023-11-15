@@ -16,7 +16,6 @@ import InlineWorker from "../../../../../lib/InlineWorker";
 import Modal from "react-modal";
 import cookie from "../../../../../public/cookie.png";
 import { styles } from "../../../../../styles/player";
-import { getQueryParams } from "../../../../../lib/scoop.repo";
 
 export const SKPlayer = ({
   entries,
@@ -24,6 +23,7 @@ export const SKPlayer = ({
   refresh_duration,
   playlist_id,
   screen_id,
+  backend_url,
 }: EntriesModel) => {
   const [playlists, setPlaylists] = useState([...entries]);
   const [modalIsOpen, setIsOpen] = useState(false);
@@ -44,7 +44,7 @@ export const SKPlayer = ({
           fetchScreenDetailsByDuration(playlist_id, refresh_duration)
         );
         const pulse =
-          screen_id && new InlineWorker(uplodPulse(screen_id, "lsdjlfjljsd"));
+          screen_id && new InlineWorker(uplodPulse(screen_id, backend_url));
       }
     } else {
       setPlaylists([]);

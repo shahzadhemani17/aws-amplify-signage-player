@@ -28,7 +28,11 @@ const Home: NextPage = (props: any) => {
 
       <main className={styles.main}>
         {/* <Player playlistData={props.playlistData} /> */}
-        <Player playlistData={props.playlistData} screenId={props.screen_id} />
+        <Player
+          playlistData={props.playlistData}
+          screenId={props.screen_id}
+          backendUrl={props.backend_url}
+        />
       </main>
     </div>
   );
@@ -36,7 +40,11 @@ const Home: NextPage = (props: any) => {
 
 export default Home;
 
-const playlistResponse = async (playlistDataRsponse, screen_id) => {
+const playlistResponse = async (
+  playlistDataRsponse,
+  screen_id,
+  backend_url
+) => {
   const apiResponse = await playlistDataRsponse.json();
   const playlistResponse: PlaylistResponse = {
     status: ResponseType.SUCCESS,
@@ -46,14 +54,12 @@ const playlistResponse = async (playlistDataRsponse, screen_id) => {
     props: {
       playlistData: playlistResponse,
       screen_id,
+      backend_url,
     },
   };
 };
 
 export const getServerSideProps = async (context: NextPageContext) => {
-  const params = getQueryParams();
-
-  console.log("parametic |||||||||||||", params);
   const backendUrl = context?.query.backend_url
     ? context?.query.backend_url
     : process.env.NEXT_PUBLIC_API_URL;
@@ -70,7 +76,11 @@ export const getServerSideProps = async (context: NextPageContext) => {
         apiResponse?.playlist_id ?? apiResponse?.data?.playlist_id,
         backendUrl
       );
-      return playlistResponse(playlistDataRsponse, context.query.screen_id);
+      return playlistResponse(
+        playlistDataRsponse,
+        context.query.screen_id,
+        backendUrl
+      );
     } catch (err) {
       console.log("crash ");
       return {
@@ -83,7 +93,7 @@ export const getServerSideProps = async (context: NextPageContext) => {
         context?.query.playlist_id,
         backendUrl
       );
-      return playlistResponse(playlistDataResponse, null);
+      return playlistResponse(playlistDataResponse, null, null);
     } catch (err) {
       console.log("crash ");
       return {
