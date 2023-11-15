@@ -65,6 +65,22 @@ export const SKPlayer = ({
     }
   };
 
+  // it filter the vengo entries and add into playlist entries
+  const addVengoEntriesToPlaylistEntries = () => {
+    const vengoIntegrations = playlistEntries.filter((entry) => {
+      if (entry?.ad_integration?.integration_name === "vengo") {
+        return entry;
+      }
+    });
+
+    vengoIntegrations.map((integration) => {
+      // call api here
+      integration.ad_integration.params;
+      // get vengo entries
+      // set playlistEntries
+    });
+  };
+
   return (
     <div>
       {playlistEntries?.map((entry, index) => {
