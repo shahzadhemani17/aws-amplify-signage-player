@@ -10,7 +10,7 @@ export const SKIframe = (props: PlayerPropsModel) => {
       <iframe
         className={styles.player}
         title="sample"
-        src={playlist.url}
+        src={playlist.visibility ? playlist.url : ""}
         scrolling="no"
         style={{
           border: 0,
@@ -21,6 +21,7 @@ export const SKIframe = (props: PlayerPropsModel) => {
         }}
         name="myFrame"
         key={index}
-      /></SKTransition>
-  )
-}
+      />
+    </SKTransition>
+  );
+};
