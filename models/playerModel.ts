@@ -30,7 +30,7 @@ export interface EntriesModel {
 
 export interface PlayerPropsModel {
   index: number;
-  playlist: PlayerModel;
+  playlistEntry: PlayerModel;
   videoRef?: LegacyRef<HTMLVideoElement>;
   transition: string;
 }
