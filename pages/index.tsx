@@ -13,7 +13,10 @@ import {
 
 // configure amplify for cloud communication
 // Amplify.configure(awsConfig);
-
+export enum ErrorTypes {
+  Screen_Not_Found_Error = "Screen_Not_Found_Error",
+  Playlist_Not_Attached_Error = "Playlist_Not_Attached_Error",
+}
 const Home: NextPage = (props: any) => {
   //console.log("Props Response", props.playlistData);
   console.log("Props Response", props);
@@ -72,15 +75,42 @@ export const getServerSideProps = async (context: NextPageContext) => {
       );
 
       const apiResponse = await screenDetailResponse.json();
+
+      if (!apiResponse?.data?.playlist_id && !apiResponse?.playlist_id) {
+        return {
+          props: {
+            playlistData: {
+              status: ResponseType.ERROR,
+              data: {},
+              message: "Playlist_Not_Attached_Error",
+            },
+          },
+        };
+      }
+
       const playlistDataRsponse = await getPlaylistData(
         apiResponse?.playlist_id ?? apiResponse?.data?.playlist_id,
         backendUrl
       );
-      return playlistResponse(
+
+      const playlistJsonResponse = await playlistResponse(
         playlistDataRsponse,
         context.query.screen_id,
         backendUrl
       );
+      // improve this
+      if (typeof playlistJsonResponse.props.playlistData?.data === "string") {
+        return {
+          props: {
+            playlistData: {
+              status: ResponseType.ERROR,
+              data: {},
+              message: "Playlist_Not_Attached_Error",
+            },
+          },
+        };
+      }
+      return playlistJsonResponse;
     } catch (err) {
       console.log("crash ");
       return {
