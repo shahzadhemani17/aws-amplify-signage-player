@@ -19,20 +19,19 @@ export interface PlayerModel {
   url: string;
   duration: number;
   visibility: boolean;
-  ad_integration: AdIntegration;
 }
 
-export interface AdIntegration {
-  id: number;
-  integration_name: string;
-  url: string;
-  params: VengoParams[];
-}
+// export interface AdIntegration {
+//   id: number;
+//   integration_name: string;
+//   url: string;
+//   params: VengoParams[];
+// }
 
-export interface VengoParams {
-  key: string;
-  value: string;
-}
+// export interface VengoParams {
+//   key: string;
+//   value: string;
+// }
 
 export interface EntriesModel {
   entries: PlayerModel[];

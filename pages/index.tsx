@@ -5,7 +5,11 @@ import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { Player } from "src/modules/player";
 import Amplify from "aws-amplify";
 import awsConfig from "../src/aws-exports";
-import { getPlaylistData, getScreenDetails } from "../lib/scoop.repo";
+import {
+  getPlaylistData,
+  getScreenDetails,
+  getVengoEntries,
+} from "../lib/scoop.repo";
 
 // configure amplify for cloud communication
 // Amplify.configure(awsConfig);
@@ -47,6 +51,79 @@ const playlistResponse = async (playlistDataRsponse) => {
   };
 };
 
+type KeyValuePair = {
+  key: string;
+  value: string;
+};
+
+const createObjectFromArray = (array: KeyValuePair[]) => {
+  console.log("crash hota dekho", array);
+  const result = {};
+
+  for (const item of array) {
+    result[item.key] = item.value;
+  }
+
+  return result;
+};
+
+// Example array
+const inputArray: KeyValuePair[] = [
+  {
+    key: "organization_id",
+    value: "testing_company",
+  },
+  {
+    key: "ad_unit_id",
+    value: "vistar_image",
+  },
+];
+
+const addVengoEntries = async (responseData: any) => {
+  if (responseData?.props?.playlistData?.data?.entries) {
+    const vengoIntegrations =
+      responseData?.props?.playlistData?.data?.entries?.filter((entry) => {
+        if (entry?.ad_integration?.integration_name === "vengo") {
+          return entry;
+        }
+      });
+
+    if (!vengoIntegrations.length) {
+      return;
+    }
+    const vengoEntries = await Promise.all(
+      vengoIntegrations.map((integration) => {
+        // call api here
+        const paramObject = createObjectFromArray(
+          integration?.ad_integration?.Params
+        );
+        // console.log("paramObject............", paramObject);
+        return getVengoEntries(integration?.ad_integration?.url, paramObject);
+      })
+    );
+
+    const jsonEntries = (
+      await Promise.all(
+        vengoEntries.map((entry) => {
+          return entry.json();
+        })
+      )
+    ).flat();
+
+    console.log("vengoEntries............4", jsonEntries);
+
+    return jsonEntries;
+  }
+};
+
+const filterLocalEntries = (entries) => {
+  return entries.filter((entry) => {
+    if (entry?.ad_integration?.integration_name !== "vengo") {
+      return entry;
+    }
+  });
+};
+
 export const getServerSideProps = async (context: NextPageContext) => {
   const backendUrl = context?.query.backend_url
     ? context?.query.backend_url
@@ -59,9 +136,12 @@ export const getServerSideProps = async (context: NextPageContext) => {
         backendUrl
       );
 
-      const apiResponse = await screenDetailResponse.json();
+      const screenApiResponse = await screenDetailResponse.json();
 
-      if (!apiResponse?.data?.playlist_id && !apiResponse?.playlist_id) {
+      if (
+        !screenApiResponse?.data?.playlist_id &&
+        !screenApiResponse?.playlist_id
+      ) {
         return {
           props: {
             playlistData: {
@@ -74,11 +154,22 @@ export const getServerSideProps = async (context: NextPageContext) => {
       }
 
       const playlistDataRsponse = await getPlaylistData(
-        apiResponse?.playlist_id ?? apiResponse?.data?.playlist_id,
+        screenApiResponse?.playlist_id ?? screenApiResponse?.data?.playlist_id,
         backendUrl
       );
 
       const playlistJsonResponse = await playlistResponse(playlistDataRsponse);
+
+      const vengoEntries = await addVengoEntries(playlistJsonResponse);
+      const localEntries = filterLocalEntries(
+        playlistJsonResponse.props.playlistData?.data.entries
+      );
+
+      console.log("vengoEntryArray...........1", vengoEntries);
+
+      const vengoEntryArray = vengoEntries;
+      console.log("vengoEntryArray...........2", vengoEntryArray);
+
       // improve this
       if (typeof playlistJsonResponse.props.playlistData?.data === "string") {
         return {
@@ -91,6 +182,14 @@ export const getServerSideProps = async (context: NextPageContext) => {
           },
         };
       }
+
+      const playlistData = playlistJsonResponse?.props?.playlistData?.data;
+      console.log("playlistData.......6", playlistData);
+
+      if (playlistData?.entries?.length) {
+        playlistData.entries = [...localEntries, ...vengoEntryArray];
+      }
+
       return playlistJsonResponse;
     } catch (err) {
       console.log("crash ");

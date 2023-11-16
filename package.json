@@ -27,7 +27,7 @@
     "typescript": "4.7.4"
   },
   "scripts": {
-    "dev": "next dev",
+    "dev": "NODE_OPTIONS='--inspect' next dev",
     "build": "next build",
     "build:production": "env-cmd -f .env.production next build",
     "start": "next start",
