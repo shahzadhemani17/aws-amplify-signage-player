@@ -21,7 +21,7 @@ const populatePlayer = (
     tag: tag,
     url: url,
     duration: duration * 1000,
-    visibility: tag === "iframe" && index !== 0 ? false : true
+    visibility: true
   };
   return player;
 };

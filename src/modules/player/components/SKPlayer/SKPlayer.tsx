@@ -50,7 +50,7 @@ export const SKPlayer = ({
   const setVisiblePlaylist = async () => {
     for (let i = 0; i < playlists.length; i++) {
       playlists[i].visibility = true; // visibility set to true before sleep
-      setPlaylists([playlists[i]]); // update state
+      setPlaylists([...playlists]); // update state
       if (playlists[i].tag === "video") {
         handlePlayVideo(vidRef);
       }
