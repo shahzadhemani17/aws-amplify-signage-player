@@ -3,37 +3,33 @@ import Image from "next/image";
 import {
   sleep,
   fetchScreenDetailsByDuration,
-  uplodPulse,
+  uplodPulse
 } from "../../helpers/player.helper";
 import { HtmlEnum, EntriesModel } from "@models/playerModel";
 import {
   SKImage,
   SKIframe,
-  SKVideo,
+  SKVideo
 } from "@playerComponents/SKPlayer/components/index";
 import InlineWorker from "../../../../../lib/InlineWorker";
 /* @ts-ignore */
 import Modal from "react-modal";
 import cookie from "../../../../../public/cookie.png";
 import { styles } from "../../../../../styles/player";
-
 export const SKPlayer = ({
   entries,
   transition,
   refresh_duration,
   playlist_id,
   screen_id,
-  backend_url,
+  backend_url
 }: EntriesModel) => {
   const [playlists, setPlaylists] = useState([...entries]);
   const [modalIsOpen, setIsOpen] = useState(false);
-
   const vidRef = useRef(null);
-
   const handlePlayVideo = (vidRef: any) => {
     vidRef?.current?.play();
   };
-
   useEffect(() => {
     if (navigator.cookieEnabled && typeof window.localStorage !== "undefined") {
       setVisiblePlaylist();
@@ -51,11 +47,10 @@ export const SKPlayer = ({
       setIsOpen(true);
     }
   }, []);
-
   const setVisiblePlaylist = async () => {
     for (let i = 0; i < playlists.length; i++) {
       playlists[i].visibility = true; // visibility set to true before sleep
-      setPlaylists([...playlists]); // update state
+      setPlaylists([playlists[i]]); // update state
       if (playlists[i].tag === "video") {
         handlePlayVideo(vidRef);
       }
@@ -67,7 +62,6 @@ export const SKPlayer = ({
       }
     }
   };
-
   return (
     <div>
       {playlists?.map((playlist, index) => {
