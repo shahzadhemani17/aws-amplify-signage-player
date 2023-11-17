@@ -6,11 +6,11 @@ import {
   getScreenDetails,
   getPlaylistData,
   getQueryParams,
-  postPulse,
+  postPulse
 } from "lib/scoop.repo";
 import { sectionBody } from "aws-amplify";
-
 const populatePlayer = (
+  index: number,
   duration: number,
   id: number,
   tag: string,
@@ -21,17 +21,16 @@ const populatePlayer = (
     tag: tag,
     url: url,
     duration: duration * 1000,
-    visibility: true,
+    visibility: tag === "iframe" && index !== 0 ? false : true
   };
   return player;
 };
-
 export const convertJSON = (playlist: any) => {
   const result: PlayerModel[] = [];
   playlist.entries.sort(
     (a: any, b: any) => parseFloat(a.position) - parseFloat(b.position)
   );
-  playlist?.entries.map((entry: any) => {
+  playlist?.entries.map((entry: any, index: number) => {
     if (entry.is_web_url === true || entry.is_menu === true) {
       entry.weburl.url =
         entry.is_menu && !entry.weburl.url.includes("&refresh=true")
@@ -39,6 +38,7 @@ export const convertJSON = (playlist: any) => {
           : entry.weburl.url;
       result.push(
         populatePlayer(
+          index,
           entry.duration_in_seconds,
           entry.id,
           HtmlEnum.iFRAME,
@@ -49,6 +49,7 @@ export const convertJSON = (playlist: any) => {
       entry.media.hash &&
         result.push(
           populatePlayer(
+            index,
             entry.duration_in_seconds,
             entry.id,
             entry.media.content_type === "video"
@@ -61,7 +62,6 @@ export const convertJSON = (playlist: any) => {
   });
   return result;
 };
-
 export const getPlaylistEntries = (playlistData: any) => {
   let convertedPlaylist: PlayerModel[] = [];
   let transition: string = "";
@@ -94,14 +94,12 @@ export const getPlaylistEntries = (playlistData: any) => {
     message,
     transition,
     is_edited,
-    refresh_duration,
+    refresh_duration
   };
 };
-
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
-
 const checkValidMomentDates = (type: string, dates: any) => {
   const currentDate = moment().format("DD/MM/YYYY");
   const compareDate = moment(currentDate, "DD/MM/YYYY");
@@ -127,7 +125,6 @@ const checkValidMomentDates = (type: string, dates: any) => {
     return compareTime.isBetween(beforeTime, afterTime);
   }
 };
-
 function checkScheduledPlayList(playList: any) {
   const entries = playList?.map((entry: any) => {
     const { scheduled_criteria } = entry;
@@ -135,18 +132,17 @@ function checkScheduledPlayList(playList: any) {
       entry.isValidScheduled = true;
     } else if (scheduled_criteria && scheduled_criteria !== "") {
       const scheduledCriteria = JSON.parse(scheduled_criteria);
-
       if (scheduledCriteria) {
         const { date_from, date_to, day, time_from, time_to } =
           scheduledCriteria;
         if (date_from && date_to && (day === "" || !day.length)) {
           const inBetween = checkValidMomentDates("inBetween", {
             date_from,
-            date_to,
+            date_to
           });
           const isSame = checkValidMomentDates("isSame", {
             date_from,
-            date_to,
+            date_to
           });
           entry.isValidScheduled = inBetween || isSame ? true : false;
         }
@@ -170,11 +166,11 @@ function checkScheduledPlayList(playList: any) {
         ) {
           const inBetween = checkValidMomentDates("inBetween", {
             date_from,
-            date_to,
+            date_to
           });
           const isSame = checkValidMomentDates("isSame", {
             date_from,
-            date_to,
+            date_to
           });
           const weekDayName = moment().format("dddd");
           if (day.includes(weekDayName) && (inBetween || isSame)) {
@@ -188,7 +184,7 @@ function checkScheduledPlayList(playList: any) {
           ) {
             const withinTime = checkValidMomentDates("withinTime", {
               time_from,
-              time_to,
+              time_to
             });
             if (withinTime) {
               entry.isValidScheduled = true;
@@ -205,7 +201,7 @@ function checkScheduledPlayList(playList: any) {
               const weekDayName = moment().format("dddd");
               const withinTime = checkValidMomentDates("withinTime", {
                 time_from,
-                time_to,
+                time_to
               });
               if (day.includes(weekDayName) && withinTime) {
                 entry.isValidScheduled = true;
@@ -216,16 +212,16 @@ function checkScheduledPlayList(playList: any) {
           } else if (day && day.length) {
             const inBetween = checkValidMomentDates("inBetween", {
               date_from,
-              date_to,
+              date_to
             });
             const isSame = checkValidMomentDates("isSame", {
               date_from,
-              date_to,
+              date_to
             });
             const weekDayName = moment().format("dddd");
             const withinTime = checkValidMomentDates("withinTime", {
               time_from,
-              time_to,
+              time_to
             });
             if (
               day.includes(weekDayName) &&
@@ -237,15 +233,15 @@ function checkScheduledPlayList(playList: any) {
           } else if (!day || !day.length) {
             const inBetween = checkValidMomentDates("inBetween", {
               date_from,
-              date_to,
+              date_to
             });
             const isSame = checkValidMomentDates("isSame", {
               date_from,
-              date_to,
+              date_to
             });
             const withinTime = checkValidMomentDates("withinTime", {
               time_from,
-              time_to,
+              time_to
             });
             if ((inBetween || isSame) && withinTime) {
               entry.isValidScheduled = true;
@@ -258,7 +254,6 @@ function checkScheduledPlayList(playList: any) {
     }
     return entry;
   });
-
   let scheduledEntries = entries.filter((entry: any) => entry.isValidScheduled);
   const notValidScheduleFound = entries.find(
     (entry: any) => entry.isValidScheduled === false
@@ -269,7 +264,6 @@ function checkScheduledPlayList(playList: any) {
   playList.entries = scheduledEntries;
   return { playListWithValidEntries: playList, notValidScheduleFound };
 }
-
 export async function fetchScreenDetailsByDuration(
   playlist_id: number,
   duration: number = 5000
@@ -284,7 +278,7 @@ export async function fetchScreenDetailsByDuration(
     const playListLatest = await playListRes.json();
     const playlistResponse: PlaylistResponse = {
       status: ResponseType.SUCCESS,
-      data: playListLatest,
+      data: playListLatest
     };
     const latestPlaylist = getPlaylistEntries(playlistResponse);
     const playlist = localStorage.getItem("playlist");
@@ -310,11 +304,9 @@ export async function fetchScreenDetailsByDuration(
   }
   return fetchScreenDetailsByDuration(playlist_id, duration);
 }
-
 export async function wait(ms: number) {
   return new Promise((res) => setTimeout(res, ms));
 }
-
 export async function uplodPulse(
   screenId: number,
   backend_url: string
