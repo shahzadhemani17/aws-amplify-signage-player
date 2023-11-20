@@ -312,7 +312,7 @@ export async function fetchScreenDetailsByDuration(
       }
     }
   }
-  return fetchScreenDetailsByDuration(playlist_id, duration);
+  return fetchScreenDetailsByDuration(playlist_id, duration, doWait);
 }
 export async function wait(ms: number) {
   return new Promise((res) => setTimeout(res, ms));

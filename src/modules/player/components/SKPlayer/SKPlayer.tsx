@@ -19,6 +19,7 @@ import Modal from "react-modal";
 import cookie from "../../../../../public/cookie.png";
 import { styles } from "../../../../../styles/player";
 import { EmptyPlayer } from "..";
+import moment from "moment";
 export const SKPlayer = ({
   entries,
   transition,
@@ -64,6 +65,7 @@ export const SKPlayer = ({
       }
     }
   }
+  
   useEffect(() => {
 
     if (navigator.cookieEnabled && typeof window.localStorage !== "undefined") {
@@ -77,6 +79,7 @@ export const SKPlayer = ({
       setIsOpen(true);
     }
   }, []);
+
   const setVisiblePlaylist = async () => {
     for (let i = 0; i < playlists.length; i++) {
       playlists[i].visibility = true; // visibility set to true before sleep
@@ -93,7 +96,7 @@ export const SKPlayer = ({
     }
   };
   if (!isScreenOn) {
-    return <EmptyPlayer message="Invalid Screen Time"/>
+    return <EmptyPlayer message={`Screen On/Off: ${moment(screenOnTime, "h:mm:ss").format("HH:mm")} to ${moment(screenOffTime, "h:mm:ss").format("HH:mm")}`}/>
   }
   return (
     <div>
