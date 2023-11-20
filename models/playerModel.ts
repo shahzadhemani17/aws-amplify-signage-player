@@ -26,8 +26,11 @@ export interface EntriesModel {
   transition: string;
   refresh_duration: number;
   playlist_id: number;
-  screen_id: number;
+  screenId: number;
   backend_url: string;
+  screenOnTime: string;
+  screenOffTime: string;
+  screenRefreshDuration: number;
 }
 
 export interface PlayerPropsModel {

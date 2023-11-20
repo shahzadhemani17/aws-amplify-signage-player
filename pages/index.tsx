@@ -35,6 +35,7 @@ const Home: NextPage = (props: any) => {
           playlistData={props.playlistData}
           screenId={props.screen_id}
           backendUrl={props.backend_url}
+          screenData={props.screenData}
         />
       </main>
     </div>
@@ -45,6 +46,7 @@ export default Home;
 
 const playlistResponse = async (
   playlistDataRsponse,
+  screenDataResponse,
   screen_id,
   backend_url
 ) => {
@@ -56,6 +58,7 @@ const playlistResponse = async (
   return {
     props: {
       playlistData: playlistResponse,
+      screenData: screenDataResponse,
       screen_id,
       backend_url,
     },
@@ -97,6 +100,7 @@ export const getServerSideProps = async (context: NextPageContext) => {
 
       const playlistJsonResponse = await playlistResponse(
         playlistDataRsponse,
+        apiResponse,
         context.query.screen_id,
         backendUrl
       );
@@ -131,7 +135,7 @@ export const getServerSideProps = async (context: NextPageContext) => {
         context?.query.playlist_id,
         backendUrl
       );
-      return playlistResponse(playlistDataResponse, null, null);
+      return playlistResponse(playlistDataResponse, null, null, null);
     } catch (err) {
       console.log("crash ");
       return {

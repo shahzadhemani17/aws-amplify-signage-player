@@ -62,6 +62,15 @@ export const convertJSON = (playlist: any) => {
   });
   return result;
 };
+
+export const isScreenScheduleValid = (screenOnTime, screenOffTime) => {
+  const format = 'hh:mm:ss';
+  const time = moment();
+  const beforeTime = moment(screenOnTime, format);
+  const afterTime = moment(screenOffTime, format);
+  return time.isBetween(beforeTime, afterTime) || time.isSame(beforeTime) ? true : false;
+}
+
 export const getPlaylistEntries = (playlistData: any) => {
   let convertedPlaylist: PlayerModel[] = [];
   let transition: string = "";
@@ -266,9 +275,10 @@ function checkScheduledPlayList(playList: any) {
 }
 export async function fetchScreenDetailsByDuration(
   playlist_id: number,
-  duration: number = 5000
+  duration: number = 5000,
+  doWait: boolean
 ): Promise<any> {
-  await wait(10 * 1000);
+  doWait && await wait(10 * 1000);
   let playListRes;
   if (playlist_id) {
     const params = getQueryParams();

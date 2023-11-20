@@ -8,9 +8,10 @@ import {
 import { ErrorTypes } from "../../../pages";
 import InlineWorker from "../../../lib/InlineWorker";
 
-export const Player = ({ playlistData, screenId, backendUrl }: any) => {
-  console.log("PLAYER PLAYLISTdATA", playlistData);
+export const Player = ({ playlistData, screenData, screenId, backendUrl }: any) => {
+  console.log("PLAYER PLAYLISTdATA", playlistData, screenData);
   const response = getPlaylistEntries(playlistData);
+  const screenDetail = screenData?.data;
   useEffect(() => {
     if (window.Worker && navigator.onLine && screenId) {
       screenId && new InlineWorker(uplodPulse(screenId, backendUrl));
@@ -27,7 +28,10 @@ export const Player = ({ playlistData, screenId, backendUrl }: any) => {
           transition={response.transition}
           refresh_duration={response.refresh_duration}
           playlist_id={playlistData.data.id}
-          screen_id={screenId}
+          screenId={screenId}
+          screenOnTime={screenDetail?.screen_on_time}
+          screenOffTime={screenDetail?.screen_off_time}
+          screenRefreshDuration={screenDetail?.refresh_duration}
           backend_url={backendUrl}
         />
       ) : (

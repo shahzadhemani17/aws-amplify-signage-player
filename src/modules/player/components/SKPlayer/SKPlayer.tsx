@@ -3,7 +3,9 @@ import Image from "next/image";
 import {
   sleep,
   fetchScreenDetailsByDuration,
-  uplodPulse
+  uplodPulse,
+  isScreenScheduleValid,
+  wait
 } from "../../helpers/player.helper";
 import { HtmlEnum, EntriesModel } from "@models/playerModel";
 import {
@@ -16,29 +18,57 @@ import InlineWorker from "../../../../../lib/InlineWorker";
 import Modal from "react-modal";
 import cookie from "../../../../../public/cookie.png";
 import { styles } from "../../../../../styles/player";
+import { EmptyPlayer } from "..";
 export const SKPlayer = ({
   entries,
   transition,
   refresh_duration,
   playlist_id,
-  screen_id,
-  backend_url
+  screenOnTime,
+  screenOffTime,
+  screenId,
+  screenRefreshDuration,
+  backend_url,
 }: EntriesModel) => {
   const [playlists, setPlaylists] = useState([...entries]);
   const [modalIsOpen, setIsOpen] = useState(false);
+  const [isScreenOn, setScreenToOn] = useState(isScreenScheduleValid(screenOnTime, screenOffTime));
+
   const vidRef = useRef(null);
   const handlePlayVideo = (vidRef: any) => {
     vidRef?.current?.play();
   };
-  useEffect(() => {
-    if (navigator.cookieEnabled && typeof window.localStorage !== "undefined") {
-      setVisiblePlaylist();
-      localStorage.setItem("playlist", JSON.stringify(entries));
-      if (window.Worker && navigator.onLine) {
+
+  const checkScreenSchedule = async () => {
+    await wait(10 * 1000);
+    const validScreenTime = isScreenScheduleValid(screenOnTime, screenOffTime);
+    validScreenTime ? setScreenToOn(true) : setScreenToOn(false);
+    if (validScreenTime) {
+      fetchScreenDetailsByDuration(playlist_id, refresh_duration, false);
+
+    }
+    return checkScreenSchedule();
+  };
+
+  const playEntriesWithWorker = () => {
+    localStorage.setItem("playlist", JSON.stringify(entries));
+    if (window.Worker && navigator.onLine) {
+      if (screenId && screenOnTime && screenOffTime) { 
         const inlineWorker = new InlineWorker(
-          fetchScreenDetailsByDuration(playlist_id, refresh_duration)
+          checkScreenSchedule()
+        );
+      } else {
+        const inlineWorker = new InlineWorker(
+          fetchScreenDetailsByDuration(playlist_id, refresh_duration, true)
         );
       }
+    }
+  }
+  useEffect(() => {
+
+    if (navigator.cookieEnabled && typeof window.localStorage !== "undefined") {
+      setVisiblePlaylist();
+      playEntriesWithWorker();
     } else {
       setPlaylists([]);
       //alert("No Playlist Available");
@@ -62,6 +92,9 @@ export const SKPlayer = ({
       }
     }
   };
+  if (!isScreenOn) {
+    return <EmptyPlayer message="Invalid Screen Time"/>
+  }
   return (
     <div>
       {playlists?.map((playlist, index) => {
