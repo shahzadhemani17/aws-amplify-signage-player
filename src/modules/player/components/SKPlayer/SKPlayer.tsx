@@ -61,10 +61,6 @@ export const SKPlayer = ({
         const inlineWorker = new InlineWorker(
           checkScreenSchedule()
         );
-      } else {
-        const inlineWorker = new InlineWorker(
-          fetchScreenDetailsByDuration(playlist_id, refresh_duration, true)
-        );
       }
     }
   }
