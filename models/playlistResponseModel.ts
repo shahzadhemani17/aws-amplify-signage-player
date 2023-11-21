@@ -1,9 +1,11 @@
 export enum ResponseType {
   SUCCESS = "success",
-  ERROR = "error"
+  ERROR = "error",
 }
 
 export interface PlaylistResponse {
   status: ResponseType;
-  data: {};
-};
+  data: {
+    entries: any[];
+  };
+}

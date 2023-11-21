@@ -9,7 +9,7 @@ export const getPlaylistData = (
   screen_id?: string
 ) => {
   return fetch(
-    `${backendUrl}/playlists/${playlist_id}/entries?screen_id=${870}`,
+    `${backendUrl}/playlists/${playlist_id}/entries?screen_id=${screen_id}`,
     {
       method: "GET",
       headers: headers,

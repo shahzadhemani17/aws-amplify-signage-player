@@ -50,12 +50,10 @@ const playlistResponse = async (playlistDataRsponse) => {
     },
   };
 };
-
 type KeyValuePair = {
   key: string;
   value: string;
 };
-
 const createObjectFromArray = (array: KeyValuePair[]) => {
   console.log("crash hota dekho", array);
   const result = {};
@@ -66,19 +64,6 @@ const createObjectFromArray = (array: KeyValuePair[]) => {
 
   return result;
 };
-
-// Example array
-const inputArray: KeyValuePair[] = [
-  {
-    key: "organization_id",
-    value: "testing_company",
-  },
-  {
-    key: "ad_unit_id",
-    value: "vistar_image",
-  },
-];
-
 const addVengoEntries = async (responseData: any) => {
   if (responseData?.props?.playlistData?.data?.entries) {
     const vengoIntegrations =
@@ -112,6 +97,9 @@ const addVengoEntries = async (responseData: any) => {
 
     console.log("vengoEntries............4", jsonEntries);
 
+    jsonEntries.forEach((entry, index) => {
+      entry.position = vengoIntegrations[index].position;
+    });
     return jsonEntries;
   }
 };
@@ -137,6 +125,7 @@ export const getServerSideProps = async (context: NextPageContext) => {
       );
 
       const screenApiResponse = await screenDetailResponse.json();
+      console.log("screenApiResponse...................1", screenApiResponse);
 
       if (
         !screenApiResponse?.data?.playlist_id &&
@@ -155,7 +144,8 @@ export const getServerSideProps = async (context: NextPageContext) => {
 
       const playlistDataRsponse = await getPlaylistData(
         screenApiResponse?.playlist_id ?? screenApiResponse?.data?.playlist_id,
-        backendUrl
+        backendUrl,
+        context?.query.screen_id as string
       );
 
       const playlistJsonResponse = await playlistResponse(playlistDataRsponse);
@@ -187,8 +177,16 @@ export const getServerSideProps = async (context: NextPageContext) => {
       console.log("playlistData.......6", playlistData);
 
       if (playlistData?.entries?.length) {
-        playlistData.entries = [...localEntries, ...vengoEntryArray];
+        if (localEntries.length && vengoEntryArray?.length) {
+          playlistData.entries = [...localEntries, ...vengoEntryArray];
+        } else if (localEntries.length && !vengoEntryArray?.length) {
+          playlistData.entries = [...localEntries];
+        } else if (!localEntries.length && vengoEntryArray?.length) {
+          playlistData.entries = [...vengoEntryArray];
+        }
       }
+
+      console.log("playlistData.......7", playlistData);
 
       return playlistJsonResponse;
     } catch (err) {

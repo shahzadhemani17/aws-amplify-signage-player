@@ -14,7 +14,7 @@ export enum HtmlEnum {
 }
 
 export interface PlayerModel {
-  id: number;
+  id?: number;
   tag: string;
   url: string;
   duration: number;
