@@ -35,17 +35,19 @@ export const Player = ({ playlistData, screenData, screenId, backendUrl }: any) 
   }
 
   useEffect(() => {
-    const getScreenDetails = () => {
-      const inlineWorker = new InlineWorker(
-        refreshScreenDataAfterDuration()
-      );
-    };
-
-    const intervalId = setInterval(() => {
-      getScreenDetails();
-    }, screenRefreshDuration * 1000);
-
-    return () => clearInterval(intervalId);
+    if (screenId) {
+      const getScreenDetails = () => {
+        const inlineWorker = new InlineWorker(
+          refreshScreenDataAfterDuration()
+        );
+      };
+  
+      const intervalId = setInterval(() => {
+        getScreenDetails();
+      }, screenRefreshDuration * 1000);
+  
+      return () => clearInterval(intervalId);
+    }
   }, []);
 
 
