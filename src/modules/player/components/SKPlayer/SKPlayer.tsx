@@ -20,6 +20,7 @@ import cookie from "../../../../../public/cookie.png";
 import { styles } from "../../../../../styles/player";
 import { EmptyPlayer } from "..";
 import moment from "moment";
+import { labels } from "@playerComponents/labels";
 export const SKPlayer = ({
   entries,
   transition,
@@ -34,6 +35,8 @@ export const SKPlayer = ({
   const [playlists, setPlaylists] = useState([...entries]);
   const [modalIsOpen, setIsOpen] = useState(false);
   const [isScreenOn, setScreenToOn] = useState(isScreenScheduleValid(screenOnTime, screenOffTime));
+  const screenOnTimeRef = useRef(screenOnTime);
+  const screenOffTimeRef = useRef(screenOffTime);
 
   const vidRef = useRef(null);
   const handlePlayVideo = (vidRef: any) => {
@@ -42,7 +45,8 @@ export const SKPlayer = ({
 
   const checkScreenSchedule = async () => {
     await wait(10 * 1000);
-    const validScreenTime = isScreenScheduleValid(screenOnTime, screenOffTime);
+    console.log("on/off", screenOnTimeRef.current, screenOffTimeRef.current);
+    const validScreenTime = isScreenScheduleValid(screenOnTimeRef.current, screenOffTimeRef.current);
     validScreenTime ? setScreenToOn(true) : setScreenToOn(false);
     if (validScreenTime) {
       fetchScreenDetailsByDuration(playlist_id, refresh_duration, false);
@@ -65,7 +69,12 @@ export const SKPlayer = ({
       }
     }
   }
-  
+
+  useEffect(() => {
+    screenOnTimeRef.current = screenOnTime;
+    screenOffTimeRef.current = screenOffTime;
+  }, [screenOnTime, screenOffTime])
+ 
   useEffect(() => {
 
     if (navigator.cookieEnabled && typeof window.localStorage !== "undefined") {
@@ -96,7 +105,7 @@ export const SKPlayer = ({
     }
   };
   if (!isScreenOn) {
-    return <EmptyPlayer message={`Screen On/Off: ${moment(screenOnTime, "h:mm:ss").format("HH:mm")} to ${moment(screenOffTime, "h:mm:ss").format("HH:mm")}`}/>
+    return <EmptyPlayer message={(screenOnTime && screenOffTime) ? `Screen On/Off: ${moment(screenOnTime, "h:mm:ss").format("HH:mm")} to ${moment(screenOffTime, "h:mm:ss").format("HH:mm")}` : labels.setScreenOnOffTime}/>
   }
   return (
     <div>

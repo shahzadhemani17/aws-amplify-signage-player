@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { EmptyPlayer, SKPlayer, SplashScreen } from "@playerComponents/index";
 import {
   fetchScreenDetailsByDuration,
@@ -7,11 +7,45 @@ import {
 } from "./helpers/player.helper";
 import { ErrorTypes } from "../../../pages";
 import InlineWorker from "../../../lib/InlineWorker";
+import { getScreenDetails } from "lib/scoop.repo";
 
 export const Player = ({ playlistData, screenData, screenId, backendUrl }: any) => {
   console.log("PLAYER PLAYLISTdATA", playlistData, screenData);
+  let screenDetail = screenData?.data;
+  const [screenRefreshDuration, setScreenRefreshDuration] = useState(screenDetail.refresh_duration);
+  const [screenDetailData, setScreenDetailData] = useState(screenDetail);
+
+  const refreshScreenDataAfterDuration = async () => {
+    const localScreenDetails = localStorage.getItem("screenDetail");
+    const screenDetailResponse = await getScreenDetails(
+      screenId,
+      backendUrl
+    );
+      const apiResponse = await screenDetailResponse.json();
+      screenDetail = apiResponse.data;
+    if (localScreenDetails !== JSON.stringify(screenDetail)) {
+      setScreenDetailData(screenDetail);
+      setScreenRefreshDuration(screenDetail.refresh_duration);
+      localStorage.setItem("screenDetail", JSON.stringify(screenDetail));
+    }
+  }
+
+  useEffect(() => {
+    const getScreenDetails = () => {
+      const inlineWorker = new InlineWorker(
+        refreshScreenDataAfterDuration()
+      );
+    };
+
+    const intervalId = setInterval(() => {
+      getScreenDetails();
+    }, screenRefreshDuration * 1000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+
   const response = getPlaylistEntries(playlistData);
-  const screenDetail = screenData?.data;
   useEffect(() => {
     if (window.Worker && navigator.onLine && screenId) {
       screenId && new InlineWorker(uplodPulse(screenId, backendUrl));
@@ -29,9 +63,9 @@ export const Player = ({ playlistData, screenData, screenId, backendUrl }: any) 
           refresh_duration={response.refresh_duration}
           playlist_id={playlistData.data.id}
           screenId={screenId}
-          screenOnTime={screenDetail?.screen_on_time}
-          screenOffTime={screenDetail?.screen_off_time}
-          screenRefreshDuration={screenDetail?.refresh_duration}
+          screenOnTime={screenDetailData?.screen_on_time}
+          screenOffTime={screenDetailData?.screen_off_time}
+          screenRefreshDuration={screenRefreshDuration}
           backend_url={backendUrl}
         />
       ) : (
