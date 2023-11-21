@@ -18,7 +18,7 @@ import InlineWorker from "../../../../../lib/InlineWorker";
 import Modal from "react-modal";
 import cookie from "../../../../../public/cookie.png";
 import { styles } from "../../../../../styles/player";
-import { EmptyPlayer } from "..";
+import { EmptyPlayer } from "@playerComponents/index";
 import moment from "moment";
 import { labels } from "@playerComponents/labels";
 export const SKPlayer = ({
@@ -103,7 +103,7 @@ export const SKPlayer = ({
       }
     }
   };
-  if (!isScreenOn) {
+  if (!isScreenOn && screenId) {
     return <EmptyPlayer message={(screenOnTime && screenOffTime) ? `Screen On/Off: ${moment(screenOnTime, "h:mm:ss").format("HH:mm")} to ${moment(screenOffTime, "h:mm:ss").format("HH:mm")}` : labels.setScreenOnOffTime}/>
   }
   return (

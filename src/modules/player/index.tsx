@@ -12,7 +12,7 @@ import { getScreenDetails } from "lib/scoop.repo";
 export const Player = ({ playlistData, screenData, screenId, backendUrl }: any) => {
   console.log("PLAYER PLAYLISTdATA", playlistData, screenData);
   let screenDetail = screenData?.data;
-  const [screenRefreshDuration, setScreenRefreshDuration] = useState(screenDetail.refresh_duration);
+  const [screenRefreshDuration, setScreenRefreshDuration] = useState(screenDetail?.refresh_duration);
   const [screenDetailData, setScreenDetailData] = useState(screenDetail);
 
   const refreshScreenDataAfterDuration = async () => {
