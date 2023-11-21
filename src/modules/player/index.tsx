@@ -1,13 +1,13 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { EmptyPlayer, SKPlayer, SplashScreen } from "@playerComponents/index";
 import {
-  fetchScreenDetailsByDuration,
   getPlaylistEntries,
   uplodPulse,
 } from "./helpers/player.helper";
 import { ErrorTypes } from "../../../pages";
 import InlineWorker from "../../../lib/InlineWorker";
 import { getScreenDetails } from "lib/scoop.repo";
+import CryptoJS from 'crypto-js';
 
 export const Player = ({ playlistData, screenData, screenId, backendUrl }: any) => {
   console.log("PLAYER PLAYLISTdATA", playlistData, screenData);
@@ -52,10 +52,13 @@ export const Player = ({ playlistData, screenData, screenId, backendUrl }: any) 
 
 
   const response = getPlaylistEntries(playlistData);
+
   useEffect(() => {
     if (window.Worker && navigator.onLine && screenId) {
       screenId && new InlineWorker(uplodPulse(screenId, backendUrl));
     }
+    const sha256Hash = CryptoJS.SHA256(JSON.stringify(playlistData.data)).toString();
+    localStorage?.setItem("playlistHash", sha256Hash);
   }, []);
 
   return (
