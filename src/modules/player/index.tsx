@@ -21,9 +21,13 @@ export const Player = ({ playlistData, screenData, screenId, backendUrl }: any) 
       screenId,
       backendUrl
     );
-      const apiResponse = await screenDetailResponse.json();
-      screenDetail = apiResponse.data;
+      const screenResponse = await screenDetailResponse.json();
+      screenDetail = screenResponse.data;
     if (localScreenDetails !== JSON.stringify(screenDetail)) {
+      const parsedScreenDetail = JSON.parse(localScreenDetails as string);
+      if (parsedScreenDetail.playlist_id !== screenDetail.playlist_id) {
+        window.location.reload();
+      }
       setScreenDetailData(screenDetail);
       setScreenRefreshDuration(screenDetail.refresh_duration);
       localStorage.setItem("screenDetail", JSON.stringify(screenDetail));

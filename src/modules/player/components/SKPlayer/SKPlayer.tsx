@@ -50,7 +50,6 @@ export const SKPlayer = ({
     validScreenTime ? setScreenToOn(true) : setScreenToOn(false);
     if (validScreenTime) {
       fetchScreenDetailsByDuration(playlist_id, refresh_duration, false);
-
     }
     return checkScreenSchedule();
   };
