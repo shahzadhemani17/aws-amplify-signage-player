@@ -11,6 +11,7 @@ export enum HtmlEnum {
   IMAGE = "image",
   iFRAME = "iframe",
   VIDEO = "video",
+  VENGO = "vengo",
 }
 
 export interface PlayerModel {
@@ -19,6 +20,7 @@ export interface PlayerModel {
   url: string;
   duration: number;
   visibility: boolean;
+  ad_integration?: any;
 }
 
 // export interface AdIntegration {

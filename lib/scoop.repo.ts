@@ -8,6 +8,7 @@ export const getPlaylistData = (
   backendUrl,
   screen_id?: string
 ) => {
+  console.log("screen_id.................PPPPPPPPPPPPP", screen_id);
   return fetch(
     `${backendUrl}/playlists/${playlist_id}/entries?screen_id=${screen_id}`,
     {

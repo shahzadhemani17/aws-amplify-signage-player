@@ -15,6 +15,7 @@ import InlineWorker from "../../../../../lib/InlineWorker";
 import Modal from "react-modal";
 import cookie from "../../../../../public/cookie.png";
 import { styles } from "../../../../../styles/player";
+import MyWorker from "../../../../../lib/MyWorker";
 
 export const SKPlayer = ({
   entries,
@@ -22,8 +23,45 @@ export const SKPlayer = ({
   refresh_duration,
   playlist_id,
 }: EntriesModel) => {
+  console.log("entries SK PLAYER", entries);
+  const filterLocalEntries = (entries) => {
+    return entries.filter((entry) => {
+      if (entry.tag !== "vengo") {
+        return entry;
+      }
+    });
+  };
+
+  const filterVengoIntegrationEntries = (entries) => {
+    return entries.filter((entry) => {
+      if (entry.tag === "vengo") {
+        return entry;
+      }
+    });
+  };
+
   const [playlistEntries, setPlaylistEntries] = useState([...entries]);
+  const [localPlaylistEntries, setLocalPlaylistEntries] = useState([
+    ...filterLocalEntries(entries),
+  ]);
+  const [vengoIntegrationEntries, setVengoIntegrationEntries] = useState([
+    ...filterVengoIntegrationEntries(entries),
+  ]);
+  const [vengoPlaylistEntries, setVengoPlaylistEntries] = useState([]);
+  console.log("entries SK PLAYER", vengoPlaylistEntries);
+
   const [modalIsOpen, setIsOpen] = useState(false);
+  // const [worker, setWorker] = useState<Worker | null>(null);
+  const workerRef = React.useRef<MyWorker | null>(null);
+  // const [apiResponse, setApiResponse] = useState<any | null>(null);
+
+  const startWorker = () => {
+    const onDataReceived = (data: any) => {
+      setVengoPlaylistEntries(data);
+    };
+    workerRef.current = new MyWorker(onDataReceived);
+    workerRef.current.fetchData("fetchData", vengoIntegrationEntries);
+  };
 
   const vidRef = useRef(null);
 
@@ -42,19 +80,16 @@ export const SKPlayer = ({
       }
     } else {
       setPlaylistEntries([]);
-      //alert("No Playlist Available");
-      //playlists.length = 0;
       console.log("pl", playlistEntries);
       setIsOpen(true);
     }
   }, []);
 
-  // useEffect(() => {
-  //   addVengoEntriesToPlaylistEntries();
-  // }, [playlistEntries]);
-
   const setVisiblePlaylist = async () => {
     for (let i = 0; i < playlistEntries.length; i++) {
+      if (i === 0) {
+        startWorker();
+      }
       playlistEntries[i].visibility = true; // visibility set to true before sleep
       setPlaylistEntries([...playlistEntries]); // update state
       if (playlistEntries[i].tag === "video") {
@@ -73,7 +108,7 @@ export const SKPlayer = ({
 
   return (
     <div>
-      {playlistEntries?.map((entry, index) => {
+      {localPlaylistEntries?.map((entry, index) => {
         switch (entry.tag) {
           case HtmlEnum.VIDEO:
             return (
