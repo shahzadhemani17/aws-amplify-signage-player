@@ -28,53 +28,30 @@ export const SKPlayer = ({
   playlist_id,
   screenOnTime,
   screenOffTime,
+  isScreenOn,
+  setScreenToOn,
   screenId,
   screenRefreshDuration,
   backend_url,
 }: EntriesModel) => {
   const [playlists, setPlaylists] = useState([...entries]);
   const [modalIsOpen, setIsOpen] = useState(false);
-  const [isScreenOn, setScreenToOn] = useState(isScreenScheduleValid(screenOnTime, screenOffTime));
-  const screenOnTimeRef = useRef(screenOnTime);
-  const screenOffTimeRef = useRef(screenOffTime);
 
   const vidRef = useRef(null);
   const handlePlayVideo = (vidRef: any) => {
     vidRef?.current?.play();
   };
 
-  const checkScreenSchedule = async () => {
-    await wait(10 * 1000);
-    console.log("on/off", screenOnTimeRef.current, screenOffTimeRef.current);
-    const validScreenTime = isScreenScheduleValid(screenOnTimeRef.current, screenOffTimeRef.current);
-    validScreenTime ? setScreenToOn(true) : setScreenToOn(false);
-    if (validScreenTime) {
-      fetchScreenDetailsByDuration(playlist_id, refresh_duration, false);
-    }
-    return checkScreenSchedule();
-  };
-
-  const playEntriesWithWorker = () => {
-    localStorage.setItem("playlist", JSON.stringify(entries));
-    if (window.Worker && navigator.onLine) {
-      if (screenId && screenOnTime && screenOffTime) { 
-        const inlineWorker = new InlineWorker(
-          checkScreenSchedule()
-        );
-      }
-    }
-  }
+  console.log("on/off", screenOnTime, screenOffTime);
 
   useEffect(() => {
-    screenOnTimeRef.current = screenOnTime;
-    screenOffTimeRef.current = screenOffTime;
+    setScreenToOn(isScreenScheduleValid(screenOnTime, screenOffTime));
   }, [screenOnTime, screenOffTime])
  
   useEffect(() => {
 
     if (navigator.cookieEnabled && typeof window.localStorage !== "undefined") {
       setVisiblePlaylist();
-      playEntriesWithWorker();
     } else {
       setPlaylists([]);
       //alert("No Playlist Available");
