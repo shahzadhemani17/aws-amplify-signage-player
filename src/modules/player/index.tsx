@@ -28,7 +28,7 @@ export const Player = ({ playlistData, screenData, screenId, backendUrl }: any) 
     setScreenDetailData(screenDetail);
     setScreenRefreshDuration(screenDetail.refresh_duration);
     setScreenToOn(isScreenScheduleValid(screenDetail.screen_on_time, screenDetail.screen_off_time))
-    if (localScreenDetails !== JSON.stringify(screenDetail)) {
+    if (localScreenDetails && localScreenDetails !== JSON.stringify(screenDetail)) {
       const parsedScreenDetail = JSON.parse(localScreenDetails as string);
       if (parsedScreenDetail.playlist_id !== screenDetail.playlist_id) {
         window.location.reload();
@@ -70,7 +70,7 @@ export const Player = ({ playlistData, screenData, screenId, backendUrl }: any) 
       screenId && new InlineWorker(uplodPulse(screenId, backendUrl));
       const sha256Hash = CryptoJS.SHA256(JSON.stringify(playlistData.data)).toString();
       localStorage?.setItem("playlistHash", sha256Hash);
-      localStorage?.setItem("screenDetail", JSON.stringify(screenData.data));
+      screenData && localStorage?.setItem("screenDetail", JSON.stringify(screenData?.data));
     }
   }, []);
 
