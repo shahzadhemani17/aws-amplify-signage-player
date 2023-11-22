@@ -14,7 +14,7 @@ export const Player = ({ playlistData, screenData, screenId, backendUrl }: any) 
   console.log("PLAYER PLAYLISTdATA", playlistData, screenData);
   let screenDetail = screenData?.data;
   const [screenRefreshDuration, setScreenRefreshDuration] = useState(screenDetail?.refresh_duration);
-  const [isScreenOn, setScreenToOn] = useState(isScreenScheduleValid(screenDetail.screen_on_time, screenDetail.screen_off_time));
+  const [isScreenOn, setScreenToOn] = useState(isScreenScheduleValid(screenDetail?.screen_on_time, screenDetail?.screen_off_time));
   const [screenDetailData, setScreenDetailData] = useState(screenDetail);
 
   const refreshScreenDataAfterDuration = async () => {
@@ -68,10 +68,10 @@ export const Player = ({ playlistData, screenData, screenId, backendUrl }: any) 
   useEffect(() => {
     if (window.Worker && navigator.onLine && screenId) {
       screenId && new InlineWorker(uplodPulse(screenId, backendUrl));
+      const sha256Hash = CryptoJS.SHA256(JSON.stringify(playlistData.data)).toString();
+      localStorage?.setItem("playlistHash", sha256Hash);
+      localStorage?.setItem("screenDetail", JSON.stringify(screenData.data));
     }
-    const sha256Hash = CryptoJS.SHA256(JSON.stringify(playlistData.data)).toString();
-    localStorage?.setItem("playlistHash", sha256Hash);
-    localStorage?.setItem("screenDetail", JSON.stringify(screenData.data));
   }, []);
 
   return (
