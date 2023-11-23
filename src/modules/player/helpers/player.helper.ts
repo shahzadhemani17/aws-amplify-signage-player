@@ -317,13 +317,18 @@ function checkScheduledPlayList(playList: any) {
 
 export async function fetchScreenDetailsByDuration(
   playlist_id: number,
-  duration: number = 5000
+  duration: number = 5000,
+  screen_id?: string
 ): Promise<any> {
   await wait(10 * 1000);
   let playListRes;
   if (playlist_id) {
     const params = getQueryParams();
-    playListRes = await getPlaylistData(playlist_id, params.backendUrl, "881");
+    playListRes = await getPlaylistData(
+      playlist_id,
+      params.backendUrl,
+      screen_id
+    );
   }
   if (playListRes) {
     const playListLatest = await playListRes.json();
@@ -353,7 +358,7 @@ export async function fetchScreenDetailsByDuration(
       }
     }
   }
-  return fetchScreenDetailsByDuration(playlist_id, duration);
+  return fetchScreenDetailsByDuration(playlist_id, duration, screen_id);
 }
 
 export async function wait(ms: number) {
@@ -366,7 +371,6 @@ export type KeyValuePair = {
 };
 
 export const createObjectFromArray = (array: KeyValuePair[]) => {
-  console.log("crash hota dekho", array);
   const result = {};
 
   for (const item of array) {
@@ -377,7 +381,6 @@ export const createObjectFromArray = (array: KeyValuePair[]) => {
 };
 
 export const getVengoEntriesByIntegrations = async (vengoIntegrations: any) => {
-  console.log("vengoEntries............3", vengoIntegrations);
   if (!vengoIntegrations.length) {
     return;
   }
@@ -387,7 +390,6 @@ export const getVengoEntriesByIntegrations = async (vengoIntegrations: any) => {
       const paramObject = createObjectFromArray(
         integration?.ad_integration?.Params
       );
-      // console.log("paramObject............", paramObject);
       return getVengoEntries(integration?.ad_integration?.url, paramObject);
     })
   );
@@ -400,24 +402,10 @@ export const getVengoEntriesByIntegrations = async (vengoIntegrations: any) => {
     )
   ).flat();
 
-  console.log("vengoEntries............4", jsonEntries, typeof jsonEntries);
-
   jsonEntries.forEach((entry, index) => {
     if (entry) {
       entry.position = vengoIntegrations[index].position;
     }
   });
-  console.log("vengoEntries............5", jsonEntries, typeof jsonEntries);
   return jsonEntries;
 };
-
-// if (i === 0) {
-//   // startWorker();
-//   getVengoEntriesByIntegrations(vengoIntegrationEntries).then((data) => {
-//     if (data && data.every((item) => item !== null)) {
-//       const dataArray = convetVengoEntries(data);
-//       setVengoPlaylistEntries([...dataArray]);
-//       // setIteratableEntries([...localPlaylistEntries]); // update state
-//     }
-//   });
-// }

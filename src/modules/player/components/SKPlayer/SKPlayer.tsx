@@ -24,31 +24,8 @@ export const SKPlayer = ({
   transition,
   refresh_duration,
   playlist_id,
+  screen_id,
 }: EntriesModel) => {
-  const filterLocals = (entries) => {
-    return entries.filter((entry) => {
-      if (entry.entyType !== "vengo") {
-        return entry;
-      }
-    });
-  };
-
-  const filterVengs = (entries) => {
-    return entries.filter((entry) => {
-      if (entry.entyType === "vengo") {
-        return entry;
-      }
-    });
-  };
-
-  const filterLocalEntries = (entries) => {
-    return entries.filter((entry) => {
-      if (entry.tag !== "vengo") {
-        return entry;
-      }
-    });
-  };
-
   const filterVengoIntegrationEntries = (entries) => {
     return entries.filter((entry) => {
       if (entry.tag === "vengo") {
@@ -58,32 +35,18 @@ export const SKPlayer = ({
   };
 
   const [playlistEntries, setPlaylistEntries] = useState([...entries]);
-  const [localPlaylistEntries, setLocalPlaylistEntries] = useState([
-    ...filterLocalEntries(entries),
-  ]);
+
   const [vengoIntegrationEntries, setVengoIntegrationEntries] = useState([
     ...filterVengoIntegrationEntries(entries),
   ]);
-  console.log("entries SK PLAYER", vengoIntegrationEntries);
 
   const [vengoPlaylistEntries, setVengoPlaylistEntries] = useState<any>([]);
-  console.log("entries SK PLAYER", vengoPlaylistEntries);
-  const [iteratableEntries, setIteratableEntries] = useState<any>([
-    ...filterLocalEntries(entries),
-  ]);
-
-  console.log("iteratableEntries...........", iteratableEntries);
-
   const [modalIsOpen, setIsOpen] = useState(false);
-  // const [worker, setWorker] = useState<Worker | null>(null);
   const workerRef = React.useRef<MyWorker | null>(null);
-  // const [apiResponse, setApiResponse] = useState<any | null>(null);
 
   const startWorker = () => {
     const onDataReceived = (data: any) => {
       setVengoPlaylistEntries(data);
-      console.log("vengoPlaylistEntries 999999999999999999999", data);
-      // setIteratableEntries([...localPlaylistEntries, ...data]);
     };
     workerRef.current = new MyWorker(onDataReceived);
     workerRef.current.fetchData("fetchData", vengoIntegrationEntries);
@@ -101,7 +64,7 @@ export const SKPlayer = ({
       localStorage.setItem("playlist", JSON.stringify(entries));
       if (window.Worker && navigator.onLine) {
         const inlineWorker = new InlineWorker(
-          fetchScreenDetailsByDuration(playlist_id, refresh_duration)
+          fetchScreenDetailsByDuration(playlist_id, refresh_duration, screen_id)
         );
       }
     } else {
@@ -112,8 +75,7 @@ export const SKPlayer = ({
   }, []);
 
   const setVisiblePlaylist = async () => {
-    for (let i = 0; i < iteratableEntries.length; i++) {
-      console.log(i, "111111111111111111111111111", iteratableEntries[i]);
+    for (let i = 0; i < playlistEntries.length; i++) {
       let dataArray;
       if (i === 0) {
         // startWorker();
@@ -125,22 +87,18 @@ export const SKPlayer = ({
               return item;
             });
             setVengoPlaylistEntries([...dataArray]);
-            setIteratableEntries([...localPlaylistEntries, ...dataArray]); // update state
           }
         });
       }
-      iteratableEntries[i].visibility = true; // visibility set to true before sleep
-      setIteratableEntries([...localPlaylistEntries, ...vengoPlaylistEntries]); // update state4
-      console.log(i, "11111111111112222222222", iteratableEntries[i]);
-      if (iteratableEntries[i].tag === "video") {
+      playlistEntries[i].visibility = true; // visibility set to true before sleep
+      setPlaylistEntries([...playlistEntries]); // update state4
+      if (playlistEntries[i].tag === "video") {
         handlePlayVideo(vidRef);
       }
-      await sleep(iteratableEntries[i].duration); // sleep according to playlist duration
-      console.log(i, "111111111111333333333333333", iteratableEntries[i]);
-      iteratableEntries[i].visibility = false; // visibility set to false after sleep
-      console.log(i, "1111111111114444444444444444", iteratableEntries[i]);
+      await sleep(playlistEntries[i].duration); // sleep according to playlist duration
+      playlistEntries[i].visibility = false; // visibility set to false after sleep
 
-      if (i === iteratableEntries.length - 1) {
+      if (i === playlistEntries.length - 1) {
         // check if last playlist entry
         i = -1; // play from start
       }
@@ -151,8 +109,16 @@ export const SKPlayer = ({
 
   return (
     <div>
-      {iteratableEntries?.map((entry, index) => {
-        switch (entry.tag) {
+      {playlistEntries?.map((entry, index) => {
+        if (entry.entryType === "vengo") {
+          entry = vengoPlaylistEntries?.find(
+            (ent) => entry?.position === ent?.position
+          );
+          if (entry) {
+            entry.visibility = true;
+          }
+        }
+        switch (entry?.tag) {
           case HtmlEnum.VIDEO:
             return (
               <SKVideo

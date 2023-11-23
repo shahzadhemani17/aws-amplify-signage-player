@@ -5,11 +5,7 @@ import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { Player } from "src/modules/player";
 // import Amplify from "aws-amplify";
 // import awsConfig from "../src/aws-exports";
-import {
-  getPlaylistData,
-  getScreenDetails,
-  // getVengoEntries,
-} from "../lib/scoop.repo";
+import { getPlaylistData, getScreenDetails } from "../lib/scoop.repo";
 
 // configure amplify for cloud communication
 // Amplify.configure(awsConfig);
@@ -18,7 +14,6 @@ export enum ErrorTypes {
   Playlist_Not_Attached_Error = "Playlist_Not_Attached_Error",
 }
 const Home: NextPage = (props: any) => {
-  //console.log("Props Response", props.playlistData);
   console.log("Props Response", props);
 
   return (
@@ -30,7 +25,7 @@ const Home: NextPage = (props: any) => {
       </Head>
 
       <main className={styles.main}>
-        <Player playlistData={props.playlistData} />
+        <Player playlistData={props.playlistData} screen_id={props.screen_id} />
       </main>
     </div>
   );
@@ -38,7 +33,7 @@ const Home: NextPage = (props: any) => {
 
 export default Home;
 
-const playlistResponse = async (playlistDataRsponse) => {
+const playlistResponse = async (playlistDataRsponse, screen_id?: string) => {
   const apiResponse = await playlistDataRsponse.json();
   const playlistResponse: PlaylistResponse = {
     status: ResponseType.SUCCESS,
@@ -47,6 +42,7 @@ const playlistResponse = async (playlistDataRsponse) => {
   return {
     props: {
       playlistData: playlistResponse,
+      screen_id,
     },
   };
 };
@@ -55,7 +51,6 @@ export const getServerSideProps = async (context: NextPageContext) => {
   const backendUrl = context?.query.backend_url
     ? context?.query.backend_url
     : process.env.NEXT_PUBLIC_API_URL;
-  console.log("backendurl", "public-url", backendUrl);
   if (context?.query.screen_id) {
     try {
       const screenDetailResponse = await getScreenDetails(
@@ -64,7 +59,6 @@ export const getServerSideProps = async (context: NextPageContext) => {
       );
 
       const screenApiResponse = await screenDetailResponse.json();
-      console.log("screenApiResponse...................1", screenApiResponse);
 
       if (
         !screenApiResponse?.data?.playlist_id &&
@@ -87,17 +81,10 @@ export const getServerSideProps = async (context: NextPageContext) => {
         context?.query.screen_id as string
       );
 
-      const playlistJsonResponse = await playlistResponse(playlistDataRsponse);
-
-      // const vengoEntries = await addVengoEntries(playlistJsonResponse);
-      // const localEntries = filterLocalEntries(
-      //   playlistJsonResponse.props.playlistData?.data.entries
-      // );
-
-      // console.log("vengoEntryArray...........1", vengoEntries);
-
-      // const vengoEntryArray = vengoEntries;
-      // console.log("vengoEntryArray...........2", vengoEntryArray);
+      const playlistJsonResponse = await playlistResponse(
+        playlistDataRsponse,
+        context?.query.screen_id as string
+      );
 
       // improve this
       if (typeof playlistJsonResponse.props.playlistData?.data === "string") {
@@ -113,19 +100,6 @@ export const getServerSideProps = async (context: NextPageContext) => {
       }
 
       const playlistData = playlistJsonResponse?.props?.playlistData?.data;
-      console.log("playlistData.......6", playlistData);
-
-      // if (playlistData?.entries?.length) {
-      //   if (localEntries.length && vengoEntryArray?.length) {
-      //     playlistData.entries = [...localEntries, ...vengoEntryArray];
-      //   } else if (localEntries.length && !vengoEntryArray?.length) {
-      //     playlistData.entries = [...localEntries];
-      //   } else if (!localEntries.length && vengoEntryArray?.length) {
-      //     playlistData.entries = [...vengoEntryArray];
-      //   }
-      // }
-
-      // console.log("playlistData.......7", playlistData);
 
       return playlistJsonResponse;
     } catch (err) {

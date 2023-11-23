@@ -2,7 +2,7 @@ import React, { Fragment, useEffect } from "react";
 import { EmptyPlayer, SKPlayer, SplashScreen } from "@playerComponents/index";
 import { getPlaylistEntries } from "./helpers/player.helper";
 import { ErrorTypes } from "../../../pages";
-export const Player = ({ playlistData }: any) => {
+export const Player = ({ playlistData, screen_id }: any) => {
   const response = getPlaylistEntries(playlistData);
   console.log("response in player", response);
   return (
@@ -15,6 +15,7 @@ export const Player = ({ playlistData }: any) => {
           transition={response.transition}
           refresh_duration={response.refresh_duration}
           playlist_id={playlistData.data.id}
+          screen_id={screen_id}
         />
       ) : (
         <EmptyPlayer message={response.message} />

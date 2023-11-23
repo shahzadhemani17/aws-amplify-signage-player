@@ -8,7 +8,6 @@ export const getPlaylistData = (
   backendUrl,
   screen_id?: string
 ) => {
-  console.log("screen_id.................PPPPPPPPPPPPP", screen_id);
   return fetch(
     `${backendUrl}/playlists/${playlist_id}/entries?screen_id=${screen_id}`,
     {
@@ -19,8 +18,6 @@ export const getPlaylistData = (
 };
 
 export const getVengoEntries = (url, params) => {
-  console.log("url", url);
-  console.log("params", params, typeof params);
   return fetch(url, {
     method: "POST",
     body: JSON.stringify(params),
