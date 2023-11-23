@@ -14,5 +14,6 @@ onmessage = (event: MessageEvent) => {
 };
 
 const fetchDataFromApi = async (data: any): Promise<any> => {
+  console.log(`input data......`, data);
   return getVengoEntriesByIntegrations(data);
 };

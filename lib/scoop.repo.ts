@@ -19,6 +19,8 @@ export const getPlaylistData = (
 };
 
 export const getVengoEntries = (url, params) => {
+  console.log("url", url);
+  console.log("params", params, typeof params);
   return fetch(url, {
     method: "POST",
     body: JSON.stringify(params),

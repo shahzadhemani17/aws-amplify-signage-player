@@ -15,7 +15,9 @@ const populatePlayer = (
   id: number,
   tag: string,
   url: string,
-  ad_integration?: any
+  entryType: any,
+  ad_integration?: any,
+  position?: any
 ) => {
   const player: PlayerModel = {
     id: id,
@@ -23,7 +25,9 @@ const populatePlayer = (
     url: url,
     duration: duration * 1000,
     visibility: true,
+    entryType,
     ad_integration,
+    position,
   };
   return player;
 };
@@ -45,7 +49,9 @@ export const convertJSON = (playlist: any) => {
           entry.id,
           HtmlEnum.iFRAME,
           entry.weburl.url,
-          entry?.ad_integration
+          "skoop",
+          entry?.ad_integration,
+          entry.position
         )
       );
     } else if (entry?.media?.hash) {
@@ -58,7 +64,9 @@ export const convertJSON = (playlist: any) => {
               ? HtmlEnum.VIDEO
               : HtmlEnum.IMAGE,
             entry.media.hash,
-            entry?.ad_integration
+            "skoop",
+            entry?.ad_integration,
+            entry.position
           )
         );
     } else if (entry?.ad_integration?.integration_name === "vengo") {
@@ -68,10 +76,33 @@ export const convertJSON = (playlist: any) => {
           entry.id,
           HtmlEnum.VENGO,
           entry.media.hash,
-          entry?.ad_integration
+          "vengo",
+          entry?.ad_integration,
+          entry.position
         )
       );
     }
+  });
+  return result;
+};
+
+export const convertVengoEntries = (entries: any) => {
+  const result: PlayerModel[] = [];
+  entries.sort(
+    (a: any, b: any) => parseFloat(a.position) - parseFloat(b.position)
+  );
+  entries.map((entry: any) => {
+    result.push(
+      populatePlayer(
+        entry.duration_in_seconds,
+        entry.id,
+        entry.media.content_type === "video" ? HtmlEnum.VIDEO : HtmlEnum.IMAGE,
+        entry.media.hash,
+        "vengo",
+        entry?.ad_integration,
+        entry.position
+      )
+    );
   });
   return result;
 };
@@ -292,7 +323,7 @@ export async function fetchScreenDetailsByDuration(
   let playListRes;
   if (playlist_id) {
     const params = getQueryParams();
-    playListRes = await getPlaylistData(playlist_id, params.backendUrl);
+    playListRes = await getPlaylistData(playlist_id, params.backendUrl, "881");
   }
   if (playListRes) {
     const playListLatest = await playListRes.json();
@@ -346,8 +377,7 @@ export const createObjectFromArray = (array: KeyValuePair[]) => {
 };
 
 export const getVengoEntriesByIntegrations = async (vengoIntegrations: any) => {
-  console.log("vengoEntries............POPOPOP");
-
+  console.log("vengoEntries............3", vengoIntegrations);
   if (!vengoIntegrations.length) {
     return;
   }
@@ -370,10 +400,24 @@ export const getVengoEntriesByIntegrations = async (vengoIntegrations: any) => {
     )
   ).flat();
 
-  console.log("vengoEntries............4", jsonEntries);
+  console.log("vengoEntries............4", jsonEntries, typeof jsonEntries);
 
   jsonEntries.forEach((entry, index) => {
-    entry.position = vengoIntegrations[index].position;
+    if (entry) {
+      entry.position = vengoIntegrations[index].position;
+    }
   });
+  console.log("vengoEntries............5", jsonEntries, typeof jsonEntries);
   return jsonEntries;
 };
+
+// if (i === 0) {
+//   // startWorker();
+//   getVengoEntriesByIntegrations(vengoIntegrationEntries).then((data) => {
+//     if (data && data.every((item) => item !== null)) {
+//       const dataArray = convetVengoEntries(data);
+//       setVengoPlaylistEntries([...dataArray]);
+//       // setIteratableEntries([...localPlaylistEntries]); // update state
+//     }
+//   });
+// }

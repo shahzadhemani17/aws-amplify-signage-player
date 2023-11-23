@@ -3,8 +3,8 @@ import { EmptyPlayer, SKPlayer, SplashScreen } from "@playerComponents/index";
 import { getPlaylistEntries } from "./helpers/player.helper";
 import { ErrorTypes } from "../../../pages";
 export const Player = ({ playlistData }: any) => {
-  console.log("PLAYER PLAYLISTdATA", playlistData);
   const response = getPlaylistEntries(playlistData);
+  console.log("response in player", response);
   return (
     <Fragment>
       {ErrorTypes.Playlist_Not_Attached_Error === playlistData.message ? (

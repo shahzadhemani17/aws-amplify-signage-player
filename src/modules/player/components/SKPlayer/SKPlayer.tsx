@@ -3,6 +3,8 @@ import Image from "next/image";
 import {
   sleep,
   fetchScreenDetailsByDuration,
+  getVengoEntriesByIntegrations,
+  convertVengoEntries,
 } from "../../helpers/player.helper";
 import { HtmlEnum, EntriesModel } from "@models/playerModel";
 import {
@@ -23,7 +25,22 @@ export const SKPlayer = ({
   refresh_duration,
   playlist_id,
 }: EntriesModel) => {
-  console.log("entries SK PLAYER", entries);
+  const filterLocals = (entries) => {
+    return entries.filter((entry) => {
+      if (entry.entyType !== "vengo") {
+        return entry;
+      }
+    });
+  };
+
+  const filterVengs = (entries) => {
+    return entries.filter((entry) => {
+      if (entry.entyType === "vengo") {
+        return entry;
+      }
+    });
+  };
+
   const filterLocalEntries = (entries) => {
     return entries.filter((entry) => {
       if (entry.tag !== "vengo") {
@@ -47,8 +64,15 @@ export const SKPlayer = ({
   const [vengoIntegrationEntries, setVengoIntegrationEntries] = useState([
     ...filterVengoIntegrationEntries(entries),
   ]);
-  const [vengoPlaylistEntries, setVengoPlaylistEntries] = useState([]);
+  console.log("entries SK PLAYER", vengoIntegrationEntries);
+
+  const [vengoPlaylistEntries, setVengoPlaylistEntries] = useState<any>([]);
   console.log("entries SK PLAYER", vengoPlaylistEntries);
+  const [iteratableEntries, setIteratableEntries] = useState<any>([
+    ...filterLocalEntries(entries),
+  ]);
+
+  console.log("iteratableEntries...........", iteratableEntries);
 
   const [modalIsOpen, setIsOpen] = useState(false);
   // const [worker, setWorker] = useState<Worker | null>(null);
@@ -58,6 +82,8 @@ export const SKPlayer = ({
   const startWorker = () => {
     const onDataReceived = (data: any) => {
       setVengoPlaylistEntries(data);
+      console.log("vengoPlaylistEntries 999999999999999999999", data);
+      // setIteratableEntries([...localPlaylistEntries, ...data]);
     };
     workerRef.current = new MyWorker(onDataReceived);
     workerRef.current.fetchData("fetchData", vengoIntegrationEntries);
@@ -86,18 +112,35 @@ export const SKPlayer = ({
   }, []);
 
   const setVisiblePlaylist = async () => {
-    for (let i = 0; i < playlistEntries.length; i++) {
+    for (let i = 0; i < iteratableEntries.length; i++) {
+      console.log(i, "111111111111111111111111111", iteratableEntries[i]);
+      let dataArray;
       if (i === 0) {
-        startWorker();
+        // startWorker();
+        getVengoEntriesByIntegrations(vengoIntegrationEntries).then((data) => {
+          if (data && data.every((item) => item !== null)) {
+            dataArray = convertVengoEntries(data);
+            dataArray = dataArray.map((item) => {
+              item.visibility = false;
+              return item;
+            });
+            setVengoPlaylistEntries([...dataArray]);
+            setIteratableEntries([...localPlaylistEntries, ...dataArray]); // update state
+          }
+        });
       }
-      playlistEntries[i].visibility = true; // visibility set to true before sleep
-      setPlaylistEntries([...playlistEntries]); // update state
-      if (playlistEntries[i].tag === "video") {
+      iteratableEntries[i].visibility = true; // visibility set to true before sleep
+      setIteratableEntries([...localPlaylistEntries, ...vengoPlaylistEntries]); // update state4
+      console.log(i, "11111111111112222222222", iteratableEntries[i]);
+      if (iteratableEntries[i].tag === "video") {
         handlePlayVideo(vidRef);
       }
-      await sleep(playlistEntries[i].duration); // sleep according to playlist duration
-      playlistEntries[i].visibility = false; // visibility set to false after sleep
-      if (i === playlistEntries.length - 1) {
+      await sleep(iteratableEntries[i].duration); // sleep according to playlist duration
+      console.log(i, "111111111111333333333333333", iteratableEntries[i]);
+      iteratableEntries[i].visibility = false; // visibility set to false after sleep
+      console.log(i, "1111111111114444444444444444", iteratableEntries[i]);
+
+      if (i === iteratableEntries.length - 1) {
         // check if last playlist entry
         i = -1; // play from start
       }
@@ -108,7 +151,7 @@ export const SKPlayer = ({
 
   return (
     <div>
-      {localPlaylistEntries?.map((entry, index) => {
+      {iteratableEntries?.map((entry, index) => {
         switch (entry.tag) {
           case HtmlEnum.VIDEO:
             return (
@@ -140,6 +183,7 @@ export const SKPlayer = ({
             );
         }
       })}
+
       <Modal
         isOpen={modalIsOpen}
         style={styles.modalStyles}

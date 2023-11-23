@@ -20,7 +20,9 @@ export interface PlayerModel {
   url: string;
   duration: number;
   visibility: boolean;
+  entryType: any;
   ad_integration?: any;
+  position?: any;
 }
 
 // export interface AdIntegration {
