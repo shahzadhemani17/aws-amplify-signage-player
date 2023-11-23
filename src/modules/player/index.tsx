@@ -48,7 +48,7 @@ export const Player = ({ playlistData, screenData, screenId, backendUrl }: any) 
   }
 
   useEffect(() => {
-    if (screenId) {
+    if (screenId && screenDetail) {
       const getScreenDetails = () => {
         const inlineWorker = new InlineWorker(
           refreshScreenDataAfterDuration()
