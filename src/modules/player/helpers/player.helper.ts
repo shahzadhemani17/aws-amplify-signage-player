@@ -1,7 +1,7 @@
 import { HtmlEnum, PlayerModel } from "@models/playerModel";
 import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { PlaylistMessages } from "../player.constant";
-import moment from "moment";
+import moment from "moment-timezone";
 import {
   getScreenDetails,
   getPlaylistData,
@@ -65,12 +65,12 @@ export const convertJSON = (playlist: any) => {
 };
 
 export const isScreenScheduleValid = (screenOnTime, screenOffTime) => {
-  const format = 'hh:mm:ss';
+  const format = 'hh:mm:ss'; // Use 'HH' for 24-hour format
   const time = moment();
   const beforeTime = moment(screenOnTime, format);
   const afterTime = moment(screenOffTime, format);
-  return time.isBetween(beforeTime, afterTime) || time.isSame(beforeTime) ? true : false;
-}
+  return time.isBetween(beforeTime, afterTime) || time.isSame(beforeTime);
+};
 
 export const getPlaylistEntries = (playlistData: any) => {
   let convertedPlaylist: PlayerModel[] = [];

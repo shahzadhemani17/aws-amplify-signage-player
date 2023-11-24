@@ -9,6 +9,7 @@ import { ErrorTypes } from "../../../pages";
 import InlineWorker from "../../../lib/InlineWorker";
 import { getPlaylistData, getScreenDetails } from "lib/scoop.repo";
 import CryptoJS from 'crypto-js';
+import moment from "moment-timezone";
 
 export const Player = ({ playlistData, screenData, screenId, backendUrl }: any) => {
   console.log("PLAYER PLAYLISTdATA", playlistData, screenData);
@@ -16,6 +17,9 @@ export const Player = ({ playlistData, screenData, screenId, backendUrl }: any) 
   const [screenRefreshDuration, setScreenRefreshDuration] = useState(screenDetail?.refresh_duration);
   const [isScreenOn, setScreenToOn] = useState(isScreenScheduleValid(screenDetail?.screen_on_time, screenDetail?.screen_off_time));
   const [screenDetailData, setScreenDetailData] = useState(screenDetail);
+  if (screenId) {
+    moment.tz.setDefault(screenDetail?.timezone_identifier)
+  }
 
   const refreshScreenDataAfterDuration = async () => {
     const localScreenDetails = localStorage.getItem("screenDetail");
