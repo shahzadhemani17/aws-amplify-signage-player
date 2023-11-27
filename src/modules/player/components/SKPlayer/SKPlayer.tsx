@@ -96,9 +96,37 @@ export const SKPlayer = ({
               return item;
             });
             setVengoPlaylistEntries && setVengoPlaylistEntries([...dataArray]);
+
+            // logic: to skip vengo entries which could not be fetched
+            if (dataArray?.length) {
+              console.log("111111111111");
+              const entries1 = playlistEntries.map((entry1) => {
+                if (entry1.entryType === "vengo") {
+                  console.log("entry1", entry1);
+                  const vengoEntry = dataArray.find(
+                    (entry2) => entry2.position === entry1.position
+                  );
+                  if (vengoEntry?.url) {
+                    entry1.vengoEntry = vengoEntry;
+                    entry1.visibility = false;
+                    entry1.duration = vengoEntry.duration;
+                  } else {
+                    entry1.vengoEntry = vengoEntry;
+                    entry1.visibility = false;
+                    entry1.duration = 0;
+                  }
+                }
+                console.log("entry1 m111111111111", entry1);
+                return entry1;
+              });
+              setPlaylistEntries([...entries1]); // update state
+            }
           }
         });
       }
+      console.log("dataArray", dataArray);
+
+      setPlaylistEntries([...playlistEntries]); // update state4
 
       playlistEntries[i].visibility = true; // visibility set to true before sleep
       setPlaylistEntries([...playlistEntries]); // update state4
@@ -106,8 +134,14 @@ export const SKPlayer = ({
         handlePlayVideo(vidRef);
       }
 
-      await sleep(playlistEntries[i].duration); // sleep according to playlist duration4
+      if (!!playlistEntries[i].duration) {
+        await sleep(playlistEntries[i].duration); // sleep according to playlist duration4
+      } else {
+        await sleep(1);
+      }
       playlistEntries[i].visibility = false; // visibility set to false after sleep
+
+      console.log("playlistEntries..................q", playlistEntries);
 
       if (i === playlistEntries.length - 1) {
         // check if last playlist entry
@@ -121,12 +155,12 @@ export const SKPlayer = ({
     <div>
       {playlistEntries?.map((entry, index) => {
         if (entry.entryType === "vengo") {
-          entry = vengoPlaylistEntries?.find(
-            (item) => entry?.position === item?.position
-          );
-          if (entry) {
+          console.log("pentry.......", entry);
+          entry = entry?.vengoEntry;
+          if (entry?.url) {
             entry.visibility = true;
           }
+          // entry.visibility = true;
         }
         switch (entry?.tag) {
           case HtmlEnum.VIDEO:

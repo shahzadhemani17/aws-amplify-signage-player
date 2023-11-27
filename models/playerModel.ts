@@ -25,6 +25,7 @@ export interface PlayerModel {
   position?: any;
   impression?: any;
   cancel?: any;
+  vengoEntry?: any;
 }
 
 // export interface AdIntegration {
