@@ -21,7 +21,6 @@ class MyWorker {
 
     // Update your React component state here
     if (action === "fetchData") {
-      console.log(`cut cut cut cut`);
       // Call the callback function with the received data
       resolvedData.then((data) => {
         this.onDataReceived(data);
@@ -32,7 +31,7 @@ class MyWorker {
 
   fetchData(action: string, data: any) {
     console.log(`Sending data to worker: ${data}`);
-    this.worker.postMessage({ action, data });
+    this.worker?.postMessage({ action, data });
   }
 
   terminate() {

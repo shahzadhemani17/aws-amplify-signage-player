@@ -23,6 +23,8 @@ export interface PlayerModel {
   entryType: any;
   ad_integration?: any;
   position?: any;
+  impression?: any;
+  cancel?: any;
 }
 
 // export interface AdIntegration {

@@ -33,7 +33,6 @@ export const SKPlayer = ({
       }
     });
   };
-
   const [playlistEntries, setPlaylistEntries] = useState([...entries]);
 
   const [vengoIntegrationEntries, setVengoIntegrationEntries] = useState([
@@ -41,12 +40,21 @@ export const SKPlayer = ({
   ]);
 
   const [vengoPlaylistEntries, setVengoPlaylistEntries] = useState<any>([]);
+  console.log("Vengo Playlist Entries", vengoPlaylistEntries);
   const [modalIsOpen, setIsOpen] = useState(false);
   const workerRef = React.useRef<MyWorker | null>(null);
 
   const startWorker = () => {
     const onDataReceived = (data: any) => {
-      setVengoPlaylistEntries(data);
+      let dataArray;
+      if (data && data.every((item) => item !== null)) {
+        dataArray = convertVengoEntries(data);
+        dataArray = dataArray.map((item) => {
+          item.visibility = false;
+          return item;
+        });
+        setVengoPlaylistEntries([...dataArray]);
+      }
     };
     workerRef.current = new MyWorker(onDataReceived);
     workerRef.current.fetchData("fetchData", vengoIntegrationEntries);
@@ -86,16 +94,18 @@ export const SKPlayer = ({
               item.visibility = false;
               return item;
             });
-            setVengoPlaylistEntries([...dataArray]);
+            setVengoPlaylistEntries && setVengoPlaylistEntries([...dataArray]);
           }
         });
       }
+
       playlistEntries[i].visibility = true; // visibility set to true before sleep
       setPlaylistEntries([...playlistEntries]); // update state4
       if (playlistEntries[i].tag === "video") {
         handlePlayVideo(vidRef);
       }
-      await sleep(playlistEntries[i].duration); // sleep according to playlist duration
+
+      await sleep(playlistEntries[i].duration); // sleep according to playlist duration4
       playlistEntries[i].visibility = false; // visibility set to false after sleep
 
       if (i === playlistEntries.length - 1) {
@@ -104,17 +114,18 @@ export const SKPlayer = ({
       }
     }
   };
-
   // it filter the vengo entries and add into playlist entries
 
   return (
     <div>
       {playlistEntries?.map((entry, index) => {
         if (entry.entryType === "vengo") {
-          entry = vengoPlaylistEntries?.find(
-            (ent) => entry?.position === ent?.position
+          let vengoeEntry = vengoPlaylistEntries?.find(
+            (item) => entry?.position === item?.position
           );
-          if (entry) {
+          if (vengoeEntry?.url) {
+            console.log("vengoeEntry 1", vengoeEntry);
+            entry = vengoeEntry;
             entry.visibility = true;
           }
         }

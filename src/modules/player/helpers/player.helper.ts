@@ -17,7 +17,8 @@ const populatePlayer = (
   url: string,
   entryType: any,
   ad_integration?: any,
-  position?: any
+  position?: any,
+  impression?: any
 ) => {
   const player: PlayerModel = {
     id: id,
@@ -28,6 +29,7 @@ const populatePlayer = (
     entryType,
     ad_integration,
     position,
+    impression,
   };
   return player;
 };
@@ -51,7 +53,8 @@ export const convertJSON = (playlist: any) => {
           entry.weburl.url,
           "skoop",
           entry?.ad_integration,
-          entry.position
+          entry.position,
+          entry?.impression
         )
       );
     } else if (entry?.media?.hash) {
@@ -66,7 +69,8 @@ export const convertJSON = (playlist: any) => {
             entry.media.hash,
             "skoop",
             entry?.ad_integration,
-            entry.position
+            entry.position,
+            entry?.impression
           )
         );
     } else if (entry?.ad_integration?.integration_name === "vengo") {
@@ -78,7 +82,8 @@ export const convertJSON = (playlist: any) => {
           entry.media.hash,
           "vengo",
           entry?.ad_integration,
-          entry.position
+          entry.position,
+          entry?.impression
         )
       );
     }
@@ -96,11 +101,12 @@ export const convertVengoEntries = (entries: any) => {
       populatePlayer(
         entry.duration_in_seconds,
         entry.id,
-        entry.media.content_type === "video" ? HtmlEnum.VIDEO : HtmlEnum.IMAGE,
-        entry.media.hash,
+        entry.media?.content_type === "video" ? HtmlEnum.VIDEO : HtmlEnum.IMAGE,
+        entry.media?.hash,
         "vengo",
         entry?.ad_integration,
-        entry.position
+        entry.position,
+        entry?.impression
       )
     );
   });
