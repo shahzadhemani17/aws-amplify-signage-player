@@ -34,6 +34,7 @@ export const SKPlayer = ({
     });
   };
   const [playlistEntries, setPlaylistEntries] = useState([...entries]);
+  console.log("playlistEntries.......", playlistEntries);
 
   const [vengoIntegrationEntries, setVengoIntegrationEntries] = useState([
     ...filterVengoIntegrationEntries(entries),
@@ -88,7 +89,7 @@ export const SKPlayer = ({
       if (i === 0) {
         // startWorker();
         getVengoEntriesByIntegrations(vengoIntegrationEntries).then((data) => {
-          if (data && data.every((item) => item !== null)) {
+          if (data && data.every((item) => !!item)) {
             dataArray = convertVengoEntries(data);
             dataArray = dataArray.map((item) => {
               item.visibility = false;
@@ -120,12 +121,10 @@ export const SKPlayer = ({
     <div>
       {playlistEntries?.map((entry, index) => {
         if (entry.entryType === "vengo") {
-          let vengoeEntry = vengoPlaylistEntries?.find(
+          entry = vengoPlaylistEntries?.find(
             (item) => entry?.position === item?.position
           );
-          if (vengoeEntry?.url) {
-            console.log("vengoeEntry 1", vengoeEntry);
-            entry = vengoeEntry;
+          if (entry) {
             entry.visibility = true;
           }
         }
