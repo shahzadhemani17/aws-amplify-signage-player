@@ -22,7 +22,7 @@ const populatePlayer = (
     tag: tag,
     url: url,
     duration: duration * 1000,
-    visibility: true
+    visibility: false
   };
   return player;
 };
