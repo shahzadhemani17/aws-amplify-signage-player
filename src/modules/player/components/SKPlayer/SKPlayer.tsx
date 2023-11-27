@@ -3,7 +3,9 @@ import Image from "next/image";
 import {
   sleep,
   fetchScreenDetailsByDuration,
-  uplodPulse
+  uplodPulse,
+  isScreenScheduleValid,
+  wait
 } from "../../helpers/player.helper";
 import { HtmlEnum, EntriesModel } from "@models/playerModel";
 import {
@@ -16,29 +18,40 @@ import InlineWorker from "../../../../../lib/InlineWorker";
 import Modal from "react-modal";
 import cookie from "../../../../../public/cookie.png";
 import { styles } from "../../../../../styles/player";
+import { EmptyPlayer } from "@playerComponents/index";
+import moment from "moment";
+import { labels } from "@playerComponents/labels";
 export const SKPlayer = ({
   entries,
   transition,
   refresh_duration,
   playlist_id,
-  screen_id,
-  backend_url
+  screenOnTime,
+  screenOffTime,
+  isScreenOn,
+  setScreenToOn,
+  screenId,
+  screenRefreshDuration,
+  backend_url,
 }: EntriesModel) => {
   const [playlists, setPlaylists] = useState([...entries]);
   const [modalIsOpen, setIsOpen] = useState(false);
+
   const vidRef = useRef(null);
   const handlePlayVideo = (vidRef: any) => {
     vidRef?.current?.play();
   };
+
+  console.log("on/off", screenOnTime, screenOffTime);
+
   useEffect(() => {
+    setScreenToOn(isScreenScheduleValid(screenOnTime, screenOffTime));
+  }, [screenOnTime, screenOffTime])
+ 
+  useEffect(() => {
+
     if (navigator.cookieEnabled && typeof window.localStorage !== "undefined") {
       setVisiblePlaylist();
-      localStorage.setItem("playlist", JSON.stringify(entries));
-      if (window.Worker && navigator.onLine) {
-        const inlineWorker = new InlineWorker(
-          fetchScreenDetailsByDuration(playlist_id, refresh_duration)
-        );
-      }
     } else {
       setPlaylists([]);
       //alert("No Playlist Available");
@@ -47,6 +60,7 @@ export const SKPlayer = ({
       setIsOpen(true);
     }
   }, []);
+
   const setVisiblePlaylist = async () => {
     for (let i = 0; i < playlists.length; i++) {
       playlists[i].visibility = true; // visibility set to true before sleep
@@ -62,6 +76,9 @@ export const SKPlayer = ({
       }
     }
   };
+  if (!isScreenOn && screenId && screenOnTime && screenOffTime || !isScreenOn && screenId && screenOnTime && !screenOffTime || !isScreenOn && screenId && !screenOnTime && screenOffTime) {
+    return <EmptyPlayer message={(screenOnTime && screenOffTime) ? `Screen On/Off: ${moment(screenOnTime, "h:mm:ss").format("HH:mm")} to ${moment(screenOffTime, "h:mm:ss").format("HH:mm")}` : labels.setScreenOnOffTime}/>
+  }
   return (
     <div>
       {playlists?.map((playlist, index) => {
