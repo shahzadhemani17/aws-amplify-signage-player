@@ -3,13 +3,11 @@ import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { PlaylistMessages } from "../player.constant";
 import moment from "moment-timezone";
 import {
-  getScreenDetails,
   getPlaylistData,
   getQueryParams,
   getVengoEntries,
   postPulse,
 } from "lib/scoop.repo";
-import { sectionBody } from "aws-amplify";
 import CryptoJS from "crypto-js";
 const populatePlayer = (
   index: number,
@@ -425,7 +423,7 @@ export const getVengoEntriesByIntegrations = async (vengoIntegrations: any) => {
       return getVengoEntries(integration?.ad_integration?.url, paramObject);
     })
   );
-
+  console.log("vengoEntries......3", vengoEntries);
   const jsonEntries = (
     await Promise.all(
       vengoEntries.map((entry) => {
@@ -434,11 +432,18 @@ export const getVengoEntriesByIntegrations = async (vengoIntegrations: any) => {
     )
   ).flat();
 
+  console.log("jsonEntries.........4", jsonEntries);
   jsonEntries.forEach((entry, index) => {
     if (entry) {
       entry.position = vengoIntegrations[index].position;
+    } else {
+      jsonEntries[index] = {
+        position: vengoIntegrations[index].position,
+      };
     }
   });
+  console.log("jsonEntries.........5", jsonEntries);
+
   return jsonEntries;
 };
 export async function uplodPulse(

@@ -2,12 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import {
   sleep,
-  fetchScreenDetailsByDuration,
   getVengoEntriesByIntegrations,
   convertVengoEntries,
-  uplodPulse,
   isScreenScheduleValid,
-  wait,
 } from "../../helpers/player.helper";
 import { HtmlEnum, EntriesModel } from "@models/playerModel";
 import {
@@ -15,12 +12,10 @@ import {
   SKIframe,
   SKVideo,
 } from "@playerComponents/SKPlayer/components/index";
-import InlineWorker from "../../../../../lib/InlineWorker";
 /* @ts-ignore */
 import Modal from "react-modal";
 import cookie from "../../../../../public/cookie.png";
 import { styles } from "../../../../../styles/player";
-import MyWorker from "../../../../../lib/MyWorker";
 
 import { EmptyPlayer } from "@playerComponents/index";
 import moment from "moment";
@@ -28,15 +23,11 @@ import { labels } from "@playerComponents/labels";
 export const SKPlayer = ({
   entries,
   transition,
-  refresh_duration,
-  playlist_id,
   screenOnTime,
   screenOffTime,
   isScreenOn,
   setScreenToOn,
   screenId,
-  screenRefreshDuration,
-  backend_url,
 }: EntriesModel) => {
   const filterVengoIntegrationEntries = (entries) => {
     return entries.filter((entry) => {
@@ -48,30 +39,12 @@ export const SKPlayer = ({
   const [playlistEntries, setPlaylistEntries] = useState([...entries]);
   console.log("playlistEntries.......", playlistEntries);
 
-  const [vengoIntegrationEntries, setVengoIntegrationEntries] = useState([
+  const [vengoIntegrationEntries] = useState([
     ...filterVengoIntegrationEntries(entries),
   ]);
 
-  const [vengoPlaylistEntries, setVengoPlaylistEntries] = useState<any>([]);
-  console.log("Vengo Playlist Entries", vengoPlaylistEntries);
+  const [, setVengoPlaylistEntries] = useState<any>([]);
   const [modalIsOpen, setIsOpen] = useState(false);
-  const workerRef = React.useRef<MyWorker | null>(null);
-
-  const startWorker = () => {
-    const onDataReceived = (data: any) => {
-      let dataArray;
-      if (data && data.every((item) => item !== null)) {
-        dataArray = convertVengoEntries(data);
-        dataArray = dataArray.map((item) => {
-          item.visibility = false;
-          return item;
-        });
-        setVengoPlaylistEntries([...dataArray]);
-      }
-    };
-    workerRef.current = new MyWorker(onDataReceived);
-    workerRef.current.fetchData("fetchData", vengoIntegrationEntries);
-  };
 
   const vidRef = useRef(null);
   const handlePlayVideo = (vidRef: any) => {
@@ -98,38 +71,35 @@ export const SKPlayer = ({
 
   const setVisiblePlaylist = async () => {
     for (let i = 0; i < playlistEntries.length; i++) {
-      let dataArray;
+      let dataArray1, dataArray2;
       if (i === 0) {
-        // startWorker();
         getVengoEntriesByIntegrations(vengoIntegrationEntries).then((data) => {
-          if (data && data.every((item) => !!item)) {
-            dataArray = convertVengoEntries(data);
-            dataArray = dataArray.map((item) => {
+          dataArray2 = data;
+          if (data) {
+            dataArray1 = convertVengoEntries(data);
+            dataArray1 = dataArray1.map((item) => {
               item.visibility = false;
               return item;
             });
-            setVengoPlaylistEntries && setVengoPlaylistEntries([...dataArray]);
+            setVengoPlaylistEntries && setVengoPlaylistEntries([...dataArray1]);
 
             // logic: to skip vengo entries which could not be fetched
-            if (dataArray?.length) {
-              console.log("111111111111");
+            if (dataArray1?.length) {
               const entries1 = playlistEntries.map((entry1) => {
                 if (entry1.entryType === "vengo") {
-                  console.log("entry1", entry1);
-                  const vengoEntry = dataArray.find(
-                    (entry2) => entry2.position === entry1.position
+                  const vengoEntry = dataArray1?.find(
+                    (entry2) => entry2?.position === entry1?.position
                   );
                   if (vengoEntry?.url) {
                     entry1.vengoEntry = vengoEntry;
                     entry1.visibility = false;
-                    entry1.duration = vengoEntry.duration;
+                    entry1.duration = vengoEntry?.duration;
                   } else {
                     entry1.vengoEntry = vengoEntry;
                     entry1.visibility = false;
                     entry1.duration = 0;
                   }
                 }
-                console.log("entry1 m111111111111", entry1);
                 return entry1;
               });
               setPlaylistEntries([...entries1]); // update state
@@ -137,7 +107,8 @@ export const SKPlayer = ({
           }
         });
       }
-      console.log("dataArray", dataArray);
+      console.log("dataArray1", dataArray1);
+      console.log("dataArray2", dataArray2);
 
       setPlaylistEntries([...playlistEntries]); // update state4
 
@@ -149,8 +120,6 @@ export const SKPlayer = ({
 
       if (!!playlistEntries[i].duration) {
         await sleep(playlistEntries[i].duration); // sleep according to playlist duration4
-      } else {
-        await sleep(1);
       }
       playlistEntries[i].visibility = false; // visibility set to false after sleep
 
