@@ -25,7 +25,7 @@ export const getVengoEntries = (url, params) => {
 };
 
 export const sendVengoImpression = (url) => {
-  return fetch(url + "/sdkljdsfljs/jlsdjsj", {
+  return fetch(url, {
     method: "GET",
     headers: headers,
   });
