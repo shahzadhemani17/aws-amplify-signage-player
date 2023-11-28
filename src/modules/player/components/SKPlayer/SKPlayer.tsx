@@ -5,6 +5,9 @@ import {
   fetchScreenDetailsByDuration,
   getVengoEntriesByIntegrations,
   convertVengoEntries,
+  uplodPulse,
+  isScreenScheduleValid,
+  wait,
 } from "../../helpers/player.helper";
 import { HtmlEnum, EntriesModel } from "@models/playerModel";
 import {
@@ -19,12 +22,21 @@ import cookie from "../../../../../public/cookie.png";
 import { styles } from "../../../../../styles/player";
 import MyWorker from "../../../../../lib/MyWorker";
 
+import { EmptyPlayer } from "@playerComponents/index";
+import moment from "moment";
+import { labels } from "@playerComponents/labels";
 export const SKPlayer = ({
   entries,
   transition,
   refresh_duration,
   playlist_id,
-  screen_id,
+  screenOnTime,
+  screenOffTime,
+  isScreenOn,
+  setScreenToOn,
+  screenId,
+  screenRefreshDuration,
+  backend_url,
 }: EntriesModel) => {
   const filterVengoIntegrationEntries = (entries) => {
     return entries.filter((entry) => {
@@ -62,22 +74,23 @@ export const SKPlayer = ({
   };
 
   const vidRef = useRef(null);
-
   const handlePlayVideo = (vidRef: any) => {
     vidRef?.current?.play();
   };
 
+  console.log("on/off", screenOnTime, screenOffTime);
+
+  useEffect(() => {
+    setScreenToOn(isScreenScheduleValid(screenOnTime, screenOffTime));
+  }, [screenOnTime, screenOffTime]);
+
   useEffect(() => {
     if (navigator.cookieEnabled && typeof window.localStorage !== "undefined") {
       setVisiblePlaylist();
-      localStorage.setItem("playlist", JSON.stringify(entries));
-      if (window.Worker && navigator.onLine) {
-        const inlineWorker = new InlineWorker(
-          fetchScreenDetailsByDuration(playlist_id, refresh_duration, screen_id)
-        );
-      }
     } else {
       setPlaylistEntries([]);
+      //alert("No Playlist Available");
+      //playlists.length = 0;
       console.log("pl", playlistEntries);
       setIsOpen(true);
     }
@@ -149,8 +162,23 @@ export const SKPlayer = ({
       }
     }
   };
-  // it filter the vengo entries and add into playlist entries
-
+  if (
+    (!isScreenOn && screenId && screenOnTime && screenOffTime) ||
+    (!isScreenOn && screenId && screenOnTime && !screenOffTime) ||
+    (!isScreenOn && screenId && !screenOnTime && screenOffTime)
+  ) {
+    return (
+      <EmptyPlayer
+        message={
+          screenOnTime && screenOffTime
+            ? `Screen On/Off: ${moment(screenOnTime, "h:mm:ss").format(
+                "HH:mm"
+              )} to ${moment(screenOffTime, "h:mm:ss").format("HH:mm")}`
+            : labels.setScreenOnOffTime
+        }
+      />
+    );
+  }
   return (
     <div>
       {playlistEntries?.map((entry, index) => {

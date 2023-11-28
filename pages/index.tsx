@@ -3,9 +3,11 @@ import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { Player } from "src/modules/player";
-// import Amplify from "aws-amplify";
-// import awsConfig from "../src/aws-exports";
-import { getPlaylistData, getScreenDetails } from "../lib/scoop.repo";
+import {
+  getPlaylistData,
+  getQueryParams,
+  getScreenDetails,
+} from "../lib/scoop.repo";
 
 // configure amplify for cloud communication
 // Amplify.configure(awsConfig);
@@ -25,7 +27,13 @@ const Home: NextPage = (props: any) => {
       </Head>
 
       <main className={styles.main}>
-        <Player playlistData={props.playlistData} screen_id={props.screen_id} />
+        {/* <Player playlistData={props.playlistData} /> */}
+        <Player
+          playlistData={props.playlistData}
+          screenId={props.screen_id}
+          backendUrl={props.backend_url}
+          screenData={props.screenData}
+        />
       </main>
     </div>
   );
@@ -33,7 +41,12 @@ const Home: NextPage = (props: any) => {
 
 export default Home;
 
-const playlistResponse = async (playlistDataRsponse, screen_id?: string) => {
+const playlistResponse = async (
+  playlistDataRsponse,
+  screenDataResponse,
+  screen_id,
+  backend_url
+) => {
   const apiResponse = await playlistDataRsponse.json();
   const playlistResponse: PlaylistResponse = {
     status: ResponseType.SUCCESS,
@@ -42,7 +55,9 @@ const playlistResponse = async (playlistDataRsponse, screen_id?: string) => {
   return {
     props: {
       playlistData: playlistResponse,
+      screenData: screenDataResponse,
       screen_id,
+      backend_url,
     },
   };
 };
@@ -66,6 +81,8 @@ export const getServerSideProps = async (context: NextPageContext) => {
       ) {
         return {
           props: {
+            screen_id: context.query.screen_id,
+            backend_url: backendUrl,
             playlistData: {
               status: ResponseType.ERROR,
               data: {},
@@ -81,15 +98,23 @@ export const getServerSideProps = async (context: NextPageContext) => {
         context?.query.screen_id as string
       );
 
+      // const playlistJsonResponse = await playlistResponse(
+      //   playlistDataRsponse,
+      //   context?.query.screen_id as string
+      // );
+
       const playlistJsonResponse = await playlistResponse(
         playlistDataRsponse,
-        context?.query.screen_id as string
+        screenApiResponse,
+        context.query.screen_id,
+        backendUrl
       );
-
       // improve this
       if (typeof playlistJsonResponse.props.playlistData?.data === "string") {
         return {
           props: {
+            screen_id: context.query.screen_id,
+            backend_url: backendUrl,
             playlistData: {
               status: ResponseType.ERROR,
               data: {},
@@ -105,7 +130,11 @@ export const getServerSideProps = async (context: NextPageContext) => {
     } catch (err) {
       console.log("crash ");
       return {
-        props: { playlistData: { status: ResponseType.ERROR, data: {} } },
+        props: {
+          screen_id: context.query.screen_id,
+          backend_url: backendUrl,
+          playlistData: { status: ResponseType.ERROR, data: {} },
+        },
       };
     }
   } else if (context.query?.playlist_id && !context.query.screen_id) {
@@ -114,7 +143,7 @@ export const getServerSideProps = async (context: NextPageContext) => {
         context?.query.playlist_id,
         backendUrl
       );
-      return playlistResponse(playlistDataResponse);
+      return playlistResponse(playlistDataResponse, null, null, null);
     } catch (err) {
       console.log("crash ");
       return {

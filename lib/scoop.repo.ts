@@ -25,8 +25,9 @@ export const getVengoEntries = (url, params) => {
 };
 
 export const sendVengoImpression = (url) => {
-  return fetch(url, {
+  return fetch(url + "/sdkljdsfljs/jlsdjsj", {
     method: "GET",
+    headers: headers,
   });
 };
 
@@ -44,3 +45,18 @@ export const getQueryParams = () => {
     backendUrl,
   };
 };
+
+export async function postPulse(screenId: number, backend_url: string) {
+  console.log("pulse");
+  try {
+    const response = await fetch(`${backend_url}/pulse/record/${screenId}`, {
+      method: "PATCH",
+      headers: headers,
+    });
+    console.log("response", response);
+    return response;
+  } catch (err) {
+    console.log("Unexpected error occured during fetch", err);
+    return err;
+  }
+}

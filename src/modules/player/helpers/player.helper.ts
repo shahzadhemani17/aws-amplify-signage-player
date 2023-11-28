@@ -1,16 +1,18 @@
 import { HtmlEnum, PlayerModel } from "@models/playerModel";
 import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { PlaylistMessages } from "../player.constant";
-import moment from "moment";
+import moment from "moment-timezone";
 import {
   getScreenDetails,
   getPlaylistData,
   getQueryParams,
   getVengoEntries,
+  postPulse,
 } from "lib/scoop.repo";
 import { sectionBody } from "aws-amplify";
-
+import CryptoJS from "crypto-js";
 const populatePlayer = (
+  index: number,
   duration: number,
   id: number,
   tag: string,
@@ -25,7 +27,7 @@ const populatePlayer = (
     tag: tag,
     url: url,
     duration: duration * 1000,
-    visibility: true,
+    visibility: false,
     entryType,
     ad_integration,
     position,
@@ -33,13 +35,12 @@ const populatePlayer = (
   };
   return player;
 };
-
 export const convertJSON = (playlist: any) => {
   const result: PlayerModel[] = [];
   playlist.entries.sort(
     (a: any, b: any) => parseFloat(a.position) - parseFloat(b.position)
   );
-  playlist?.entries.map((entry: any) => {
+  playlist?.entries.map((entry: any, index: number) => {
     if (entry.is_web_url === true || entry.is_menu === true) {
       entry.weburl.url =
         entry.is_menu && !entry.weburl.url.includes("&refresh=true")
@@ -47,6 +48,7 @@ export const convertJSON = (playlist: any) => {
           : entry.weburl.url;
       result.push(
         populatePlayer(
+          index,
           entry.duration_in_seconds,
           entry.id,
           HtmlEnum.iFRAME,
@@ -61,6 +63,7 @@ export const convertJSON = (playlist: any) => {
       entry.media.hash &&
         result.push(
           populatePlayer(
+            index,
             entry.duration_in_seconds,
             entry.id,
             entry.media.content_type === "video"
@@ -76,6 +79,7 @@ export const convertJSON = (playlist: any) => {
     } else if (entry?.ad_integration?.integration_name === "vengo") {
       result.push(
         populatePlayer(
+          index,
           entry.duration_in_seconds,
           entry.id,
           HtmlEnum.VENGO,
@@ -96,9 +100,10 @@ export const convertVengoEntries = (entries: any) => {
   entries.sort(
     (a: any, b: any) => parseFloat(a.position) - parseFloat(b.position)
   );
-  entries.map((entry: any) => {
+  entries.map((entry: any, index: number) => {
     result.push(
       populatePlayer(
+        index,
         entry.duration_in_seconds,
         entry.id,
         entry.media?.content_type === "video" ? HtmlEnum.VIDEO : HtmlEnum.IMAGE,
@@ -111,6 +116,14 @@ export const convertVengoEntries = (entries: any) => {
     );
   });
   return result;
+};
+
+export const isScreenScheduleValid = (screenOnTime, screenOffTime) => {
+  const format = "hh:mm:ss"; // Use 'HH' for 24-hour format
+  const time = moment();
+  const beforeTime = moment(screenOnTime, format);
+  const afterTime = moment(screenOffTime, format);
+  return time.isBetween(beforeTime, afterTime) || time.isSame(beforeTime);
 };
 
 export const getPlaylistEntries = (playlistData: any) => {
@@ -148,11 +161,9 @@ export const getPlaylistEntries = (playlistData: any) => {
     refresh_duration,
   };
 };
-
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
-
 const checkValidMomentDates = (type: string, dates: any) => {
   const currentDate = moment().format("DD/MM/YYYY");
   const compareDate = moment(currentDate, "DD/MM/YYYY");
@@ -178,7 +189,6 @@ const checkValidMomentDates = (type: string, dates: any) => {
     return compareTime.isBetween(beforeTime, afterTime);
   }
 };
-
 function checkScheduledPlayList(playList: any) {
   const entries = playList?.map((entry: any) => {
     const { scheduled_criteria } = entry;
@@ -186,7 +196,6 @@ function checkScheduledPlayList(playList: any) {
       entry.isValidScheduled = true;
     } else if (scheduled_criteria && scheduled_criteria !== "") {
       const scheduledCriteria = JSON.parse(scheduled_criteria);
-
       if (scheduledCriteria) {
         const { date_from, date_to, day, time_from, time_to } =
           scheduledCriteria;
@@ -309,7 +318,6 @@ function checkScheduledPlayList(playList: any) {
     }
     return entry;
   });
-
   let scheduledEntries = entries.filter((entry: any) => entry.isValidScheduled);
   const notValidScheduleFound = entries.find(
     (entry: any) => entry.isValidScheduled === false
@@ -320,13 +328,13 @@ function checkScheduledPlayList(playList: any) {
   playList.entries = scheduledEntries;
   return { playListWithValidEntries: playList, notValidScheduleFound };
 }
-
 export async function fetchScreenDetailsByDuration(
   playlist_id: number,
   duration: number = 5000,
+  doWait: boolean,
   screen_id?: string
 ): Promise<any> {
-  await wait(10 * 1000);
+  doWait && (await wait(10 * 1000));
   let playListRes;
   if (playlist_id) {
     const params = getQueryParams();
@@ -344,9 +352,18 @@ export async function fetchScreenDetailsByDuration(
     };
     const latestPlaylist = getPlaylistEntries(playlistResponse);
     const playlist = localStorage.getItem("playlist");
+    const playlistHash = localStorage.getItem("playlistHash");
     let existingPlayList = [];
     if (playlist) {
       existingPlayList = JSON.parse(playlist);
+    }
+    // for v2. need to find a better check for v2 maybe
+    if (!latestPlaylist.is_edited) {
+      checkChangesToReload(
+        playlistHash as string,
+        CryptoJS.SHA256(JSON.stringify(playListLatest)).toString()
+      );
+      return;
     }
     if (latestPlaylist.convertedPlaylist?.length > 1) {
       if (
@@ -364,8 +381,17 @@ export async function fetchScreenDetailsByDuration(
       }
     }
   }
-  return fetchScreenDetailsByDuration(playlist_id, duration, screen_id);
+  return;
 }
+
+export const checkChangesToReload = (
+  playlistLocalHash: string,
+  latestPlayListHash: string
+) => {
+  if (playlistLocalHash !== latestPlayListHash) {
+    window.location.reload();
+  }
+};
 
 export async function wait(ms: number) {
   return new Promise((res) => setTimeout(res, ms));
@@ -415,3 +441,12 @@ export const getVengoEntriesByIntegrations = async (vengoIntegrations: any) => {
   });
   return jsonEntries;
 };
+export async function uplodPulse(
+  screenId: number,
+  backend_url: string
+): Promise<any> {
+  console.log("uploadpulse");
+  await wait(60000);
+  await postPulse(screenId, backend_url);
+  return uplodPulse(screenId, backend_url);
+}
