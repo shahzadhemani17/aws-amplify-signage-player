@@ -1,19 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import {
-  sleep,
-  fetchScreenDetailsByDuration,
-  uplodPulse,
-  isScreenScheduleValid,
-  wait
-} from "../../helpers/player.helper";
+import { sleep, isScreenScheduleValid } from "../../helpers/player.helper";
 import { HtmlEnum, EntriesModel } from "@models/playerModel";
 import {
   SKImage,
   SKIframe,
-  SKVideo
+  SKVideo,
 } from "@playerComponents/SKPlayer/components/index";
-import InlineWorker from "../../../../../lib/InlineWorker";
 /* @ts-ignore */
 import Modal from "react-modal";
 import cookie from "../../../../../public/cookie.png";
@@ -24,15 +17,11 @@ import { labels } from "@playerComponents/labels";
 export const SKPlayer = ({
   entries,
   transition,
-  refresh_duration,
-  playlist_id,
   screenOnTime,
   screenOffTime,
   isScreenOn,
   setScreenToOn,
   screenId,
-  screenRefreshDuration,
-  backend_url,
 }: EntriesModel) => {
   const [playlists, setPlaylists] = useState([...entries]);
   const [modalIsOpen, setIsOpen] = useState(false);
@@ -46,10 +35,9 @@ export const SKPlayer = ({
 
   useEffect(() => {
     setScreenToOn(isScreenScheduleValid(screenOnTime, screenOffTime));
-  }, [screenOnTime, screenOffTime])
- 
-  useEffect(() => {
+  }, [screenOnTime, screenOffTime]);
 
+  useEffect(() => {
     if (navigator.cookieEnabled && typeof window.localStorage !== "undefined") {
       setVisiblePlaylist();
     } else {
@@ -76,8 +64,27 @@ export const SKPlayer = ({
       }
     }
   };
-  if (!isScreenOn && screenId && screenOnTime && screenOffTime || !isScreenOn && screenId && screenOnTime && !screenOffTime || !isScreenOn && screenId && !screenOnTime && screenOffTime) {
-    return <EmptyPlayer message={(screenOnTime && screenOffTime) ? `Screen On/Off: ${moment(screenOnTime, "h:mm:ss").format("HH:mm")} to ${moment(screenOffTime, "h:mm:ss").format("HH:mm")}` : labels.setScreenOnOffTime}/>
+
+  // if screenId is available, we will consider a screen is attached to the player, and we will check following cases
+  // both screenOnTime and screenOffTime should be empty or should have valid time
+  // isScreenOn flag should be true which means screen is scheduled
+  // Note: if both screenOnTime and screenOffTime are empty it means screen will be played 24/7 on player
+  if (
+    (!isScreenOn && screenId && screenOnTime && screenOffTime) ||
+    (!isScreenOn && screenId && screenOnTime && !screenOffTime) ||
+    (!isScreenOn && screenId && !screenOnTime && screenOffTime)
+  ) {
+    return (
+      <EmptyPlayer
+        message={
+          screenOnTime && screenOffTime
+            ? `Screen On/Off: ${moment(screenOnTime, "h:mm:ss").format(
+                "HH:mm"
+              )} to ${moment(screenOffTime, "h:mm:ss").format("HH:mm")}`
+            : labels.setScreenOnOffTime
+        }
+      />
+    );
   }
   return (
     <div>
