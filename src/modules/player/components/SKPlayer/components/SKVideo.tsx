@@ -4,7 +4,7 @@ import styles from "../../../../../../styles/Home.module.css";
 import { SKTransition } from "@playerComponents/SKPlayer/components/index";
 
 export const SKVideo = (props: PlayerPropsModel) => {
-  const { videoRef, index, playlist, transition } = props;
+  const { videoRef, index, playlistEntry, transition } = props;
   return (
     <SKTransition transition={transition}>
       <video
@@ -15,10 +15,11 @@ export const SKVideo = (props: PlayerPropsModel) => {
         muted
         key={index}
         style={{
-          display: playlist.visibility ? "" : "none",
+          display: playlistEntry.visibility ? "" : "none",
         }}
       >
-        <source src={playlist.url} type="video/mp4" />;
-      </video></SKTransition>
-  )
-}
+        <source src={playlistEntry.url} type="video/mp4" />;
+      </video>
+    </SKTransition>
+  );
+};

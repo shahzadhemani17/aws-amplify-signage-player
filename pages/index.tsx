@@ -3,8 +3,6 @@ import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { Player } from "src/modules/player";
-import Amplify from "aws-amplify";
-import awsConfig from "../src/aws-exports";
 import {
   getPlaylistData,
   getQueryParams,
@@ -18,7 +16,6 @@ export enum ErrorTypes {
   Playlist_Not_Attached_Error = "Playlist_Not_Attached_Error",
 }
 const Home: NextPage = (props: any) => {
-  //console.log("Props Response", props.playlistData);
   console.log("Props Response", props);
 
   return (
@@ -69,7 +66,6 @@ export const getServerSideProps = async (context: NextPageContext) => {
   const backendUrl = context?.query.backend_url
     ? context?.query.backend_url
     : process.env.NEXT_PUBLIC_API_URL;
-  console.log("backendurl", "public-url", backendUrl);
   if (context?.query.screen_id) {
     try {
       const screenDetailResponse = await getScreenDetails(
@@ -77,9 +73,12 @@ export const getServerSideProps = async (context: NextPageContext) => {
         backendUrl
       );
 
-      const apiResponse = await screenDetailResponse.json();
+      const screenApiResponse = await screenDetailResponse.json();
 
-      if (!apiResponse?.data?.playlist_id && !apiResponse?.playlist_id) {
+      if (
+        !screenApiResponse?.data?.playlist_id &&
+        !screenApiResponse?.playlist_id
+      ) {
         return {
           props: {
             screen_id: context.query.screen_id,
@@ -94,13 +93,19 @@ export const getServerSideProps = async (context: NextPageContext) => {
       }
 
       const playlistDataRsponse = await getPlaylistData(
-        apiResponse?.playlist_id ?? apiResponse?.data?.playlist_id,
-        backendUrl
+        screenApiResponse?.playlist_id ?? screenApiResponse?.data?.playlist_id,
+        backendUrl,
+        context?.query.screen_id as string
       );
+
+      // const playlistJsonResponse = await playlistResponse(
+      //   playlistDataRsponse,
+      //   context?.query.screen_id as string
+      // );
 
       const playlistJsonResponse = await playlistResponse(
         playlistDataRsponse,
-        apiResponse,
+        screenApiResponse,
         context.query.screen_id,
         backendUrl
       );
@@ -118,6 +123,9 @@ export const getServerSideProps = async (context: NextPageContext) => {
           },
         };
       }
+
+      const playlistData = playlistJsonResponse?.props?.playlistData?.data;
+
       return playlistJsonResponse;
     } catch (err) {
       console.log("crash ");

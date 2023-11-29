@@ -8,31 +8,48 @@ import {
 import { ErrorTypes } from "../../../pages";
 import InlineWorker from "../../../lib/InlineWorker";
 import { getPlaylistData, getScreenDetails } from "lib/scoop.repo";
-import CryptoJS from 'crypto-js';
+import CryptoJS from "crypto-js";
 import moment from "moment-timezone";
 
-export const Player = ({ playlistData, screenData, screenId, backendUrl }: any) => {
+export const Player = ({
+  playlistData,
+  screenData,
+  screenId,
+  backendUrl,
+}: any) => {
   console.log("PLAYER PLAYLISTdATA", playlistData, screenData);
   let screenDetail = screenData?.data;
-  const [screenRefreshDuration, setScreenRefreshDuration] = useState(screenDetail?.refresh_duration);
-  const [isScreenOn, setScreenToOn] = useState(isScreenScheduleValid(screenDetail?.screen_on_time, screenDetail?.screen_off_time));
+  const [screenRefreshDuration, setScreenRefreshDuration] = useState(
+    screenDetail?.refresh_duration
+  );
+  const [isScreenOn, setScreenToOn] = useState(
+    isScreenScheduleValid(
+      screenDetail?.screen_on_time,
+      screenDetail?.screen_off_time
+    )
+  );
   const [screenDetailData, setScreenDetailData] = useState(screenDetail);
   if (screenId) {
-    moment.tz.setDefault(screenDetail?.timezone_identifier)
+    moment.tz.setDefault(screenDetail?.timezone_identifier);
   }
 
   const refreshScreenDataAfterDuration = async () => {
     const localScreenDetails = localStorage.getItem("screenDetail");
-    const screenDetailResponse = await getScreenDetails(
-      screenId,
-      backendUrl
-    );
+    const screenDetailResponse = await getScreenDetails(screenId, backendUrl);
     const screenResponse = await screenDetailResponse.json();
     const screenDetail = screenResponse.data;
     setScreenDetailData(screenDetail);
     setScreenRefreshDuration(screenDetail.refresh_duration);
-    setScreenToOn(isScreenScheduleValid(screenDetail.screen_on_time, screenDetail.screen_off_time))
-    if (localScreenDetails && localScreenDetails !== JSON.stringify(screenDetail)) {
+    setScreenToOn(
+      isScreenScheduleValid(
+        screenDetail.screen_on_time,
+        screenDetail.screen_off_time
+      )
+    );
+    if (
+      localScreenDetails &&
+      localScreenDetails !== JSON.stringify(screenDetail)
+    ) {
       const parsedScreenDetail = JSON.parse(localScreenDetails as string);
       if (parsedScreenDetail.playlist_id !== screenDetail.playlist_id) {
         window.location.reload();
@@ -46,23 +63,24 @@ export const Player = ({ playlistData, screenData, screenId, backendUrl }: any) 
 
     const playlistHash = localStorage.getItem("playlistHash");
 
-    if (playlistHash !== CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString()) {
+    if (
+      playlistHash !==
+      CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString()
+    ) {
       window.location.reload();
     }
-  }
+  };
 
   useEffect(() => {
     if (screenId && screenDetail) {
       const getScreenDetails = () => {
-        const inlineWorker = new InlineWorker(
-          refreshScreenDataAfterDuration()
-        );
+        const inlineWorker = new InlineWorker(refreshScreenDataAfterDuration());
       };
-  
+
       const intervalId = setInterval(() => {
         getScreenDetails();
       }, screenRefreshDuration * 1000);
-  
+
       return () => clearInterval(intervalId);
     }
   }, [screenRefreshDuration]);
@@ -72,9 +90,12 @@ export const Player = ({ playlistData, screenData, screenId, backendUrl }: any) 
   useEffect(() => {
     if (window.Worker && navigator.onLine && screenId) {
       screenId && new InlineWorker(uplodPulse(screenId, backendUrl));
-      const sha256Hash = CryptoJS.SHA256(JSON.stringify(playlistData.data)).toString();
+      const sha256Hash = CryptoJS.SHA256(
+        JSON.stringify(playlistData.data)
+      ).toString();
       localStorage?.setItem("playlistHash", sha256Hash);
-      screenData && localStorage?.setItem("screenDetail", JSON.stringify(screenData?.data));
+      screenData &&
+        localStorage?.setItem("screenDetail", JSON.stringify(screenData?.data));
     }
   }, []);
 
