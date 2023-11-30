@@ -53,7 +53,6 @@ export async function postPulse(screenId: number, backend_url: string) {
       method: "PATCH",
       headers: headers,
     });
-    console.log("response", response);
     return response;
   } catch (err) {
     console.log("Unexpected error occured during fetch", err);
