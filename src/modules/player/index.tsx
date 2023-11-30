@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { EmptyPlayer, SKPlayer, SplashScreen } from "@playerComponents/index";
 import {
-  getDifferenceOfTimeByCurrentTime,
+  getDifferenceOfOnOffTimeByCurrentTime,
   getPlaylistEntries,
   isScreenScheduleValid,
   uplodPulse,
@@ -79,18 +79,26 @@ export const Player = ({
 
   useEffect(() => {
     setRefreshDuration(screenRefreshDuration);
+    const { offTimeDifference, onTimeDifference } = getDifferenceOfOnOffTimeByCurrentTime(
+      screenDetail?.screen_off_time,
+      screenDetail?.screen_on_time
+    );
     // if screen off time is less than screenRefreshDuration than the refresh duration will be screen off time
-    if (screenDetail?.screen_off_time) {
-      const offAndCurrentTimeDifference = getDifferenceOfTimeByCurrentTime(
-        screenDetail?.screen_off_time
-      );
+    if (isScreenOn && screenDetail?.screen_off_time) {
       if (
-        offAndCurrentTimeDifference &&
-        offAndCurrentTimeDifference < screenRefreshDuration &&
-        offAndCurrentTimeDifference > 0
+        offTimeDifference &&
+        offTimeDifference < screenRefreshDuration &&
+        offTimeDifference > 0
       ) {
         // added one second delay
-        setRefreshDuration(offAndCurrentTimeDifference + 1);
+        setRefreshDuration(offTimeDifference + 1);
+      }
+    }
+    else if (!isScreenOn && screenDetail?.screen_on_time) {
+      if (onTimeDifference &&
+        onTimeDifference < screenRefreshDuration &&
+        onTimeDifference > 0) {
+        setRefreshDuration(onTimeDifference + 1);
       }
     }
   }, [screenRefreshDuration]);

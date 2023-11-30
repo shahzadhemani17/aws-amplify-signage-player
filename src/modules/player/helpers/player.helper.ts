@@ -459,16 +459,22 @@ export async function uplodPulse(
   return uplodPulse(screenId, backend_url);
 }
 
-export const getDifferenceOfTimeByCurrentTime = (time) => {
+export const getDifferenceOfOnOffTimeByCurrentTime = (offTime, onTime) => {
   const currentTime = moment();
 
   // Parse the given time string and set it to today's date
-  const givenDateTime = moment(time, "HH:mm:ss").set({
+  const givenOffDateTime = moment(offTime, "HH:mm:ss").set({
+    year: currentTime.year(),
+    month: currentTime.month(),
+    date: currentTime.date(),
+  });
+
+  const givenOnDateTime = moment(onTime, "HH:mm:ss").set({
     year: currentTime.year(),
     month: currentTime.month(),
     date: currentTime.date(),
   });
 
   // Calculate and return the difference in seconds
-  return givenDateTime.diff(currentTime, "seconds");
+  return { offTimeDifference: givenOffDateTime.diff(currentTime, "seconds"), onTimeDifference: givenOnDateTime.diff(currentTime, "seconds") };
 };
