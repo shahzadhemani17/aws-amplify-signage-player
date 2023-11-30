@@ -71,23 +71,22 @@ export const SKPlayer = ({
 
   const setVisiblePlaylist = async () => {
     for (let i = 0; i < playlistEntries.length; i++) {
-      let dataArray1, dataArray2;
+      let dataArray;
       if (i === 0) {
         getVengoEntriesByIntegrations(vengoIntegrationEntries).then((data) => {
-          dataArray2 = data;
           if (data) {
-            dataArray1 = convertVengoEntries(data);
-            dataArray1 = dataArray1.map((item) => {
+            dataArray = convertVengoEntries(data);
+            dataArray = dataArray.map((item) => {
               item.visibility = false;
               return item;
             });
-            setVengoPlaylistEntries && setVengoPlaylistEntries([...dataArray1]);
+            setVengoPlaylistEntries && setVengoPlaylistEntries([...dataArray]);
 
             // logic: to skip vengo entries which could not be fetched
-            if (dataArray1?.length) {
+            if (dataArray?.length) {
               const entries1 = playlistEntries.map((entry1) => {
                 if (entry1.entryType === "vengo") {
-                  const vengoEntry = dataArray1?.find(
+                  const vengoEntry = dataArray?.find(
                     (entry2) => entry2?.position === entry1?.position
                   );
                   if (vengoEntry?.url) {
@@ -107,8 +106,7 @@ export const SKPlayer = ({
           }
         });
       }
-      console.log("dataArray1", dataArray1);
-      console.log("dataArray2", dataArray2);
+      console.log("dataArray", dataArray);
 
       setPlaylistEntries([...playlistEntries]); // update state4
 

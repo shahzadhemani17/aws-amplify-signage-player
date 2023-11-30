@@ -57,7 +57,8 @@ export const Player = ({
     }
     const playlistDataRsponse = await getPlaylistData(
       screenDetail?.playlist_id ?? screenDetail?.data?.playlist_id,
-      backendUrl
+      backendUrl,
+      screenId
     );
     const playlistResponse = await playlistDataRsponse.json();
 
