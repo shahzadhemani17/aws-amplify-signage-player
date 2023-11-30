@@ -2,14 +2,24 @@ import { HtmlEnum, PlayerModel } from "@models/playerModel";
 import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { PlaylistMessages } from "../player.constant";
 import moment from "moment-timezone";
-import { getPlaylistData, getQueryParams, postPulse } from "lib/scoop.repo";
+// import { getPlaylistData, getQueryParams, postPulse } from "lib/scoop.repo";
+import {
+  getPlaylistData,
+  getQueryParams,
+  getVengoEntries,
+  postPulse,
+} from "lib/scoop.repo";
 import CryptoJS from "crypto-js";
 const populatePlayer = (
   index: number,
   duration: number,
   id: number,
   tag: string,
-  url: string
+  url: string,
+  entryType: any,
+  ad_integration?: any,
+  position?: any,
+  impression?: any
 ) => {
   const player: PlayerModel = {
     id: id,
@@ -17,6 +27,10 @@ const populatePlayer = (
     url: url,
     duration: duration * 1000,
     visibility: false,
+    entryType,
+    ad_integration,
+    position,
+    impression,
   };
   return player;
 };
@@ -37,10 +51,14 @@ export const convertJSON = (playlist: any) => {
           entry.duration_in_seconds,
           entry.id,
           HtmlEnum.iFRAME,
-          entry.weburl.url
+          entry.weburl.url,
+          "skoop",
+          entry?.ad_integration,
+          entry.position,
+          entry?.impression
         )
       );
-    } else {
+    } else if (entry?.media?.hash) {
       entry.media.hash &&
         result.push(
           populatePlayer(
@@ -50,10 +68,51 @@ export const convertJSON = (playlist: any) => {
             entry.media.content_type === "video"
               ? HtmlEnum.VIDEO
               : HtmlEnum.IMAGE,
-            entry.media.hash
+            entry.media.hash,
+            "skoop",
+            entry?.ad_integration,
+            entry.position,
+            entry?.impression
           )
         );
+    } else if (entry?.ad_integration?.integration_name === "vengo") {
+      result.push(
+        populatePlayer(
+          index,
+          entry.duration_in_seconds,
+          entry.id,
+          HtmlEnum.VENGO,
+          entry.media.hash,
+          "vengo",
+          entry?.ad_integration,
+          entry.position,
+          entry?.impression
+        )
+      );
     }
+  });
+  return result;
+};
+
+export const convertVengoEntries = (entries: any) => {
+  const result: PlayerModel[] = [];
+  entries.sort(
+    (a: any, b: any) => parseFloat(a.position) - parseFloat(b.position)
+  );
+  entries.map((entry: any, index: number) => {
+    result.push(
+      populatePlayer(
+        index,
+        entry.duration_in_seconds,
+        entry.id,
+        entry.media?.content_type === "video" ? HtmlEnum.VIDEO : HtmlEnum.IMAGE,
+        entry.media?.hash,
+        "vengo",
+        entry?.ad_integration,
+        entry.position,
+        entry?.impression
+      )
+    );
   });
   return result;
 };
@@ -129,6 +188,7 @@ const checkValidMomentDates = (type: string, dates: any) => {
     return compareTime.isBetween(beforeTime, afterTime);
   }
 };
+
 function checkScheduledPlayList(playList: any) {
   const entries = playList?.map((entry: any) => {
     const { scheduled_criteria } = entry;
@@ -258,6 +318,7 @@ function checkScheduledPlayList(playList: any) {
     }
     return entry;
   });
+
   let scheduledEntries = entries.filter((entry: any) => entry.isValidScheduled);
   const notValidScheduleFound = entries.find(
     (entry: any) => entry.isValidScheduled === false
@@ -271,13 +332,18 @@ function checkScheduledPlayList(playList: any) {
 export async function fetchScreenDetailsByDuration(
   playlist_id: number,
   duration: number = 5000,
-  doWait: boolean
+  doWait: boolean,
+  screen_id?: string
 ): Promise<any> {
   doWait && (await wait(10 * 1000));
   let playListRes;
   if (playlist_id) {
     const params = getQueryParams();
-    playListRes = await getPlaylistData(playlist_id, params.backendUrl);
+    playListRes = await getPlaylistData(
+      playlist_id,
+      params.backendUrl,
+      screen_id
+    );
   }
   if (playListRes) {
     const playListLatest = await playListRes.json();
@@ -305,14 +371,14 @@ export async function fetchScreenDetailsByDuration(
         latestPlaylist.convertedPlaylist?.length !== existingPlayList?.length &&
         latestPlaylist.is_edited === 0
       ) {
-        window.location.reload();
+        // window.location.reload();
       }
       if (
         JSON.stringify(existingPlayList) !=
           JSON.stringify(latestPlaylist.convertedPlaylist) &&
         latestPlaylist.is_edited === 0
       ) {
-        window.location.reload();
+        // window.location.reload();
       }
     }
   }
@@ -332,6 +398,57 @@ export async function wait(ms: number) {
   return new Promise((res) => setTimeout(res, ms));
 }
 
+export type KeyValuePair = {
+  key: string;
+  value: string;
+};
+
+export const createObjectFromArray = (array: KeyValuePair[]) => {
+  const result = {};
+
+  for (const item of array) {
+    result[item.key] = item.value;
+  }
+
+  return result;
+};
+
+export const getVengoEntriesByIntegrations = async (vengoIntegrations: any) => {
+  if (!vengoIntegrations.length) {
+    return;
+  }
+  const vengoEntries = await Promise.all(
+    vengoIntegrations.map((integration) => {
+      // call api here
+      const paramObject = createObjectFromArray(
+        integration?.ad_integration?.Params
+      );
+      return getVengoEntries(integration?.ad_integration?.url, paramObject);
+    })
+  );
+  console.log("vengoEntries......3", vengoEntries);
+  const jsonEntries = (
+    await Promise.all(
+      vengoEntries.map((entry) => {
+        return entry.json();
+      })
+    )
+  ).flat();
+
+  console.log("jsonEntries.........4", jsonEntries);
+  jsonEntries.forEach((entry, index) => {
+    if (entry) {
+      entry.position = vengoIntegrations[index].position;
+    } else {
+      jsonEntries[index] = {
+        position: vengoIntegrations[index].position,
+      };
+    }
+  });
+  console.log("jsonEntries.........5", jsonEntries);
+
+  return jsonEntries;
+};
 export async function uplodPulse(
   screenId: number,
   backend_url: string

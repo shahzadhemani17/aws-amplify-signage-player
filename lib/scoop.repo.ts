@@ -3,8 +3,29 @@ const headers = new Headers({
   "Content-Type": "application/json",
 });
 
-export const getPlaylistData = (playlist_id, backendUrl) => {
-  return fetch(`${backendUrl}/playlists/${playlist_id}/entries`, {
+export const getPlaylistData = (
+  playlist_id,
+  backendUrl,
+  screen_id?: string
+) => {
+  return fetch(
+    `${backendUrl}/playlists/${playlist_id}/entries?screen_id=${screen_id}`,
+    {
+      method: "GET",
+      headers: headers,
+    }
+  );
+};
+
+export const getVengoEntries = (url, params) => {
+  return fetch(url, {
+    method: "POST",
+    body: JSON.stringify(params),
+  });
+};
+
+export const sendVengoImpression = (url) => {
+  return fetch(url, {
     method: "GET",
     headers: headers,
   });

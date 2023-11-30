@@ -11,15 +11,34 @@ export enum HtmlEnum {
   IMAGE = "image",
   iFRAME = "iframe",
   VIDEO = "video",
+  VENGO = "vengo",
 }
 
 export interface PlayerModel {
-  id: number;
+  id?: number;
   tag: string;
   url: string;
   duration: number;
   visibility: boolean;
+  entryType: any;
+  ad_integration?: any;
+  position?: any;
+  impression?: any;
+  cancel?: any;
+  vengoEntry?: any;
 }
+
+// export interface AdIntegration {
+//   id: number;
+//   integration_name: string;
+//   url: string;
+//   params: VengoParams[];
+// }
+
+// export interface VengoParams {
+//   key: string;
+//   value: string;
+// }
 
 export interface EntriesModel {
   entries: PlayerModel[];
@@ -37,7 +56,7 @@ export interface EntriesModel {
 
 export interface PlayerPropsModel {
   index: number;
-  playlist: PlayerModel;
+  playlistEntry: PlayerModel;
   videoRef?: LegacyRef<HTMLVideoElement>;
   transition: string;
 }

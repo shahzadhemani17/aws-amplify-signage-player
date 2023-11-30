@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { sleep, isScreenScheduleValid } from "../../helpers/player.helper";
+// import { sleep, isScreenScheduleValid } from "../../helpers/player.helper";
+import {
+  sleep,
+  getVengoEntriesByIntegrations,
+  convertVengoEntries,
+  isScreenScheduleValid,
+} from "../../helpers/player.helper";
 import { HtmlEnum, EntriesModel } from "@models/playerModel";
 import {
   SKImage,
@@ -11,6 +17,7 @@ import {
 import Modal from "react-modal";
 import cookie from "../../../../../public/cookie.png";
 import { styles } from "../../../../../styles/player";
+
 import { EmptyPlayer } from "@playerComponents/index";
 import moment from "moment";
 import { labels } from "@playerComponents/labels";
@@ -23,7 +30,21 @@ export const SKPlayer = ({
   setScreenToOn,
   screenId,
 }: EntriesModel) => {
-  const [playlists, setPlaylists] = useState([...entries]);
+  const filterVengoIntegrationEntries = (entries) => {
+    return entries.filter((entry) => {
+      if (entry.tag === "vengo") {
+        return entry;
+      }
+    });
+  };
+  const [playlistEntries, setPlaylistEntries] = useState([...entries]);
+  console.log("playlistEntries.......", playlistEntries);
+
+  const [vengoIntegrationEntries] = useState([
+    ...filterVengoIntegrationEntries(entries),
+  ]);
+
+  const [, setVengoPlaylistEntries] = useState<any>([]);
   const [modalIsOpen, setIsOpen] = useState(false);
 
   const vidRef = useRef(null);
@@ -41,24 +62,71 @@ export const SKPlayer = ({
     if (navigator.cookieEnabled && typeof window.localStorage !== "undefined") {
       setVisiblePlaylist();
     } else {
-      setPlaylists([]);
+      setPlaylistEntries([]);
       //alert("No Playlist Available");
       //playlists.length = 0;
-      console.log("pl", playlists);
+      console.log("pl", playlistEntries);
       setIsOpen(true);
     }
   }, []);
 
   const setVisiblePlaylist = async () => {
-    for (let i = 0; i < playlists.length; i++) {
-      playlists[i].visibility = true; // visibility set to true before sleep
-      setPlaylists([...playlists]); // update state
-      if (playlists[i].tag === "video") {
+    for (let i = 0; i < playlistEntries.length; i++) {
+      let dataArray1, dataArray2;
+      if (i === 0) {
+        getVengoEntriesByIntegrations(vengoIntegrationEntries).then((data) => {
+          dataArray2 = data;
+          if (data) {
+            dataArray1 = convertVengoEntries(data);
+            dataArray1 = dataArray1.map((item) => {
+              item.visibility = false;
+              return item;
+            });
+            setVengoPlaylistEntries && setVengoPlaylistEntries([...dataArray1]);
+
+            // logic: to skip vengo entries which could not be fetched
+            if (dataArray1?.length) {
+              const entries1 = playlistEntries.map((entry1) => {
+                if (entry1.entryType === "vengo") {
+                  const vengoEntry = dataArray1?.find(
+                    (entry2) => entry2?.position === entry1?.position
+                  );
+                  if (vengoEntry?.url) {
+                    entry1.vengoEntry = vengoEntry;
+                    entry1.visibility = false;
+                    entry1.duration = vengoEntry?.duration;
+                  } else {
+                    entry1.vengoEntry = vengoEntry;
+                    entry1.visibility = false;
+                    entry1.duration = 0;
+                  }
+                }
+                return entry1;
+              });
+              setPlaylistEntries([...entries1]); // update state
+            }
+          }
+        });
+      }
+      console.log("dataArray1", dataArray1);
+      console.log("dataArray2", dataArray2);
+
+      setPlaylistEntries([...playlistEntries]); // update state4
+
+      playlistEntries[i].visibility = true; // visibility set to true before sleep
+      setPlaylistEntries([...playlistEntries]); // update state4
+      if (playlistEntries[i].tag === "video") {
         handlePlayVideo(vidRef);
       }
-      await sleep(playlists[i].duration); // sleep according to playlist duration
-      playlists[i].visibility = false; // visibility set to false after sleep
-      if (i === playlists.length - 1) {
+
+      if (!!playlistEntries[i].duration) {
+        await sleep(playlistEntries[i].duration); // sleep according to playlist duration4
+      }
+      playlistEntries[i].visibility = false; // visibility set to false after sleep
+
+      console.log("playlistEntries..................q", playlistEntries);
+
+      if (i === playlistEntries.length - 1) {
         // check if last playlist entry
         i = -1; // play from start
       }
@@ -88,13 +156,21 @@ export const SKPlayer = ({
   }
   return (
     <div>
-      {playlists?.map((playlist, index) => {
-        switch (playlist.tag) {
+      {playlistEntries?.map((entry, index) => {
+        if (entry.entryType === "vengo") {
+          console.log("pentry.......", entry);
+          entry = entry?.vengoEntry;
+          if (entry?.url) {
+            entry.visibility = true;
+          }
+          // entry.visibility = true;
+        }
+        switch (entry?.tag) {
           case HtmlEnum.VIDEO:
             return (
               <SKVideo
                 videoRef={vidRef}
-                playlist={playlist}
+                playlistEntry={entry}
                 index={index}
                 transition={transition}
                 key={index}
@@ -103,7 +179,7 @@ export const SKPlayer = ({
           case HtmlEnum.iFRAME:
             return (
               <SKIframe
-                playlist={playlist}
+                playlistEntry={entry}
                 index={index}
                 transition={transition}
                 key={index}
@@ -112,7 +188,7 @@ export const SKPlayer = ({
           default:
             return (
               <SKImage
-                playlist={playlist}
+                playlistEntry={entry}
                 index={index}
                 transition={transition}
                 key={index}
@@ -120,6 +196,7 @@ export const SKPlayer = ({
             );
         }
       })}
+
       <Modal
         isOpen={modalIsOpen}
         style={styles.modalStyles}
