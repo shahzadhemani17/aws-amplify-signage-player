@@ -4,7 +4,7 @@ import {
   getDifferenceOfOnOffTimeByCurrentTime,
   getPlaylistEntries,
   isScreenScheduleValid,
-  uplodPulse,
+  uplodPulse
 } from "./helpers/player.helper";
 import { ErrorTypes } from "../../../pages";
 import InlineWorker from "../../../lib/InlineWorker";
@@ -16,9 +16,8 @@ export const Player = ({
   playlistData,
   screenData,
   screenId,
-  backendUrl,
+  backendUrl
 }: any) => {
-  console.log("PLAYER PLAYLISTdATA", playlistData, screenData);
   let screenDetail = screenData?.data;
   const [screenRefreshDuration, setScreenRefreshDuration] = useState(
     screenDetail?.refresh_duration
@@ -79,10 +78,11 @@ export const Player = ({
 
   useEffect(() => {
     setRefreshDuration(screenRefreshDuration);
-    const { offTimeDifference, onTimeDifference } = getDifferenceOfOnOffTimeByCurrentTime(
-      screenDetail?.screen_off_time,
-      screenDetail?.screen_on_time
-    );
+    const { offTimeDifference, onTimeDifference } =
+      getDifferenceOfOnOffTimeByCurrentTime(
+        screenDetail?.screen_off_time,
+        screenDetail?.screen_on_time
+      );
     // if screen off time is less than screenRefreshDuration than the refresh duration will be screen off time
     if (isScreenOn && screenDetail?.screen_off_time) {
       if (
@@ -93,11 +93,12 @@ export const Player = ({
         // added one second delay
         setRefreshDuration(offTimeDifference + 1);
       }
-    }
-    else if (!isScreenOn && screenDetail?.screen_on_time) {
-      if (onTimeDifference &&
+    } else if (!isScreenOn && screenDetail?.screen_on_time) {
+      if (
+        onTimeDifference &&
         onTimeDifference < screenRefreshDuration &&
-        onTimeDifference > 0) {
+        onTimeDifference > 0
+      ) {
         setRefreshDuration(onTimeDifference + 1);
       }
     }

@@ -5,13 +5,13 @@ import {
   sleep,
   getVengoEntriesByIntegrations,
   convertVengoEntries,
-  isScreenScheduleValid,
+  isScreenScheduleValid
 } from "../../helpers/player.helper";
 import { HtmlEnum, EntriesModel } from "@models/playerModel";
 import {
   SKImage,
   SKIframe,
-  SKVideo,
+  SKVideo
 } from "@playerComponents/SKPlayer/components/index";
 /* @ts-ignore */
 import Modal from "react-modal";
@@ -28,7 +28,7 @@ export const SKPlayer = ({
   screenOffTime,
   isScreenOn,
   setScreenToOn,
-  screenId,
+  screenId
 }: EntriesModel) => {
   const filterVengoIntegrationEntries = (entries) => {
     return entries.filter((entry) => {
@@ -38,10 +38,13 @@ export const SKPlayer = ({
     });
   };
   const [playlistEntries, setPlaylistEntries] = useState([...entries]);
-  console.log("playlistEntries.......", playlistEntries);
+  console.log(
+    "Client: Playlist Entries available for the play",
+    playlistEntries
+  );
 
   const [vengoIntegrationEntries] = useState([
-    ...filterVengoIntegrationEntries(entries),
+    ...filterVengoIntegrationEntries(entries)
   ]);
 
   const [, setVengoPlaylistEntries] = useState<any>([]);
@@ -52,7 +55,13 @@ export const SKPlayer = ({
     vidRef?.current?.play();
   };
 
-  console.log("on/off", screenOnTime, screenOffTime);
+  console.log(
+    "Client: on & off time for the screen:",
+    "OnTime:",
+    screenOnTime || "Empty",
+    ", Off Time:",
+    screenOffTime || "Empty"
+  );
 
   useEffect(() => {
     setScreenToOn(isScreenScheduleValid(screenOnTime, screenOffTime));
@@ -107,7 +116,6 @@ export const SKPlayer = ({
           }
         });
       }
-      console.log("dataArray", dataArray);
 
       setPlaylistEntries([...playlistEntries]); // update state4
 
@@ -121,8 +129,6 @@ export const SKPlayer = ({
         await sleep(playlistEntries[i].duration); // sleep according to playlist duration4
       }
       playlistEntries[i].visibility = false; // visibility set to false after sleep
-
-      console.log("playlistEntries..................q", playlistEntries);
 
       if (i === playlistEntries.length - 1) {
         // check if last playlist entry
@@ -156,7 +162,7 @@ export const SKPlayer = ({
     <div>
       {playlistEntries?.map((entry, index) => {
         if (entry.entryType === "vengo") {
-          console.log("pentry.......", entry);
+          console.log("Client: Vengo Entry", entry);
           entry = entry?.vengoEntry;
           if (entry?.url) {
             entry.visibility = true;

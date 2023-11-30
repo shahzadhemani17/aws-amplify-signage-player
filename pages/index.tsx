@@ -6,18 +6,17 @@ import { Player } from "src/modules/player";
 import {
   getPlaylistData,
   getQueryParams,
-  getScreenDetails,
+  getScreenDetails
 } from "../lib/scoop.repo";
 
 // configure amplify for cloud communication
 // Amplify.configure(awsConfig);
 export enum ErrorTypes {
   Screen_Not_Found_Error = "Screen_Not_Found_Error",
-  Playlist_Not_Attached_Error = "Playlist_Not_Attached_Error",
+  Playlist_Not_Attached_Error = "Playlist_Not_Attached_Error"
 }
 const Home: NextPage = (props: any) => {
-  console.log("Props Response", props);
-
+  console.log("API: Screen or Playlist Data Response", props);
   return (
     <div>
       <Head>
@@ -50,15 +49,15 @@ const playlistResponse = async (
   const apiResponse = await playlistDataRsponse.json();
   const playlistResponse: PlaylistResponse = {
     status: ResponseType.SUCCESS,
-    data: apiResponse,
+    data: apiResponse
   };
   return {
     props: {
       playlistData: playlistResponse,
       screenData: screenDataResponse,
       screen_id,
-      backend_url,
-    },
+      backend_url
+    }
   };
 };
 
@@ -86,9 +85,9 @@ export const getServerSideProps = async (context: NextPageContext) => {
             playlistData: {
               status: ResponseType.ERROR,
               data: {},
-              message: "Playlist_Not_Attached_Error",
-            },
-          },
+              message: "Playlist_Not_Attached_Error"
+            }
+          }
         };
       }
 
@@ -118,9 +117,9 @@ export const getServerSideProps = async (context: NextPageContext) => {
             playlistData: {
               status: ResponseType.ERROR,
               data: {},
-              message: "Playlist_Not_Attached_Error",
-            },
-          },
+              message: "Playlist_Not_Attached_Error"
+            }
+          }
         };
       }
 
@@ -133,8 +132,8 @@ export const getServerSideProps = async (context: NextPageContext) => {
         props: {
           screen_id: context.query.screen_id,
           backend_url: backendUrl,
-          playlistData: { status: ResponseType.ERROR, data: {} },
-        },
+          playlistData: { status: ResponseType.ERROR, data: {} }
+        }
       };
     }
   } else if (context.query?.playlist_id && !context.query.screen_id) {
@@ -147,11 +146,11 @@ export const getServerSideProps = async (context: NextPageContext) => {
     } catch (err) {
       console.log("crash ");
       return {
-        props: { playlistData: { status: ResponseType.ERROR, data: {} } },
+        props: { playlistData: { status: ResponseType.ERROR, data: {} } }
       };
     }
   }
   return {
-    props: { playlistData: { status: ResponseType.SUCCESS, data: {} } },
+    props: { playlistData: { status: ResponseType.SUCCESS, data: {} } }
   };
 };
