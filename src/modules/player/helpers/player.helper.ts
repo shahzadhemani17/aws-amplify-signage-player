@@ -41,10 +41,6 @@ export const convertJSON = (playlist: any) => {
   );
   playlist?.entries.map((entry: any, index: number) => {
     if (entry.is_web_url === true || entry.is_menu === true) {
-      entry.weburl.url =
-        entry.is_menu && !entry.weburl.url.includes("&refresh=true")
-          ? entry.weburl.url + "&refresh=true"
-          : entry.weburl.url;
       result.push(
         populatePlayer(
           index,
@@ -320,9 +316,13 @@ function checkScheduledPlayList(playList: any) {
   });
 
   let scheduledEntries = entries.filter((entry: any) => entry.isValidScheduled);
+  let notScheduledEntries = entries.filter((entry: any) => !entry.isValidScheduled);
   const notValidScheduleFound = entries.find(
     (entry: any) => entry.isValidScheduled === false
   );
+  notScheduledEntries?.forEach((entry: any) => {
+    delete entry["isValidScheduled"];
+  });  
   scheduledEntries?.forEach((entry: any) => {
     delete entry["isValidScheduled"];
   });

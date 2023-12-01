@@ -187,6 +187,7 @@ export const SKPlayer = ({
                 index={index}
                 transition={transition}
                 key={index}
+                entry={entries.find((entryObj) => entryObj.id === entry.id)}
               />
             );
           default:

@@ -19,6 +19,7 @@ export const Player = ({
   backendUrl
 }: any) => {
   let screenDetail = screenData?.data;
+  let playlistToSave = Object.assign(playlistData?.data);
   const [screenRefreshDuration, setScreenRefreshDuration] = useState(
     screenDetail?.refresh_duration
   );
@@ -72,6 +73,7 @@ export const Player = ({
       playlistHash !==
       CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString()
     ) {
+      localStorage?.setItem("playlistHash", CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString());
       window.location.reload();
     }
   };
@@ -120,7 +122,7 @@ export const Player = ({
     if (window.Worker && navigator.onLine && screenId) {
       screenId && new InlineWorker(uplodPulse(screenId, backendUrl));
       const sha256Hash = CryptoJS.SHA256(
-        JSON.stringify(playlistData.data)
+        JSON.stringify(playlistToSave)
       ).toString();
       localStorage?.setItem("playlistHash", sha256Hash);
       screenData &&
