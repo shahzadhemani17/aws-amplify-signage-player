@@ -20,6 +20,7 @@ import { styles } from "../../../../../styles/player";
 import { EmptyPlayer } from "@playerComponents/index";
 import moment from "moment";
 import { labels } from "@playerComponents/labels";
+import { sendVengoImpression } from "../../../../../lib/scoop.repo";
 export const SKPlayer = ({
   entries,
   transition,
@@ -37,7 +38,6 @@ export const SKPlayer = ({
     });
   };
   const [playlistEntries, setPlaylistEntries] = useState([...entries]);
-  console.log("playlistEntries.......", playlistEntries);
 
   const [vengoIntegrationEntries] = useState([
     ...filterVengoIntegrationEntries(entries),
@@ -51,8 +51,6 @@ export const SKPlayer = ({
     vidRef?.current?.play();
   };
 
-  console.log("on/off", screenOnTime, screenOffTime);
-
   useEffect(() => {
     setScreenToOn(isScreenScheduleValid(screenOnTime, screenOffTime));
   }, [screenOnTime, screenOffTime]);
@@ -62,9 +60,6 @@ export const SKPlayer = ({
       setVisiblePlaylist();
     } else {
       setPlaylistEntries([]);
-      //alert("No Playlist Available");
-      //playlists.length = 0;
-      console.log("pl", playlistEntries);
       setIsOpen(true);
     }
   }, []);
@@ -106,7 +101,6 @@ export const SKPlayer = ({
           }
         });
       }
-      console.log("dataArray", dataArray);
 
       setPlaylistEntries([...playlistEntries]); // update state4
 
@@ -118,10 +112,19 @@ export const SKPlayer = ({
 
       if (!!playlistEntries[i].duration) {
         await sleep(playlistEntries[i].duration); // sleep according to playlist duration4
+
+        // impression call on successfull vengo call
+        if (playlistEntries[i]?.entryType === "vengo") {
+          if (playlistEntries[i]?.vengoEntry?.url) {
+            sendVengoImpression(
+              playlistEntries[i]?.vengoEntry?.impression
+            ).then((data) => {
+              console.log("vengo impression...........", data);
+            });
+          }
+        }
       }
       playlistEntries[i].visibility = false; // visibility set to false after sleep
-
-      console.log("playlistEntries..................q", playlistEntries);
 
       if (i === playlistEntries.length - 1) {
         // check if last playlist entry
@@ -129,6 +132,7 @@ export const SKPlayer = ({
       }
     }
   };
+
   if (
     (!isScreenOn && screenId && screenOnTime && screenOffTime) ||
     (!isScreenOn && screenId && screenOnTime && !screenOffTime) ||
@@ -149,13 +153,11 @@ export const SKPlayer = ({
   return (
     <div>
       {playlistEntries?.map((entry, index) => {
-        if (entry.entryType === "vengo") {
-          console.log("pentry.......", entry);
+        if (entry.entryType === "vengo" && entry.visibility) {
           entry = entry?.vengoEntry;
           if (entry?.url) {
             entry.visibility = true;
           }
-          // entry.visibility = true;
         }
         switch (entry?.tag) {
           case HtmlEnum.VIDEO:

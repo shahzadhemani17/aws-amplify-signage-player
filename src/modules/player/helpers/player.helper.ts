@@ -159,9 +159,11 @@ export const getPlaylistEntries = (playlistData: any) => {
     refresh_duration,
   };
 };
+
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
+
 const checkValidMomentDates = (type: string, dates: any) => {
   const currentDate = moment().format("DD/MM/YYYY");
   const compareDate = moment(currentDate, "DD/MM/YYYY");
@@ -423,7 +425,6 @@ export const getVengoEntriesByIntegrations = async (vengoIntegrations: any) => {
       return getVengoEntries(integration?.ad_integration?.url, paramObject);
     })
   );
-  console.log("vengoEntries......3", vengoEntries);
   const jsonEntries = (
     await Promise.all(
       vengoEntries.map((entry) => {
@@ -432,7 +433,6 @@ export const getVengoEntriesByIntegrations = async (vengoIntegrations: any) => {
     )
   ).flat();
 
-  console.log("jsonEntries.........4", jsonEntries);
   jsonEntries.forEach((entry, index) => {
     if (entry) {
       entry.position = vengoIntegrations[index].position;
@@ -442,8 +442,6 @@ export const getVengoEntriesByIntegrations = async (vengoIntegrations: any) => {
       };
     }
   });
-  console.log("jsonEntries.........5", jsonEntries);
-
   return jsonEntries;
 };
 export async function uplodPulse(
