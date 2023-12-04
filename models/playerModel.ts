@@ -26,6 +26,7 @@ export interface PlayerModel {
   impression?: any;
   cancel?: any;
   vengoEntry?: any;
+  scheduled_criteria: string;
 }
 
 // export interface AdIntegration {
@@ -52,6 +53,7 @@ export interface EntriesModel {
   screenRefreshDuration: number;
   isScreenOn: boolean;
   setScreenToOn: (screenOn: boolean) => void;
+  originalEntries: any;
 }
 
 export interface PlayerPropsModel {

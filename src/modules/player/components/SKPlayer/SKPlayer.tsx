@@ -6,6 +6,7 @@ import {
   getVengoEntriesByIntegrations,
   convertVengoEntries,
   isScreenScheduleValid,
+  getEntrySchedule
 } from "../../helpers/player.helper";
 import { HtmlEnum, EntriesModel } from "@models/playerModel";
 import {
@@ -30,6 +31,7 @@ export const SKPlayer = ({
   isScreenOn,
   setScreenToOn,
   screenId,
+  originalEntries
 }: EntriesModel) => {
   const filterVengoIntegrationEntries = (entries) => {
     return entries.filter((entry) => {
@@ -80,6 +82,14 @@ export const SKPlayer = ({
   const setVisiblePlaylist = async () => {
     for (let i = 0; i < playlistEntries.length; i++) {
       let dataArray;
+      const scheduledEntry = getEntrySchedule(playlistEntries[i]);
+      if (!scheduledEntry.isValidScheduled) {
+        playlistEntries[i] = {
+          ...playlistEntries[i],
+          visibility: false,
+          duration: 0
+        } 
+      }
       if (i === 0) {
         getVengoEntriesByIntegrations(vengoIntegrationEntries).then((data) => {
           if (data) {
@@ -192,7 +202,7 @@ export const SKPlayer = ({
                 index={index}
                 transition={transition}
                 key={index}
-                entry={entries.find((entryObj) => entryObj.id === entry.id)}
+                entry={originalEntries.find((entryObj) => entryObj.id === entry.id)}
               />
             );
           default:
