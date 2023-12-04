@@ -21,6 +21,7 @@ const populatePlayer = (
   ad_integration?: any,
   position?: any,
   impression?: any,
+  app_id?: any
 ) => {
   const player: PlayerModel = {
     id: id,
@@ -55,6 +56,7 @@ export const convertJSON = (playlist: any) => {
           entry?.ad_integration,
           entry.position,
           entry?.impression,
+          entry?.app_id
         )
       );
     } else if (entry?.media?.hash) {

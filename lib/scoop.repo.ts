@@ -40,8 +40,10 @@ export const getScreenDetails = (screen_id, backendUrl) => {
 export const getQueryParams = () => {
   const params = new URL(location.href).searchParams;
   const backendUrl = params.get("backend_url");
+  const refreshCacheDuration = params.get("refresh");
   return {
     backendUrl,
+    refreshCacheDuration
   };
 };
 
