@@ -39,8 +39,6 @@ export const Player = ({
   }
 
   const refreshScreenDataAfterDuration = async () => {
-    console.log("here-2");
-
     const localScreenDetails = localStorage.getItem("screenDetail");
     const screenDetailResponse = await getScreenDetails(screenId, backendUrl);
     const screenResponse = await screenDetailResponse.json();
@@ -113,7 +111,6 @@ export const Player = ({
   useEffect(() => {
     if (screenId && screenDetail) {
       const intervalId = setInterval(() => {
-        console.log("here-1");
         refreshScreenDataAfterDuration();
       }, refreshDuration * 1000);
 
