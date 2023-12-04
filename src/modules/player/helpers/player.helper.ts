@@ -7,7 +7,7 @@ import {
   getPlaylistData,
   getQueryParams,
   getVengoEntries,
-  postPulse
+  postPulse,
 } from "lib/scoop.repo";
 import CryptoJS from "crypto-js";
 const populatePlayer = (
@@ -30,7 +30,7 @@ const populatePlayer = (
     entryType,
     ad_integration,
     position,
-    impression
+    impression,
   };
   return player;
 };
@@ -153,12 +153,14 @@ export const getPlaylistEntries = (playlistData: any) => {
     message,
     transition,
     is_edited,
-    refresh_duration
+    refresh_duration,
   };
 };
+
 export const sleep = (ms: number) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
 };
+
 const checkValidMomentDates = (type: string, dates: any) => {
   const currentDate = moment().format("DD/MM/YYYY");
   const compareDate = moment(currentDate, "DD/MM/YYYY");
@@ -260,7 +262,7 @@ export const getEntrySchedule = (entry: any) => {
             const weekDayName = moment().format("dddd");
             const withinTime = checkValidMomentDates("withinTime", {
               time_from,
-              time_to
+              time_to,
             });
             if (day.includes(weekDayName) && withinTime) {
               entry.isValidScheduled = true;
@@ -320,13 +322,15 @@ function checkScheduledPlayList(playList: any) {
   });
 
   let scheduledEntries = entries.filter((entry: any) => entry.isValidScheduled);
-  let notScheduledEntries = entries.filter((entry: any) => !entry.isValidScheduled);
+  let notScheduledEntries = entries.filter(
+    (entry: any) => !entry.isValidScheduled
+  );
   const notValidScheduleFound = entries.find(
     (entry: any) => entry.isValidScheduled === false
   );
   notScheduledEntries?.forEach((entry: any) => {
     delete entry["isValidScheduled"];
-  });  
+  });
   scheduledEntries?.forEach((entry: any) => {
     delete entry["isValidScheduled"];
   });
@@ -353,7 +357,7 @@ export async function fetchScreenDetailsByDuration(
     const playListLatest = await playListRes.json();
     const playlistResponse: PlaylistResponse = {
       status: ResponseType.SUCCESS,
-      data: playListLatest
+      data: playListLatest,
     };
     const latestPlaylist = getPlaylistEntries(playlistResponse);
     const playlist = localStorage.getItem("playlist");
@@ -443,11 +447,10 @@ export const getVengoEntriesByIntegrations = async (vengoIntegrations: any) => {
       entry.position = vengoIntegrations[index].position;
     } else {
       jsonEntries[index] = {
-        position: vengoIntegrations[index].position
+        position: vengoIntegrations[index].position,
       };
     }
   });
-
   return jsonEntries;
 };
 export async function uplodPulse(
@@ -467,18 +470,18 @@ export const getDifferenceOfOnOffTimeByCurrentTime = (offTime, onTime) => {
   const givenOffDateTime = moment(offTime, "HH:mm:ss").set({
     year: currentTime.year(),
     month: currentTime.month(),
-    date: currentTime.date()
+    date: currentTime.date(),
   });
 
   const givenOnDateTime = moment(onTime, "HH:mm:ss").set({
     year: currentTime.year(),
     month: currentTime.month(),
-    date: currentTime.date()
+    date: currentTime.date(),
   });
 
   // Calculate and return the difference in seconds
   return {
     offTimeDifference: givenOffDateTime.diff(currentTime, "seconds"),
-    onTimeDifference: givenOnDateTime.diff(currentTime, "seconds")
+    onTimeDifference: givenOnDateTime.diff(currentTime, "seconds"),
   };
 };
