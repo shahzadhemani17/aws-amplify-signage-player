@@ -5,13 +5,13 @@ import {
   sleep,
   getVengoEntriesByIntegrations,
   convertVengoEntries,
-  isScreenScheduleValid
+  isScreenScheduleValid,
 } from "../../helpers/player.helper";
 import { HtmlEnum, EntriesModel } from "@models/playerModel";
 import {
   SKImage,
   SKIframe,
-  SKVideo
+  SKVideo,
 } from "@playerComponents/SKPlayer/components/index";
 /* @ts-ignore */
 import Modal from "react-modal";
@@ -21,6 +21,7 @@ import { styles } from "../../../../../styles/player";
 import { EmptyPlayer } from "@playerComponents/index";
 import moment from "moment";
 import { labels } from "@playerComponents/labels";
+import { sendVengoImpression } from "../../../../../lib/scoop.repo";
 export const SKPlayer = ({
   entries,
   transition,
@@ -28,7 +29,7 @@ export const SKPlayer = ({
   screenOffTime,
   isScreenOn,
   setScreenToOn,
-  screenId
+  screenId,
 }: EntriesModel) => {
   const filterVengoIntegrationEntries = (entries) => {
     return entries.filter((entry) => {
@@ -44,7 +45,7 @@ export const SKPlayer = ({
   );
 
   const [vengoIntegrationEntries] = useState([
-    ...filterVengoIntegrationEntries(entries)
+    ...filterVengoIntegrationEntries(entries),
   ]);
 
   const [, setVengoPlaylistEntries] = useState<any>([]);
@@ -72,9 +73,6 @@ export const SKPlayer = ({
       setVisiblePlaylist();
     } else {
       setPlaylistEntries([]);
-      //alert("No Playlist Available");
-      //playlists.length = 0;
-      console.log("pl", playlistEntries);
       setIsOpen(true);
     }
   }, []);
@@ -87,7 +85,7 @@ export const SKPlayer = ({
           if (data) {
             dataArray = convertVengoEntries(data);
             dataArray = dataArray.map((item) => {
-              item.visibility = false;
+              item.visibility = true;
               return item;
             });
             setVengoPlaylistEntries && setVengoPlaylistEntries([...dataArray]);
@@ -101,7 +99,7 @@ export const SKPlayer = ({
                   );
                   if (vengoEntry?.url) {
                     entry1.vengoEntry = vengoEntry;
-                    entry1.visibility = false;
+                    entry1.visibility = true;
                     entry1.duration = vengoEntry?.duration;
                   } else {
                     entry1.vengoEntry = vengoEntry;
@@ -127,6 +125,17 @@ export const SKPlayer = ({
 
       if (!!playlistEntries[i].duration) {
         await sleep(playlistEntries[i].duration); // sleep according to playlist duration4
+
+        // impression call on successfull vengo call
+        if (playlistEntries[i]?.entryType === "vengo") {
+          if (playlistEntries[i]?.vengoEntry?.url) {
+            sendVengoImpression(
+              playlistEntries[i]?.vengoEntry?.impression
+            ).then((data) => {
+              console.log("vengo impression...........", data);
+            });
+          }
+        }
       }
       playlistEntries[i].visibility = false; // visibility set to false after sleep
 
@@ -164,10 +173,6 @@ export const SKPlayer = ({
         if (entry.entryType === "vengo") {
           console.log("Client: Vengo Entry", entry);
           entry = entry?.vengoEntry;
-          if (entry?.url) {
-            entry.visibility = true;
-          }
-          // entry.visibility = true;
         }
         switch (entry?.tag) {
           case HtmlEnum.VIDEO:
