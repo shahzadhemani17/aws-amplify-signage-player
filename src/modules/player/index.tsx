@@ -147,6 +147,7 @@ export const Player = ({
           backend_url={backendUrl}
           isScreenOn={isScreenOn}
           setScreenToOn={setScreenToOn}
+          originalEntries={playlistData.data.entries}
         />
       ) : (
         <EmptyPlayer message={response.message} />

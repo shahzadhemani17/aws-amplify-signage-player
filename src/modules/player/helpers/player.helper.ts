@@ -185,134 +185,138 @@ const checkValidMomentDates = (type: string, dates: any) => {
   }
 };
 
-function checkScheduledPlayList(playList: any) {
-  const entries = playList?.map((entry: any) => {
-    const { scheduled_criteria } = entry;
-    if (scheduled_criteria === "") {
-      entry.isValidScheduled = true;
-    } else if (scheduled_criteria && scheduled_criteria !== "") {
-      const scheduledCriteria = JSON.parse(scheduled_criteria);
-      if (scheduledCriteria) {
-        const { date_from, date_to, day, time_from, time_to } =
-          scheduledCriteria;
-        if (date_from && date_to && (day === "" || !day.length)) {
-          const inBetween = checkValidMomentDates("inBetween", {
-            date_from,
-            date_to
-          });
-          const isSame = checkValidMomentDates("isSame", {
-            date_from,
-            date_to
-          });
-          entry.isValidScheduled = inBetween || isSame ? true : false;
+export const getEntrySchedule = (entry: any) => {
+  const { scheduled_criteria } = entry;
+  if (scheduled_criteria === "") {
+    entry.isValidScheduled = true;
+  } else if (scheduled_criteria && scheduled_criteria !== "") {
+    const scheduledCriteria = JSON.parse(scheduled_criteria);
+    if (scheduledCriteria) {
+      const { date_from, date_to, day, time_from, time_to } =
+        scheduledCriteria;
+      if (date_from && date_to && (day === "" || !day.length)) {
+        const inBetween = checkValidMomentDates("inBetween", {
+          date_from,
+          date_to
+        });
+        const isSame = checkValidMomentDates("isSame", {
+          date_from,
+          date_to
+        });
+        entry.isValidScheduled = inBetween || isSame ? true : false;
+      }
+      if (
+        day &&
+        day.length &&
+        (!date_from || date_from === "" || !date_to || date_to === "") &&
+        (!time_from || !time_to || time_from === "" || time_to === "")
+      ) {
+        const weekDayName = moment().format("dddd");
+        if (day.includes(weekDayName)) {
+          entry.isValidScheduled = true;
         }
+      }
+      if (
+        day &&
+        day.length &&
+        date_from &&
+        date_to &&
+        (!time_from || !time_to || time_from === "" || time_to === "")
+      ) {
+        const inBetween = checkValidMomentDates("inBetween", {
+          date_from,
+          date_to
+        });
+        const isSame = checkValidMomentDates("isSame", {
+          date_from,
+          date_to
+        });
+        const weekDayName = moment().format("dddd");
+        if (day.includes(weekDayName) && (inBetween || isSame)) {
+          entry.isValidScheduled = true;
+        }
+      }
+      if (time_from && time_to) {
         if (
-          day &&
-          day.length &&
-          (!date_from || date_from === "" || !date_to || date_to === "") &&
-          (!time_from || !time_to || time_from === "" || time_to === "")
+          (!day || !day.length) &&
+          (!date_from || date_from === "" || !date_to || date_to === "")
         ) {
-          const weekDayName = moment().format("dddd");
-          if (day.includes(weekDayName)) {
+          const withinTime = checkValidMomentDates("withinTime", {
+            time_from,
+            time_to
+          });
+          if (withinTime) {
             entry.isValidScheduled = true;
+          } else {
+            entry.isValidScheduled = false;
           }
-        }
-        if (
-          day &&
-          day.length &&
-          date_from &&
-          date_to &&
-          (!time_from || !time_to || time_from === "" || time_to === "")
+        } else if (
+          !date_from ||
+          date_from === "" ||
+          date_from === "" ||
+          !date_to
         ) {
-          const inBetween = checkValidMomentDates("inBetween", {
-            date_from,
-            date_to
-          });
-          const isSame = checkValidMomentDates("isSame", {
-            date_from,
-            date_to
-          });
-          const weekDayName = moment().format("dddd");
-          if (day.includes(weekDayName) && (inBetween || isSame)) {
-            entry.isValidScheduled = true;
-          }
-        }
-        if (time_from && time_to) {
-          if (
-            (!day || !day.length) &&
-            (!date_from || date_from === "" || !date_to || date_to === "")
-          ) {
-            const withinTime = checkValidMomentDates("withinTime", {
-              time_from,
-              time_to
-            });
-            if (withinTime) {
-              entry.isValidScheduled = true;
-            } else {
-              entry.isValidScheduled = false;
-            }
-          } else if (
-            !date_from ||
-            date_from === "" ||
-            date_from === "" ||
-            !date_to
-          ) {
-            if (day && day.length) {
-              const weekDayName = moment().format("dddd");
-              const withinTime = checkValidMomentDates("withinTime", {
-                time_from,
-                time_to
-              });
-              if (day.includes(weekDayName) && withinTime) {
-                entry.isValidScheduled = true;
-              }
-            } else {
-              entry.isValidScheduled = false;
-            }
-          } else if (day && day.length) {
-            const inBetween = checkValidMomentDates("inBetween", {
-              date_from,
-              date_to
-            });
-            const isSame = checkValidMomentDates("isSame", {
-              date_from,
-              date_to
-            });
+          if (day && day.length) {
             const weekDayName = moment().format("dddd");
             const withinTime = checkValidMomentDates("withinTime", {
               time_from,
               time_to
             });
-            if (
-              day.includes(weekDayName) &&
-              (inBetween || isSame) &&
-              withinTime
-            ) {
+            if (day.includes(weekDayName) && withinTime) {
               entry.isValidScheduled = true;
             }
-          } else if (!day || !day.length) {
-            const inBetween = checkValidMomentDates("inBetween", {
-              date_from,
-              date_to
-            });
-            const isSame = checkValidMomentDates("isSame", {
-              date_from,
-              date_to
-            });
-            const withinTime = checkValidMomentDates("withinTime", {
-              time_from,
-              time_to
-            });
-            if ((inBetween || isSame) && withinTime) {
-              entry.isValidScheduled = true;
-            } else {
-              entry.isValidScheduled = false;
-            }
+          } else {
+            entry.isValidScheduled = false;
+          }
+        } else if (day && day.length) {
+          const inBetween = checkValidMomentDates("inBetween", {
+            date_from,
+            date_to
+          });
+          const isSame = checkValidMomentDates("isSame", {
+            date_from,
+            date_to
+          });
+          const weekDayName = moment().format("dddd");
+          const withinTime = checkValidMomentDates("withinTime", {
+            time_from,
+            time_to
+          });
+          if (
+            day.includes(weekDayName) &&
+            (inBetween || isSame) &&
+            withinTime
+          ) {
+            entry.isValidScheduled = true;
+          }
+        } else if (!day || !day.length) {
+          const inBetween = checkValidMomentDates("inBetween", {
+            date_from,
+            date_to
+          });
+          const isSame = checkValidMomentDates("isSame", {
+            date_from,
+            date_to
+          });
+          const withinTime = checkValidMomentDates("withinTime", {
+            time_from,
+            time_to
+          });
+          if ((inBetween || isSame) && withinTime) {
+            entry.isValidScheduled = true;
+          } else {
+            entry.isValidScheduled = false;
           }
         }
       }
     }
-    return entry;
+  }
+  return entry;
+}
+
+function checkScheduledPlayList(playList: any) {
+  const entries = playList?.map((entry: any) => {
+    return getEntrySchedule(entry);
   });
 
   let scheduledEntries = entries.filter((entry: any) => entry.isValidScheduled);

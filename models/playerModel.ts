@@ -52,6 +52,7 @@ export interface EntriesModel {
   screenRefreshDuration: number;
   isScreenOn: boolean;
   setScreenToOn: (screenOn: boolean) => void;
+  originalEntries: any;
 }
 
 export interface PlayerPropsModel {
