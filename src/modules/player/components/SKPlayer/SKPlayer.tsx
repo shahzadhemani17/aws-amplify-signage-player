@@ -6,9 +6,9 @@ import {
   getVengoEntriesByIntegrations,
   convertVengoEntries,
   isScreenScheduleValid,
-  getEntrySchedule
+  getEntrySchedule,
 } from "../../helpers/player.helper";
-import { HtmlEnum, EntriesModel } from "@models/playerModel";
+import { HtmlEnum, SKPlayerProps } from "@models/playerModel";
 import {
   SKImage,
   SKIframe,
@@ -31,8 +31,8 @@ export const SKPlayer = ({
   isScreenOn,
   setScreenToOn,
   screenId,
-  originalEntries
-}: EntriesModel) => {
+  originalEntries,
+}: SKPlayerProps) => {
   const filterVengoIntegrationEntries = (entries) => {
     return entries.filter((entry) => {
       if (entry.tag === "vengo") {
@@ -87,8 +87,8 @@ export const SKPlayer = ({
         playlistEntries[i] = {
           ...playlistEntries[i],
           visibility: false,
-          duration: 0
-        } 
+          duration: 0,
+        };
       }
       if (i === 0) {
         getVengoEntriesByIntegrations(vengoIntegrationEntries).then((data) => {
@@ -202,7 +202,9 @@ export const SKPlayer = ({
                 index={index}
                 transition={transition}
                 key={index}
-                entry={originalEntries.find((entryObj) => entryObj.id === entry.id)}
+                entry={originalEntries.find(
+                  (entryObj) => entryObj.id === entry.id
+                )}
               />
             );
           default:

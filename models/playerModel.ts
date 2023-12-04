@@ -14,7 +14,7 @@ export enum HtmlEnum {
   VENGO = "vengo",
 }
 
-export interface PlayerModel {
+export interface EntryModel {
   id?: number;
   tag: string;
   url: string;
@@ -24,9 +24,11 @@ export interface PlayerModel {
   ad_integration?: any;
   position?: any;
   impression?: any;
-  cancel?: any;
   vengoEntry?: any;
   scheduled_criteria: string;
+  is_menu?: boolean;
+  is_web_url?: boolean;
+  weburl?: any;
 }
 
 // export interface AdIntegration {
@@ -41,8 +43,8 @@ export interface PlayerModel {
 //   value: string;
 // }
 
-export interface EntriesModel {
-  entries: PlayerModel[];
+export interface SKPlayerProps {
+  entries: EntryModel[];
   transition: string;
   refresh_duration: number;
   playlist_id: number;
@@ -58,7 +60,7 @@ export interface EntriesModel {
 
 export interface PlayerPropsModel {
   index: number;
-  playlistEntry: PlayerModel;
+  playlistEntry: EntryModel;
   videoRef?: LegacyRef<HTMLVideoElement>;
   transition: string;
   entry?: any;

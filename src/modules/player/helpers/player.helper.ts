@@ -1,4 +1,4 @@
-import { HtmlEnum, PlayerModel } from "@models/playerModel";
+import { HtmlEnum, EntryModel } from "@models/playerModel";
 import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { PlaylistMessages } from "../player.constant";
 import moment from "moment-timezone";
@@ -20,9 +20,9 @@ const populatePlayer = (
   scheduledCriteria: string,
   ad_integration?: any,
   position?: any,
-  impression?: any,
+  impression?: any
 ) => {
-  const player: PlayerModel = {
+  const player: EntryModel = {
     id: id,
     tag: tag,
     url: url,
@@ -32,12 +32,12 @@ const populatePlayer = (
     ad_integration,
     position,
     impression,
-    scheduled_criteria: scheduledCriteria || ""
+    scheduled_criteria: scheduledCriteria || "",
   };
   return player;
 };
 export const convertJSON = (playlist: any) => {
-  const result: PlayerModel[] = [];
+  const result: EntryModel[] = [];
   playlist.entries.sort(
     (a: any, b: any) => parseFloat(a.position) - parseFloat(b.position)
   );
@@ -54,7 +54,7 @@ export const convertJSON = (playlist: any) => {
           entry.scheduled_criteria,
           entry?.ad_integration,
           entry.position,
-          entry?.impression,
+          entry?.impression
         )
       );
     } else if (entry?.media?.hash) {
@@ -72,7 +72,7 @@ export const convertJSON = (playlist: any) => {
             entry.scheduled_criteria,
             entry?.ad_integration,
             entry.position,
-            entry?.impression,
+            entry?.impression
           )
         );
     } else if (entry?.ad_integration?.integration_name === "vengo") {
@@ -87,7 +87,7 @@ export const convertJSON = (playlist: any) => {
           entry.scheduled_criteria,
           entry?.ad_integration,
           entry.position,
-          entry?.impression,
+          entry?.impression
         )
       );
     }
@@ -96,7 +96,7 @@ export const convertJSON = (playlist: any) => {
 };
 
 export const convertVengoEntries = (entries: any) => {
-  const result: PlayerModel[] = [];
+  const result: EntryModel[] = [];
   entries.sort(
     (a: any, b: any) => parseFloat(a.position) - parseFloat(b.position)
   );
@@ -112,7 +112,7 @@ export const convertVengoEntries = (entries: any) => {
         entry?.scheduled_criteria,
         entry?.ad_integration,
         entry.position,
-        entry?.impression,
+        entry?.impression
       )
     );
   });
@@ -128,7 +128,7 @@ export const isScreenScheduleValid = (screenOnTime, screenOffTime) => {
 };
 
 export const getPlaylistEntries = (playlistData: any) => {
-  let convertedPlaylist: PlayerModel[] = [];
+  let convertedPlaylist: EntryModel[] = [];
   let transition: string = "";
   let message: string = "";
   let is_edited: number = 0;
@@ -200,16 +200,15 @@ export const getEntrySchedule = (entry: any) => {
   } else if (scheduled_criteria && scheduled_criteria !== "") {
     const scheduledCriteria = JSON.parse(scheduled_criteria);
     if (scheduledCriteria) {
-      const { date_from, date_to, day, time_from, time_to } =
-        scheduledCriteria;
+      const { date_from, date_to, day, time_from, time_to } = scheduledCriteria;
       if (date_from && date_to && (day === "" || !day.length)) {
         const inBetween = checkValidMomentDates("inBetween", {
           date_from,
-          date_to
+          date_to,
         });
         const isSame = checkValidMomentDates("isSame", {
           date_from,
-          date_to
+          date_to,
         });
         entry.isValidScheduled = inBetween || isSame ? true : false;
       }
@@ -233,11 +232,11 @@ export const getEntrySchedule = (entry: any) => {
       ) {
         const inBetween = checkValidMomentDates("inBetween", {
           date_from,
-          date_to
+          date_to,
         });
         const isSame = checkValidMomentDates("isSame", {
           date_from,
-          date_to
+          date_to,
         });
         const weekDayName = moment().format("dddd");
         if (day.includes(weekDayName) && (inBetween || isSame)) {
@@ -251,7 +250,7 @@ export const getEntrySchedule = (entry: any) => {
         ) {
           const withinTime = checkValidMomentDates("withinTime", {
             time_from,
-            time_to
+            time_to,
           });
           if (withinTime) {
             entry.isValidScheduled = true;
@@ -279,16 +278,16 @@ export const getEntrySchedule = (entry: any) => {
         } else if (day && day.length) {
           const inBetween = checkValidMomentDates("inBetween", {
             date_from,
-            date_to
+            date_to,
           });
           const isSame = checkValidMomentDates("isSame", {
             date_from,
-            date_to
+            date_to,
           });
           const weekDayName = moment().format("dddd");
           const withinTime = checkValidMomentDates("withinTime", {
             time_from,
-            time_to
+            time_to,
           });
           if (
             day.includes(weekDayName) &&
@@ -300,15 +299,15 @@ export const getEntrySchedule = (entry: any) => {
         } else if (!day || !day.length) {
           const inBetween = checkValidMomentDates("inBetween", {
             date_from,
-            date_to
+            date_to,
           });
           const isSame = checkValidMomentDates("isSame", {
             date_from,
-            date_to
+            date_to,
           });
           const withinTime = checkValidMomentDates("withinTime", {
             time_from,
-            time_to
+            time_to,
           });
           if ((inBetween || isSame) && withinTime) {
             entry.isValidScheduled = true;
@@ -320,7 +319,7 @@ export const getEntrySchedule = (entry: any) => {
     }
   }
   return entry;
-}
+};
 
 function checkScheduledPlayList(playList: any) {
   const entries = playList?.map((entry: any) => {
