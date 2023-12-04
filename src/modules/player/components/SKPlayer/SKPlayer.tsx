@@ -82,7 +82,7 @@ export const SKPlayer = ({
   const setVisiblePlaylist = async () => {
     for (let i = 0; i < playlistEntries.length; i++) {
       let dataArray;
-      const scheduledEntry = getEntrySchedule(originalEntries.find((entry => entry.id === playlistEntries[i].id)));
+      const scheduledEntry = getEntrySchedule(playlistEntries[i]);
       if (!scheduledEntry.isValidScheduled) {
         playlistEntries[i] = {
           ...playlistEntries[i],

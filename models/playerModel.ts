@@ -26,6 +26,7 @@ export interface PlayerModel {
   impression?: any;
   cancel?: any;
   vengoEntry?: any;
+  scheduled_criteria: string;
 }
 
 // export interface AdIntegration {

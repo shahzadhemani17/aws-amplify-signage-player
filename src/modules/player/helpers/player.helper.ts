@@ -17,9 +17,10 @@ const populatePlayer = (
   tag: string,
   url: string,
   entryType: any,
+  scheduledCriteria: string,
   ad_integration?: any,
   position?: any,
-  impression?: any
+  impression?: any,
 ) => {
   const player: PlayerModel = {
     id: id,
@@ -31,6 +32,7 @@ const populatePlayer = (
     ad_integration,
     position,
     impression,
+    scheduled_criteria: scheduledCriteria || ""
   };
   return player;
 };
@@ -49,9 +51,10 @@ export const convertJSON = (playlist: any) => {
           HtmlEnum.iFRAME,
           entry.weburl.url,
           "skoop",
+          entry.scheduled_criteria,
           entry?.ad_integration,
           entry.position,
-          entry?.impression
+          entry?.impression,
         )
       );
     } else if (entry?.media?.hash) {
@@ -66,9 +69,10 @@ export const convertJSON = (playlist: any) => {
               : HtmlEnum.IMAGE,
             entry.media.hash,
             "skoop",
+            entry.scheduled_criteria,
             entry?.ad_integration,
             entry.position,
-            entry?.impression
+            entry?.impression,
           )
         );
     } else if (entry?.ad_integration?.integration_name === "vengo") {
@@ -80,9 +84,10 @@ export const convertJSON = (playlist: any) => {
           HtmlEnum.VENGO,
           entry.media.hash,
           "vengo",
+          entry.scheduled_criteria,
           entry?.ad_integration,
           entry.position,
-          entry?.impression
+          entry?.impression,
         )
       );
     }
@@ -104,9 +109,10 @@ export const convertVengoEntries = (entries: any) => {
         entry.media?.content_type === "video" ? HtmlEnum.VIDEO : HtmlEnum.IMAGE,
         entry.media?.hash,
         "vengo",
+        entry?.scheduled_criteria,
         entry?.ad_integration,
         entry.position,
-        entry?.impression
+        entry?.impression,
       )
     );
   });
