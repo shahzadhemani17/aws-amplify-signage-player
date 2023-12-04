@@ -3,24 +3,20 @@ import Head from "next/head";
 import styles from "../styles/Home.module.css";
 import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { Player } from "src/modules/player";
-import Amplify from "aws-amplify";
-import awsConfig from "../src/aws-exports";
 import {
   getPlaylistData,
   getQueryParams,
-  getScreenDetails,
+  getScreenDetails
 } from "../lib/scoop.repo";
 
 // configure amplify for cloud communication
 // Amplify.configure(awsConfig);
 export enum ErrorTypes {
   Screen_Not_Found_Error = "Screen_Not_Found_Error",
-  Playlist_Not_Attached_Error = "Playlist_Not_Attached_Error",
+  Playlist_Not_Attached_Error = "Playlist_Not_Attached_Error"
 }
 const Home: NextPage = (props: any) => {
-  //console.log("Props Response", props.playlistData);
-  console.log("Props Response", props);
-
+  console.log("API: Screen or Playlist Data Response", props);
   return (
     <div>
       <Head>
@@ -35,6 +31,7 @@ const Home: NextPage = (props: any) => {
           playlistData={props.playlistData}
           screenId={props.screen_id}
           backendUrl={props.backend_url}
+          screenData={props.screenData}
         />
       </main>
     </div>
@@ -45,20 +42,22 @@ export default Home;
 
 const playlistResponse = async (
   playlistDataRsponse,
+  screenDataResponse,
   screen_id,
   backend_url
 ) => {
   const apiResponse = await playlistDataRsponse.json();
   const playlistResponse: PlaylistResponse = {
     status: ResponseType.SUCCESS,
-    data: apiResponse,
+    data: apiResponse
   };
   return {
     props: {
       playlistData: playlistResponse,
+      screenData: screenDataResponse,
       screen_id,
-      backend_url,
-    },
+      backend_url
+    }
   };
 };
 
@@ -66,7 +65,6 @@ export const getServerSideProps = async (context: NextPageContext) => {
   const backendUrl = context?.query.backend_url
     ? context?.query.backend_url
     : process.env.NEXT_PUBLIC_API_URL;
-  console.log("backendurl", "public-url", backendUrl);
   if (context?.query.screen_id) {
     try {
       const screenDetailResponse = await getScreenDetails(
@@ -74,9 +72,12 @@ export const getServerSideProps = async (context: NextPageContext) => {
         backendUrl
       );
 
-      const apiResponse = await screenDetailResponse.json();
+      const screenApiResponse = await screenDetailResponse.json();
 
-      if (!apiResponse?.data?.playlist_id && !apiResponse?.playlist_id) {
+      if (
+        !screenApiResponse?.data?.playlist_id &&
+        !screenApiResponse?.playlist_id
+      ) {
         return {
           props: {
             screen_id: context.query.screen_id,
@@ -84,19 +85,26 @@ export const getServerSideProps = async (context: NextPageContext) => {
             playlistData: {
               status: ResponseType.ERROR,
               data: {},
-              message: "Playlist_Not_Attached_Error",
-            },
-          },
+              message: "Playlist_Not_Attached_Error"
+            }
+          }
         };
       }
 
       const playlistDataRsponse = await getPlaylistData(
-        apiResponse?.playlist_id ?? apiResponse?.data?.playlist_id,
-        backendUrl
+        screenApiResponse?.playlist_id ?? screenApiResponse?.data?.playlist_id,
+        backendUrl,
+        context?.query.screen_id as string
       );
+
+      // const playlistJsonResponse = await playlistResponse(
+      //   playlistDataRsponse,
+      //   context?.query.screen_id as string
+      // );
 
       const playlistJsonResponse = await playlistResponse(
         playlistDataRsponse,
+        screenApiResponse,
         context.query.screen_id,
         backendUrl
       );
@@ -109,11 +117,14 @@ export const getServerSideProps = async (context: NextPageContext) => {
             playlistData: {
               status: ResponseType.ERROR,
               data: {},
-              message: "Playlist_Not_Attached_Error",
-            },
-          },
+              message: "Playlist_Not_Attached_Error"
+            }
+          }
         };
       }
+
+      const playlistData = playlistJsonResponse?.props?.playlistData?.data;
+
       return playlistJsonResponse;
     } catch (err) {
       console.log("crash ");
@@ -121,8 +132,8 @@ export const getServerSideProps = async (context: NextPageContext) => {
         props: {
           screen_id: context.query.screen_id,
           backend_url: backendUrl,
-          playlistData: { status: ResponseType.ERROR, data: {} },
-        },
+          playlistData: { status: ResponseType.ERROR, data: {} }
+        }
       };
     }
   } else if (context.query?.playlist_id && !context.query.screen_id) {
@@ -131,15 +142,15 @@ export const getServerSideProps = async (context: NextPageContext) => {
         context?.query.playlist_id,
         backendUrl
       );
-      return playlistResponse(playlistDataResponse, null, null);
+      return playlistResponse(playlistDataResponse, null, null, null);
     } catch (err) {
       console.log("crash ");
       return {
-        props: { playlistData: { status: ResponseType.ERROR, data: {} } },
+        props: { playlistData: { status: ResponseType.ERROR, data: {} } }
       };
     }
   }
   return {
-    props: { playlistData: { status: ResponseType.SUCCESS, data: {} } },
+    props: { playlistData: { status: ResponseType.SUCCESS, data: {} } }
   };
 };

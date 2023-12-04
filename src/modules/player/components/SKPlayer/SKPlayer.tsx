@@ -1,76 +1,195 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+// import { sleep, isScreenScheduleValid } from "../../helpers/player.helper";
 import {
   sleep,
-  fetchScreenDetailsByDuration,
-  uplodPulse
+  getVengoEntriesByIntegrations,
+  convertVengoEntries,
+  isScreenScheduleValid,
+  getEntrySchedule
 } from "../../helpers/player.helper";
 import { HtmlEnum, EntriesModel } from "@models/playerModel";
 import {
   SKImage,
   SKIframe,
-  SKVideo
+  SKVideo,
 } from "@playerComponents/SKPlayer/components/index";
-import InlineWorker from "../../../../../lib/InlineWorker";
 /* @ts-ignore */
 import Modal from "react-modal";
 import cookie from "../../../../../public/cookie.png";
 import { styles } from "../../../../../styles/player";
+
+import { EmptyPlayer } from "@playerComponents/index";
+import moment from "moment";
+import { labels } from "@playerComponents/labels";
+import { sendVengoImpression } from "../../../../../lib/scoop.repo";
 export const SKPlayer = ({
   entries,
   transition,
-  refresh_duration,
-  playlist_id,
-  screen_id,
-  backend_url
+  screenOnTime,
+  screenOffTime,
+  isScreenOn,
+  setScreenToOn,
+  screenId,
+  originalEntries
 }: EntriesModel) => {
-  const [playlists, setPlaylists] = useState([...entries]);
+  const filterVengoIntegrationEntries = (entries) => {
+    return entries.filter((entry) => {
+      if (entry.tag === "vengo") {
+        return entry;
+      }
+    });
+  };
+  const [playlistEntries, setPlaylistEntries] = useState([...entries]);
+  console.log(
+    "Client: Playlist Entries available for the play",
+    playlistEntries
+  );
+
+  const [vengoIntegrationEntries] = useState([
+    ...filterVengoIntegrationEntries(entries),
+  ]);
+
+  const [, setVengoPlaylistEntries] = useState<any>([]);
   const [modalIsOpen, setIsOpen] = useState(false);
+
   const vidRef = useRef(null);
   const handlePlayVideo = (vidRef: any) => {
     vidRef?.current?.play();
   };
+
+  console.log(
+    "Client: on & off time for the screen:",
+    "OnTime:",
+    screenOnTime || "Empty",
+    ", Off Time:",
+    screenOffTime || "Empty"
+  );
+
+  useEffect(() => {
+    setScreenToOn(isScreenScheduleValid(screenOnTime, screenOffTime));
+  }, [screenOnTime, screenOffTime]);
+
   useEffect(() => {
     if (navigator.cookieEnabled && typeof window.localStorage !== "undefined") {
       setVisiblePlaylist();
-      localStorage.setItem("playlist", JSON.stringify(entries));
-      if (window.Worker && navigator.onLine) {
-        const inlineWorker = new InlineWorker(
-          fetchScreenDetailsByDuration(playlist_id, refresh_duration)
-        );
-      }
     } else {
-      setPlaylists([]);
-      //alert("No Playlist Available");
-      //playlists.length = 0;
-      console.log("pl", playlists);
+      setPlaylistEntries([]);
       setIsOpen(true);
     }
   }, []);
+
   const setVisiblePlaylist = async () => {
-    for (let i = 0; i < playlists.length; i++) {
-      playlists[i].visibility = true; // visibility set to true before sleep
-      setPlaylists([...playlists]); // update state
-      if (playlists[i].tag === "video") {
+    for (let i = 0; i < playlistEntries.length; i++) {
+      let dataArray;
+      const scheduledEntry = getEntrySchedule(playlistEntries[i]);
+      if (!scheduledEntry.isValidScheduled) {
+        playlistEntries[i] = {
+          ...playlistEntries[i],
+          visibility: false,
+          duration: 0
+        } 
+      }
+      if (i === 0) {
+        getVengoEntriesByIntegrations(vengoIntegrationEntries).then((data) => {
+          if (data) {
+            dataArray = convertVengoEntries(data);
+            dataArray = dataArray.map((item) => {
+              item.visibility = true;
+              return item;
+            });
+            setVengoPlaylistEntries && setVengoPlaylistEntries([...dataArray]);
+
+            // logic: to skip vengo entries which could not be fetched
+            if (dataArray?.length) {
+              const entries1 = playlistEntries.map((entry1) => {
+                if (entry1.entryType === "vengo") {
+                  const vengoEntry = dataArray?.find(
+                    (entry2) => entry2?.position === entry1?.position
+                  );
+                  if (vengoEntry?.url) {
+                    entry1.vengoEntry = vengoEntry;
+                    entry1.visibility = true;
+                    entry1.duration = vengoEntry?.duration;
+                  } else {
+                    entry1.vengoEntry = vengoEntry;
+                    entry1.visibility = false;
+                    entry1.duration = 0;
+                  }
+                }
+                return entry1;
+              });
+              setPlaylistEntries([...entries1]); // update state
+            }
+          }
+        });
+      }
+
+      setPlaylistEntries([...playlistEntries]); // update state4
+
+      playlistEntries[i].visibility = true; // visibility set to true before sleep
+      setPlaylistEntries([...playlistEntries]); // update state4
+      if (playlistEntries[i].tag === "video") {
         handlePlayVideo(vidRef);
       }
-      await sleep(playlists[i].duration); // sleep according to playlist duration
-      playlists[i].visibility = false; // visibility set to false after sleep
-      if (i === playlists.length - 1) {
+
+      if (!!playlistEntries[i].duration) {
+        await sleep(playlistEntries[i].duration); // sleep according to playlist duration4
+
+        // impression call on successfull vengo call
+        if (playlistEntries[i]?.entryType === "vengo") {
+          if (playlistEntries[i]?.vengoEntry?.url) {
+            sendVengoImpression(
+              playlistEntries[i]?.vengoEntry?.impression
+            ).then((data) => {
+              console.log("vengo impression...........", data);
+            });
+          }
+        }
+      }
+      playlistEntries[i].visibility = false; // visibility set to false after sleep
+
+      if (i === playlistEntries.length - 1) {
         // check if last playlist entry
         i = -1; // play from start
       }
     }
   };
+
+  // if screenId is available, we will consider a screen is attached to the player, and we will check following cases
+  // both screenOnTime and screenOffTime should be empty or should have valid time
+  // isScreenOn flag should be true which means screen is scheduled
+  // Note: if both screenOnTime and screenOffTime are empty it means screen will be played 24/7 on player
+  if (
+    (!isScreenOn && screenId && screenOnTime && screenOffTime) ||
+    (!isScreenOn && screenId && screenOnTime && !screenOffTime) ||
+    (!isScreenOn && screenId && !screenOnTime && screenOffTime)
+  ) {
+    return (
+      <EmptyPlayer
+        message={
+          screenOnTime && screenOffTime
+            ? `Screen On/Off: ${moment(screenOnTime, "h:mm:ss").format(
+                "HH:mm"
+              )} to ${moment(screenOffTime, "h:mm:ss").format("HH:mm")}`
+            : labels.setScreenOnOffTime
+        }
+      />
+    );
+  }
   return (
     <div>
-      {playlists?.map((playlist, index) => {
-        switch (playlist.tag) {
+      {playlistEntries?.map((entry, index) => {
+        if (entry.entryType === "vengo") {
+          console.log("Client: Vengo Entry", entry);
+          entry = entry?.vengoEntry;
+        }
+        switch (entry?.tag) {
           case HtmlEnum.VIDEO:
             return (
               <SKVideo
                 videoRef={vidRef}
-                playlist={playlist}
+                playlistEntry={entry}
                 index={index}
                 transition={transition}
                 key={index}
@@ -79,16 +198,17 @@ export const SKPlayer = ({
           case HtmlEnum.iFRAME:
             return (
               <SKIframe
-                playlist={playlist}
+                playlistEntry={entry}
                 index={index}
                 transition={transition}
                 key={index}
+                entry={originalEntries.find((entryObj) => entryObj.id === entry.id)}
               />
             );
           default:
             return (
               <SKImage
-                playlist={playlist}
+                playlistEntry={entry}
                 index={index}
                 transition={transition}
                 key={index}
@@ -96,6 +216,7 @@ export const SKPlayer = ({
             );
         }
       })}
+
       <Modal
         isOpen={modalIsOpen}
         style={styles.modalStyles}

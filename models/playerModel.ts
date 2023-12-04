@@ -11,28 +11,55 @@ export enum HtmlEnum {
   IMAGE = "image",
   iFRAME = "iframe",
   VIDEO = "video",
+  VENGO = "vengo",
 }
 
 export interface PlayerModel {
-  id: number;
+  id?: number;
   tag: string;
   url: string;
   duration: number;
   visibility: boolean;
+  entryType: any;
+  ad_integration?: any;
+  position?: any;
+  impression?: any;
+  cancel?: any;
+  vengoEntry?: any;
+  scheduled_criteria: string;
 }
+
+// export interface AdIntegration {
+//   id: number;
+//   integration_name: string;
+//   url: string;
+//   params: VengoParams[];
+// }
+
+// export interface VengoParams {
+//   key: string;
+//   value: string;
+// }
 
 export interface EntriesModel {
   entries: PlayerModel[];
   transition: string;
   refresh_duration: number;
   playlist_id: number;
-  screen_id: number;
+  screenId: number;
   backend_url: string;
+  screenOnTime: string;
+  screenOffTime: string;
+  screenRefreshDuration: number;
+  isScreenOn: boolean;
+  setScreenToOn: (screenOn: boolean) => void;
+  originalEntries: any;
 }
 
 export interface PlayerPropsModel {
   index: number;
-  playlist: PlayerModel;
+  playlistEntry: PlayerModel;
   videoRef?: LegacyRef<HTMLVideoElement>;
   transition: string;
+  entry?: any;
 }
