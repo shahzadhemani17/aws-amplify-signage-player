@@ -39,6 +39,8 @@ export const Player = ({
   }
 
   const refreshScreenDataAfterDuration = async () => {
+    console.log("here-2");
+
     const localScreenDetails = localStorage.getItem("screenDetail");
     const screenDetailResponse = await getScreenDetails(screenId, backendUrl);
     const screenResponse = await screenDetailResponse.json();
@@ -60,21 +62,23 @@ export const Player = ({
         window.location.reload();
       }
     }
-    const playlistDataRsponse = await getPlaylistData(
-      screenDetail?.playlist_id ?? screenDetail?.data?.playlist_id,
-      backendUrl,
-      screenId
-    );
-    const playlistResponse = await playlistDataRsponse.json();
-
-    const playlistHash = localStorage.getItem("playlistHash");
-
-    if (
-      playlistHash !==
-      CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString()
-    ) {
-      localStorage?.setItem("playlistHash", CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString());
-      window.location.reload();
+    if (screenDetail.playlist_id) {
+      const playlistDataRsponse = await getPlaylistData(
+        screenDetail?.playlist_id ?? screenDetail?.data?.playlist_id,
+        backendUrl,
+        screenId
+      );
+      const playlistResponse = await playlistDataRsponse.json();
+  
+      const playlistHash = localStorage.getItem("playlistHash");
+  
+      if (
+        playlistHash !==
+        CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString()
+      ) {
+        localStorage?.setItem("playlistHash", CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString());
+        window.location.reload();
+      }      
     }
   };
 
@@ -109,6 +113,7 @@ export const Player = ({
   useEffect(() => {
     if (screenId && screenDetail) {
       const intervalId = setInterval(() => {
+        console.log("here-1");
         refreshScreenDataAfterDuration();
       }, refreshDuration * 1000);
 
