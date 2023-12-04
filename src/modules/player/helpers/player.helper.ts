@@ -2,6 +2,7 @@ import { HtmlEnum, PlayerModel } from "@models/playerModel";
 import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { PlaylistMessages } from "../player.constant";
 import moment from "moment-timezone";
+// import { getPlaylistData, getQueryParams, postPulse } from "lib/scoop.repo";
 import {
   getPlaylistData,
   getQueryParams,
@@ -40,10 +41,6 @@ export const convertJSON = (playlist: any) => {
   );
   playlist?.entries.map((entry: any, index: number) => {
     if (entry.is_web_url === true || entry.is_menu === true) {
-      entry.weburl.url =
-        entry.is_menu && !entry.weburl.url.includes("&refresh=true")
-          ? entry.weburl.url + "&refresh=true"
-          : entry.weburl.url;
       result.push(
         populatePlayer(
           index,
@@ -189,6 +186,7 @@ const checkValidMomentDates = (type: string, dates: any) => {
     return compareTime.isBetween(beforeTime, afterTime);
   }
 };
+
 function checkScheduledPlayList(playList: any) {
   const entries = playList?.map((entry: any) => {
     const { scheduled_criteria } = entry;
@@ -318,10 +316,17 @@ function checkScheduledPlayList(playList: any) {
     }
     return entry;
   });
+
   let scheduledEntries = entries.filter((entry: any) => entry.isValidScheduled);
+  let notScheduledEntries = entries.filter(
+    (entry: any) => !entry.isValidScheduled
+  );
   const notValidScheduleFound = entries.find(
     (entry: any) => entry.isValidScheduled === false
   );
+  notScheduledEntries?.forEach((entry: any) => {
+    delete entry["isValidScheduled"];
+  });
   scheduledEntries?.forEach((entry: any) => {
     delete entry["isValidScheduled"];
   });
@@ -448,8 +453,31 @@ export async function uplodPulse(
   screenId: number,
   backend_url: string
 ): Promise<any> {
-  console.log("uploadpulse");
+  console.log("%cUpdated Screen Pulse 📈", "color:green; font-size:15px");
   await wait(60000);
   await postPulse(screenId, backend_url);
   return uplodPulse(screenId, backend_url);
 }
+
+export const getDifferenceOfOnOffTimeByCurrentTime = (offTime, onTime) => {
+  const currentTime = moment();
+
+  // Parse the given time string and set it to today's date
+  const givenOffDateTime = moment(offTime, "HH:mm:ss").set({
+    year: currentTime.year(),
+    month: currentTime.month(),
+    date: currentTime.date(),
+  });
+
+  const givenOnDateTime = moment(onTime, "HH:mm:ss").set({
+    year: currentTime.year(),
+    month: currentTime.month(),
+    date: currentTime.date(),
+  });
+
+  // Calculate and return the difference in seconds
+  return {
+    offTimeDifference: givenOffDateTime.diff(currentTime, "seconds"),
+    onTimeDifference: givenOnDateTime.diff(currentTime, "seconds"),
+  };
+};

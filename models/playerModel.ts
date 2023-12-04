@@ -59,4 +59,5 @@ export interface PlayerPropsModel {
   playlistEntry: PlayerModel;
   videoRef?: LegacyRef<HTMLVideoElement>;
   transition: string;
+  entry?: any;
 }

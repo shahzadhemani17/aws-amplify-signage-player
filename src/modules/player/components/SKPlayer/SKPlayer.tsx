@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+// import { sleep, isScreenScheduleValid } from "../../helpers/player.helper";
 import {
   sleep,
   getVengoEntriesByIntegrations,
@@ -38,6 +39,10 @@ export const SKPlayer = ({
     });
   };
   const [playlistEntries, setPlaylistEntries] = useState([...entries]);
+  console.log(
+    "Client: Playlist Entries available for the play",
+    playlistEntries
+  );
 
   const [vengoIntegrationEntries] = useState([
     ...filterVengoIntegrationEntries(entries),
@@ -50,6 +55,14 @@ export const SKPlayer = ({
   const handlePlayVideo = (vidRef: any) => {
     vidRef?.current?.play();
   };
+
+  console.log(
+    "Client: on & off time for the screen:",
+    "OnTime:",
+    screenOnTime || "Empty",
+    ", Off Time:",
+    screenOffTime || "Empty"
+  );
 
   useEffect(() => {
     setScreenToOn(isScreenScheduleValid(screenOnTime, screenOffTime));
@@ -72,7 +85,7 @@ export const SKPlayer = ({
           if (data) {
             dataArray = convertVengoEntries(data);
             dataArray = dataArray.map((item) => {
-              item.visibility = false;
+              item.visibility = true;
               return item;
             });
             setVengoPlaylistEntries && setVengoPlaylistEntries([...dataArray]);
@@ -86,7 +99,7 @@ export const SKPlayer = ({
                   );
                   if (vengoEntry?.url) {
                     entry1.vengoEntry = vengoEntry;
-                    entry1.visibility = false;
+                    entry1.visibility = true;
                     entry1.duration = vengoEntry?.duration;
                   } else {
                     entry1.vengoEntry = vengoEntry;
@@ -133,6 +146,10 @@ export const SKPlayer = ({
     }
   };
 
+  // if screenId is available, we will consider a screen is attached to the player, and we will check following cases
+  // both screenOnTime and screenOffTime should be empty or should have valid time
+  // isScreenOn flag should be true which means screen is scheduled
+  // Note: if both screenOnTime and screenOffTime are empty it means screen will be played 24/7 on player
   if (
     (!isScreenOn && screenId && screenOnTime && screenOffTime) ||
     (!isScreenOn && screenId && screenOnTime && !screenOffTime) ||
@@ -153,11 +170,9 @@ export const SKPlayer = ({
   return (
     <div>
       {playlistEntries?.map((entry, index) => {
-        if (entry.entryType === "vengo" && entry.visibility) {
+        if (entry.entryType === "vengo") {
+          console.log("Client: Vengo Entry", entry);
           entry = entry?.vengoEntry;
-          if (entry?.url) {
-            entry.visibility = true;
-          }
         }
         switch (entry?.tag) {
           case HtmlEnum.VIDEO:
@@ -177,6 +192,7 @@ export const SKPlayer = ({
                 index={index}
                 transition={transition}
                 key={index}
+                entry={entries.find((entryObj) => entryObj.id === entry.id)}
               />
             );
           default:

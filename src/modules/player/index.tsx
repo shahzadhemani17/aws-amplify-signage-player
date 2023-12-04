@@ -1,9 +1,10 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { EmptyPlayer, SKPlayer, SplashScreen } from "@playerComponents/index";
 import {
+  getDifferenceOfOnOffTimeByCurrentTime,
   getPlaylistEntries,
   isScreenScheduleValid,
-  uplodPulse,
+  uplodPulse
 } from "./helpers/player.helper";
 import { ErrorTypes } from "../../../pages";
 import InlineWorker from "../../../lib/InlineWorker";
@@ -15,13 +16,17 @@ export const Player = ({
   playlistData,
   screenData,
   screenId,
-  backendUrl,
+  backendUrl
 }: any) => {
-  console.log("PLAYER PLAYLISTdATA", playlistData, screenData);
   let screenDetail = screenData?.data;
+  let playlistToSave = Object.assign(playlistData?.data);
   const [screenRefreshDuration, setScreenRefreshDuration] = useState(
     screenDetail?.refresh_duration
   );
+  const [refreshDuration, setRefreshDuration] = useState<number>(
+    screenDetail?.refresh_duration
+  );
+
   const [isScreenOn, setScreenToOn] = useState(
     isScreenScheduleValid(
       screenDetail?.screen_on_time,
@@ -68,23 +73,48 @@ export const Player = ({
       playlistHash !==
       CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString()
     ) {
+      localStorage?.setItem("playlistHash", CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString());
       window.location.reload();
     }
   };
 
   useEffect(() => {
-    if (screenId && screenDetail) {
-      const getScreenDetails = () => {
-        const inlineWorker = new InlineWorker(refreshScreenDataAfterDuration());
-      };
+    setRefreshDuration(screenRefreshDuration);
+    const { offTimeDifference, onTimeDifference } =
+      getDifferenceOfOnOffTimeByCurrentTime(
+        screenDetail?.screen_off_time,
+        screenDetail?.screen_on_time
+      );
+    // if screen off time is less than screenRefreshDuration than the refresh duration will be screen off time
+    if (isScreenOn && screenDetail?.screen_off_time) {
+      if (
+        offTimeDifference &&
+        offTimeDifference < screenRefreshDuration &&
+        offTimeDifference > 0
+      ) {
+        // added one second delay
+        setRefreshDuration(offTimeDifference + 1);
+      }
+    } else if (!isScreenOn && screenDetail?.screen_on_time) {
+      if (
+        onTimeDifference &&
+        onTimeDifference < screenRefreshDuration &&
+        onTimeDifference > 0
+      ) {
+        setRefreshDuration(onTimeDifference + 1);
+      }
+    }
+  }, [screenRefreshDuration]);
 
+  useEffect(() => {
+    if (screenId && screenDetail) {
       const intervalId = setInterval(() => {
-        getScreenDetails();
-      }, screenRefreshDuration * 1000);
+        refreshScreenDataAfterDuration();
+      }, refreshDuration * 1000);
 
       return () => clearInterval(intervalId);
     }
-  }, [screenRefreshDuration]);
+  }, [refreshDuration]);
 
   const response = getPlaylistEntries(playlistData);
 
@@ -92,7 +122,7 @@ export const Player = ({
     if (window.Worker && navigator.onLine && screenId) {
       screenId && new InlineWorker(uplodPulse(screenId, backendUrl));
       const sha256Hash = CryptoJS.SHA256(
-        JSON.stringify(playlistData.data)
+        JSON.stringify(playlistToSave)
       ).toString();
       localStorage?.setItem("playlistHash", sha256Hash);
       screenData &&
