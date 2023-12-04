@@ -120,6 +120,9 @@ export const convertVengoEntries = (entries: any) => {
 };
 
 export const isScreenScheduleValid = (screenOnTime, screenOffTime) => {
+  if (!screenOnTime && !screenOffTime) {
+    return true;
+  }
   const format = "hh:mm:ss"; // Use 'HH' for 24-hour format
   const time = moment();
   const beforeTime = moment(screenOnTime, format);
@@ -461,12 +464,16 @@ export const getVengoEntriesByIntegrations = async (vengoIntegrations: any) => {
 };
 export async function uplodPulse(
   screenId: number,
-  backend_url: string
+  backend_url: string,
+  isScreenOn: boolean
 ): Promise<any> {
   console.log("%cUpdated Screen Pulse 📈", "color:green; font-size:15px");
+  if (!isScreenOn) {
+    return;
+  }
   await wait(60000);
   await postPulse(screenId, backend_url);
-  return uplodPulse(screenId, backend_url);
+  return uplodPulse(screenId, backend_url, isScreenOn);
 }
 
 export const getDifferenceOfOnOffTimeByCurrentTime = (offTime, onTime) => {

@@ -120,7 +120,6 @@ export const Player = ({
 
   useEffect(() => {
     if (window.Worker && navigator.onLine && screenId) {
-      screenId && new InlineWorker(uplodPulse(screenId, backendUrl));
       const sha256Hash = CryptoJS.SHA256(
         JSON.stringify(playlistToSave)
       ).toString();
@@ -129,6 +128,20 @@ export const Player = ({
         localStorage?.setItem("screenDetail", JSON.stringify(screenData?.data));
     }
   }, []);
+
+  useEffect(() => {
+    let workerInstance;
+    if (screenId && isScreenOn) {
+      workerInstance = new InlineWorker(uplodPulse(screenId, backendUrl, isScreenOn));
+
+    } else {
+      if (workerInstance) {
+        // If workerInstance exists, terminate the worker
+        workerInstance.terminate();
+      }
+    }
+
+  }, [isScreenOn]);
 
   return (
     <Fragment>
