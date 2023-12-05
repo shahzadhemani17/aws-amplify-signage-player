@@ -4,7 +4,9 @@
     "paths": {
       "@models/*": ["./models/*"],
       "@playerComponents/*": ["./src/modules/player/components/*"],
-      "@SKplayerComponents/*": ["./src/modules/player/components/SKPlayer/components*"],
+      "@SKplayerComponents/*": [
+        "./src/modules/player/components/SKPlayer/components*"
+      ]
     },
     "target": "es5",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -20,7 +22,9 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "noImplicitAny": false
+    "noImplicitAny": false,
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules"]

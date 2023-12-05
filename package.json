@@ -8,6 +8,7 @@
     "@testing-library/react": "^13.3.0",
     "@testing-library/user-event": "^13.5.0",
     "aws-amplify": "^4.3.33",
+    "class-transformer": "^0.5.1",
     "crypto-js": "^4.2.0",
     "env-cmd": "^10.1.0",
     "moment": "^2.29.4",
