@@ -6,7 +6,7 @@ import {
   isScreenScheduleValid,
   uplodPulse
 } from "./helpers/player.helper";
-import { ErrorTypes } from "../../../pages";
+// import { ErrorTypes } from "../../../pages";
 import InlineWorker from "../../../lib/InlineWorker";
 import { getPlaylistData, getScreenDetails } from "lib/scoop.repo";
 import CryptoJS from "crypto-js";
@@ -134,7 +134,7 @@ export const Player = ({
 
   return (
     <Fragment>
-      {ErrorTypes.Playlist_Not_Attached_Error === playlistData.message ? (
+      {/* {ErrorTypes.Playlist_Not_Attached_Error === playlistData.message ? (
         <SplashScreen />
       ) : playlistData.data.entries && playlistData.data.entries.length ? (
         <SKPlayer
@@ -153,7 +153,7 @@ export const Player = ({
         />
       ) : (
         <EmptyPlayer message={response.message} />
-      )}
+      )} */}
     </Fragment>
   );
 };
