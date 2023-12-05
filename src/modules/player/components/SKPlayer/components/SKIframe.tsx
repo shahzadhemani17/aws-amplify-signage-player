@@ -10,7 +10,7 @@ export const SKIframe = (props: PlayerPropsModel) => {
       <iframe
         className={styles.player}
         title="sample"
-        src={playlistEntry.url}
+        src={`${playlistEntry.url}&refresh=false`}
         scrolling="no"
         style={{
           border: 0,

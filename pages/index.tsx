@@ -5,6 +5,14 @@ import { samplePlayerData } from "../src/seed-data";
 import { useEffect } from "react";
 import SamplePlayerContainer from "../src/SamplePlayerContainer";
 
+const filterVengoIntegrationEntries = (entries) => {
+  return entries.filter((entry) => {
+    if (entry.tag === "vengo") {
+      return entry;
+    }
+  });
+};
+
 const Home: NextPage = (props: any) => {
   useEffect(() => {
     console.log("API: Screen or Playlist Data Response", samplePlayerData);
@@ -19,7 +27,10 @@ const Home: NextPage = (props: any) => {
       </Head>
 
       <main className={styles.main}>
-        <SamplePlayerContainer entriesData={samplePlayerData}/>
+        <SamplePlayerContainer
+          entries={samplePlayerData}
+          vengoEntries={filterVengoIntegrationEntries(samplePlayerData)}
+        />
       </main>
     </div>
   );
