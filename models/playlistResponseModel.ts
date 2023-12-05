@@ -1,3 +1,5 @@
+import { PlaylistModel } from "./new.playerModel";
+
 export enum ResponseType {
   SUCCESS = "success",
   ERROR = "error",
@@ -5,7 +7,5 @@ export enum ResponseType {
 
 export interface PlaylistResponse {
   status: ResponseType;
-  data: {
-    entries: any[];
-  };
+  data: PlaylistModel;
 }
