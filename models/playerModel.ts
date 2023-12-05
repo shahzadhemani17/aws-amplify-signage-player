@@ -56,6 +56,13 @@ export interface EntriesModel {
   originalEntries: any;
 }
 
+export interface EntryPlayerModel {
+  entry: PlayerModel;
+  transition: string;
+  vidRef: any;
+  index: number;
+}
+
 export interface PlayerPropsModel {
   index: number;
   playlistEntry: PlayerModel;

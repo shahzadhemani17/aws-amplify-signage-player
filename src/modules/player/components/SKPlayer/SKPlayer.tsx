@@ -23,6 +23,7 @@ import { EmptyPlayer } from "@playerComponents/index";
 import moment from "moment";
 import { labels } from "@playerComponents/labels";
 import { sendVengoImpression } from "../../../../../lib/scoop.repo";
+import { EntryPlayer } from "@playerComponents/EntryPlayer/EntryPlayer";
 export const SKPlayer = ({
   entries,
   transition,
@@ -88,7 +89,7 @@ export const SKPlayer = ({
           ...playlistEntries[i],
           visibility: false,
           duration: 0
-        } 
+        }
       }
       if (i === 0) {
         getVengoEntriesByIntegrations(vengoIntegrationEntries).then((data) => {
@@ -170,8 +171,8 @@ export const SKPlayer = ({
         message={
           screenOnTime && screenOffTime
             ? `Screen On/Off: ${moment(screenOnTime, "h:mm:ss").format(
-                "HH:mm"
-              )} to ${moment(screenOffTime, "h:mm:ss").format("HH:mm")}`
+              "HH:mm"
+            )} to ${moment(screenOffTime, "h:mm:ss").format("HH:mm")}`
             : labels.setScreenOnOffTime
         }
       />
@@ -179,44 +180,9 @@ export const SKPlayer = ({
   }
   return (
     <div>
-      {playlistEntries?.map((entry, index) => {
-        if (entry.entryType === "vengo") {
-          console.log("Client: Vengo Entry", entry);
-          entry = entry?.vengoEntry;
-        }
-        switch (entry?.tag) {
-          case HtmlEnum.VIDEO:
-            return (
-              <SKVideo
-                videoRef={vidRef}
-                playlistEntry={entry}
-                index={index}
-                transition={transition}
-                key={index}
-              />
-            );
-          case HtmlEnum.iFRAME:
-            return (
-              <SKIframe
-                playlistEntry={entry}
-                index={index}
-                transition={transition}
-                key={index}
-                entry={originalEntries.find((entryObj) => entryObj.id === entry.id)}
-              />
-            );
-          default:
-            return (
-              <SKImage
-                playlistEntry={entry}
-                index={index}
-                transition={transition}
-                key={index}
-              />
-            );
-        }
-      })}
-
+      {
+        playlistEntries.map((playlistEntry) => <EntryPlayer entry={playlistEntry} key={playlistEntry.id} transition={transition} index={playlistEntry.id} vidRef={vidRef} />)
+      }
       <Modal
         isOpen={modalIsOpen}
         style={styles.modalStyles}
