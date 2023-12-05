@@ -12,9 +12,6 @@ export const SKImage = (props: PlayerPropsModel) => {
         src={playlistEntry?.url}
         alt="sample"
         key={index}
-        style={{
-          display: playlistEntry?.visibility ? "" : "none",
-        }}
       />
     </SKTransition>
   );
