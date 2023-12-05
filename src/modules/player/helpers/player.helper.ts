@@ -125,7 +125,11 @@ export const isScreenScheduleValid = (screenOnTime, screenOffTime) => {
   const format = "hh:mm:ss"; // Use 'HH' for 24-hour format
   const time = moment();
   const beforeTime = moment(screenOnTime, format);
-  const afterTime = moment(screenOffTime, format);
+  let afterTime = moment(screenOffTime, format);
+  // If screenOffTime is before screenOnTime, add a day to screenOff
+  if (afterTime.isBefore(beforeTime)) {
+    afterTime = afterTime.add(1, 'day');
+  }
   return time.isBetween(beforeTime, afterTime) || time.isSame(beforeTime);
 };
 
