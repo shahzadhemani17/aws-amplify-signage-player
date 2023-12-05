@@ -60,21 +60,23 @@ export const Player = ({
         window.location.reload();
       }
     }
-    const playlistDataRsponse = await getPlaylistData(
-      screenDetail?.playlist_id ?? screenDetail?.data?.playlist_id,
-      backendUrl,
-      screenId
-    );
-    const playlistResponse = await playlistDataRsponse.json();
-
-    const playlistHash = localStorage.getItem("playlistHash");
-
-    if (
-      playlistHash !==
-      CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString()
-    ) {
-      localStorage?.setItem("playlistHash", CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString());
-      window.location.reload();
+    if (screenDetail.playlist_id) {
+      const playlistDataRsponse = await getPlaylistData(
+        screenDetail?.playlist_id ?? screenDetail?.data?.playlist_id,
+        backendUrl,
+        screenId
+      );
+      const playlistResponse = await playlistDataRsponse.json();
+  
+      const playlistHash = localStorage.getItem("playlistHash");
+  
+      if (
+        playlistHash !==
+        CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString()
+      ) {
+        localStorage?.setItem("playlistHash", CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString());
+        window.location.reload();
+      }      
     }
   };
 

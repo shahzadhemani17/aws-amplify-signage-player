@@ -82,6 +82,7 @@ export const getServerSideProps = async (context: NextPageContext) => {
           props: {
             screen_id: context.query.screen_id,
             backend_url: backendUrl,
+            screenData: screenApiResponse,
             playlistData: {
               status: ResponseType.ERROR,
               data: {},

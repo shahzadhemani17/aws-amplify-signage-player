@@ -20,7 +20,8 @@ const populatePlayer = (
   scheduledCriteria: string,
   ad_integration?: any,
   position?: any,
-  impression?: any
+  impression?: any,
+  app_id?: any
 ) => {
   const player: EntryModel = {
     id: id,
@@ -54,7 +55,8 @@ export const convertJSON = (playlist: any) => {
           entry.scheduled_criteria,
           entry?.ad_integration,
           entry.position,
-          entry?.impression
+          entry?.impression,
+          entry?.app_id
         )
       );
     } else if (entry?.media?.hash) {
