@@ -134,7 +134,7 @@ export const Player = ({
 
   return (
     <Fragment>
-      {((ErrorTypes.Playlist_Not_Attached_Error === playlistData.message) || !playlistData.data.entries) ? (
+      {((ErrorTypes.Playlist_Not_Attached_Error === playlistData.message) || (!playlistData.data?.entries || playlistData.data?.entries?.length === 0)) ? (
         <SplashScreen />
       ) : playlistData.data.entries && playlistData.data.entries.length ? (
         <SKPlayer
