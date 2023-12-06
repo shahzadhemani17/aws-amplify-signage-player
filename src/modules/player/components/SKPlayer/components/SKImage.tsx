@@ -1,3 +1,8 @@
+/* 
+  Added this warning because we can't use the next image tag here
+  which required height, width and domain registration in next configuration
+*/
+/* eslint-disable @next/next/no-img-element */
 import React from "react";
 import { PlayerPropsModel } from "@models/playerModel";
 import styles from "../../../../../../styles/Home.module.css";
@@ -12,9 +17,6 @@ export const SKImage = (props: PlayerPropsModel) => {
         src={playlistEntry?.url}
         alt="sample"
         key={index}
-        style={{
-          display: playlistEntry?.visibility ? "" : "none",
-        }}
       />
     </SKTransition>
   );

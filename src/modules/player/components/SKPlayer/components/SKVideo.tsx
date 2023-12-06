@@ -14,9 +14,6 @@ export const SKVideo = (props: PlayerPropsModel) => {
         loop
         muted
         key={index}
-        style={{
-          display: playlistEntry.visibility ? "" : "none",
-        }}
       >
         <source src={playlistEntry.url} type="video/mp4" />;
       </video>

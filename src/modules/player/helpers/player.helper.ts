@@ -69,7 +69,7 @@ export const convertJSON = (playlistData1: any) => {
             index,
             entry.durationInSeconds,
             entry.id,
-            entry.media.content_type === "video"
+            entry.media.contentType === "video"
               ? HtmlEnum.VIDEO
               : HtmlEnum.IMAGE,
             entry.media.hash,
@@ -101,6 +101,7 @@ export const convertJSON = (playlistData1: any) => {
 };
 
 export const convertVengoEntries = (entries: any) => {
+  console.log("entries-jb", entries);
   const result: PlayerModel[] = [];
   entries?.sort(
     (a: any, b: any) => parseFloat(a?.position) - parseFloat(b?.position)
@@ -109,12 +110,12 @@ export const convertVengoEntries = (entries: any) => {
     result.push(
       populatePlayer(
         index,
-        entry.durationInSeconds,
+        entry.duration_in_seconds,
         entry.id,
-        entry.media?.contentType === "video" ? HtmlEnum.VIDEO : HtmlEnum.IMAGE,
+        entry.media?.content_type === "video" ? HtmlEnum.VIDEO : HtmlEnum.IMAGE,
         entry.media?.hash,
         "vengo",
-        entry?.scheduledCriteria,
+        entry?.scheduled_criteria,
         entry?.adIntegration,
         entry.position,
         entry?.impression
