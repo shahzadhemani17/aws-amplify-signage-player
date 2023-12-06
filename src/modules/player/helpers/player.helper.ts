@@ -10,6 +10,7 @@ import {
   postPulse,
 } from "lib/scoop.repo";
 import CryptoJS from "crypto-js";
+
 const populatePlayer = (
   index: number,
   duration: number,
@@ -18,10 +19,10 @@ const populatePlayer = (
   url: string,
   entryType: any,
   scheduledCriteria: string,
-  ad_integration?: any,
+  adIntegration?: any,
   position?: any,
   impression?: any,
-  app_id?: any
+  appId?: any
 ) => {
   const player: PlayerModel = {
     id: id,
@@ -30,33 +31,35 @@ const populatePlayer = (
     duration: duration * 1000,
     visibility: false,
     entryType,
-    ad_integration,
+    adIntegration,
     position,
     impression,
-    scheduled_criteria: scheduledCriteria || ""
+    scheduledCriteria: scheduledCriteria || "",
   };
   return player;
 };
-export const convertJSON = (playlist: any) => {
+
+export const convertJSON = (playlistData1: any) => {
+  console.log("how are you?", playlistData1);
   const result: PlayerModel[] = [];
-  playlist.entries.sort(
+  playlistData1?.entries?.sort(
     (a: any, b: any) => parseFloat(a.position) - parseFloat(b.position)
   );
-  playlist?.entries.map((entry: any, index: number) => {
-    if (entry.is_web_url === true || entry.is_menu === true) {
+  playlistData1?.entries?.map((entry: any, index: number) => {
+    if (entry.isWebUrl === true || entry.isMenu === true) {
       result.push(
         populatePlayer(
           index,
-          entry.duration_in_seconds,
+          entry.durationInSeconds,
           entry.id,
           HtmlEnum.iFRAME,
           entry.weburl.url,
           "skoop",
-          entry.scheduled_criteria,
-          entry?.ad_integration,
+          entry.scheduledCriteria,
+          entry?.adIntegration,
           entry.position,
           entry?.impression,
-          entry?.app_id
+          entry?.appId
         )
       );
     } else if (entry?.media?.hash) {
@@ -64,32 +67,32 @@ export const convertJSON = (playlist: any) => {
         result.push(
           populatePlayer(
             index,
-            entry.duration_in_seconds,
+            entry.durationInSeconds,
             entry.id,
             entry.media.content_type === "video"
               ? HtmlEnum.VIDEO
               : HtmlEnum.IMAGE,
             entry.media.hash,
             "skoop",
-            entry.scheduled_criteria,
-            entry?.ad_integration,
+            entry.scheduledCriteria,
+            entry?.adIntegration,
             entry.position,
-            entry?.impression,
+            entry?.impression
           )
         );
-    } else if (entry?.ad_integration?.integration_name === "vengo") {
+    } else if (entry?.adIntegration?.integrationName === "vengo") {
       result.push(
         populatePlayer(
           index,
-          entry.duration_in_seconds,
+          entry.durationInSeconds,
           entry.id,
           HtmlEnum.VENGO,
           entry.media.hash,
           "vengo",
-          entry.scheduled_criteria,
-          entry?.ad_integration,
+          entry.scheduledCriteria,
+          entry?.adIntegration,
           entry.position,
-          entry?.impression,
+          entry?.impression
         )
       );
     }
@@ -99,22 +102,22 @@ export const convertJSON = (playlist: any) => {
 
 export const convertVengoEntries = (entries: any) => {
   const result: PlayerModel[] = [];
-  entries.sort(
-    (a: any, b: any) => parseFloat(a.position) - parseFloat(b.position)
+  entries?.sort(
+    (a: any, b: any) => parseFloat(a?.position) - parseFloat(b?.position)
   );
-  entries.map((entry: any, index: number) => {
+  entries?.map((entry: any, index: number) => {
     result.push(
       populatePlayer(
         index,
-        entry.duration_in_seconds,
+        entry.durationInSeconds,
         entry.id,
-        entry.media?.content_type === "video" ? HtmlEnum.VIDEO : HtmlEnum.IMAGE,
+        entry.media?.contentType === "video" ? HtmlEnum.VIDEO : HtmlEnum.IMAGE,
         entry.media?.hash,
         "vengo",
-        entry?.scheduled_criteria,
-        entry?.ad_integration,
+        entry?.scheduledCriteria,
+        entry?.adIntegration,
         entry.position,
-        entry?.impression,
+        entry?.impression
       )
     );
   });
@@ -128,7 +131,7 @@ export const isScreenScheduleValid = (screenOnTime, screenOffTime) => {
   let afterTime = moment(screenOffTime, format);
   // If screenOffTime is before screenOnTime, add a day to screenOff
   if (afterTime.isBefore(beforeTime)) {
-    afterTime = afterTime.add(1, 'day');
+    afterTime = afterTime.add(1, "day");
   }
   return time.isBetween(beforeTime, afterTime) || time.isSame(beforeTime);
 };
@@ -206,16 +209,15 @@ export const getEntrySchedule = (entry: any) => {
   } else if (scheduled_criteria && scheduled_criteria !== "") {
     const scheduledCriteria = JSON.parse(scheduled_criteria);
     if (scheduledCriteria) {
-      const { date_from, date_to, day, time_from, time_to } =
-        scheduledCriteria;
+      const { date_from, date_to, day, time_from, time_to } = scheduledCriteria;
       if (date_from && date_to && (day === "" || !day.length)) {
         const inBetween = checkValidMomentDates("inBetween", {
           date_from,
-          date_to
+          date_to,
         });
         const isSame = checkValidMomentDates("isSame", {
           date_from,
-          date_to
+          date_to,
         });
         entry.isValidScheduled = inBetween || isSame ? true : false;
       }
@@ -239,11 +241,11 @@ export const getEntrySchedule = (entry: any) => {
       ) {
         const inBetween = checkValidMomentDates("inBetween", {
           date_from,
-          date_to
+          date_to,
         });
         const isSame = checkValidMomentDates("isSame", {
           date_from,
-          date_to
+          date_to,
         });
         const weekDayName = moment().format("dddd");
         if (day.includes(weekDayName) && (inBetween || isSame)) {
@@ -257,7 +259,7 @@ export const getEntrySchedule = (entry: any) => {
         ) {
           const withinTime = checkValidMomentDates("withinTime", {
             time_from,
-            time_to
+            time_to,
           });
           if (withinTime) {
             entry.isValidScheduled = true;
@@ -285,16 +287,16 @@ export const getEntrySchedule = (entry: any) => {
         } else if (day && day.length) {
           const inBetween = checkValidMomentDates("inBetween", {
             date_from,
-            date_to
+            date_to,
           });
           const isSame = checkValidMomentDates("isSame", {
             date_from,
-            date_to
+            date_to,
           });
           const weekDayName = moment().format("dddd");
           const withinTime = checkValidMomentDates("withinTime", {
             time_from,
-            time_to
+            time_to,
           });
           if (
             day.includes(weekDayName) &&
@@ -306,15 +308,15 @@ export const getEntrySchedule = (entry: any) => {
         } else if (!day || !day.length) {
           const inBetween = checkValidMomentDates("inBetween", {
             date_from,
-            date_to
+            date_to,
           });
           const isSame = checkValidMomentDates("isSame", {
             date_from,
-            date_to
+            date_to,
           });
           const withinTime = checkValidMomentDates("withinTime", {
             time_from,
-            time_to
+            time_to,
           });
           if ((inBetween || isSame) && withinTime) {
             entry.isValidScheduled = true;
@@ -326,7 +328,7 @@ export const getEntrySchedule = (entry: any) => {
     }
   }
   return entry;
-}
+};
 
 function checkScheduledPlayList(playList: any) {
   const entries = playList?.map((entry: any) => {
@@ -426,9 +428,9 @@ export type KeyValuePair = {
 export const createObjectFromArray = (array: KeyValuePair[]) => {
   const result = {};
 
-  for (const item of array) {
-    result[item.key] = item.value;
-  }
+  // for (const item of array) {
+  //   result[item.key] = item.value;
+  // }
 
   return result;
 };
@@ -441,9 +443,9 @@ export const getVengoEntriesByIntegrations = async (vengoIntegrations: any) => {
     vengoIntegrations.map((integration) => {
       // call api here
       const paramObject = createObjectFromArray(
-        integration?.ad_integration?.Params
+        integration?.adIntegration?.Params
       );
-      return getVengoEntries(integration?.ad_integration?.url, paramObject);
+      return getVengoEntries(integration?.adIntegration?.url, paramObject);
     })
   );
   const jsonEntries = (

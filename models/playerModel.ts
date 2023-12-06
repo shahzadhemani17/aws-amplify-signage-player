@@ -21,12 +21,12 @@ export interface PlayerModel {
   duration: number;
   visibility: boolean;
   entryType: any;
-  ad_integration?: any;
+  adIntegration?: any;
   position?: any;
   impression?: any;
   cancel?: any;
   vengoEntry?: any;
-  scheduled_criteria: string;
+  scheduledCriteria: string;
 }
 
 // export interface AdIntegration {

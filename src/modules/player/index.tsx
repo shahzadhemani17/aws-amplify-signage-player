@@ -4,7 +4,7 @@ import {
   getDifferenceOfOnOffTimeByCurrentTime,
   getPlaylistEntries,
   isScreenScheduleValid,
-  uplodPulse
+  uplodPulse,
 } from "./helpers/player.helper";
 import { ErrorTypes } from "../../../pages";
 import InlineWorker from "../../../lib/InlineWorker";
@@ -16,7 +16,7 @@ export const Player = ({
   playlistData,
   screenData,
   screenId,
-  backendUrl
+  backendUrl,
 }: any) => {
   let screenDetail = screenData?.data;
   let playlistToSave = Object.assign(playlistData?.data);
@@ -67,16 +67,19 @@ export const Player = ({
         screenId
       );
       const playlistResponse = await playlistDataRsponse.json();
-  
+
       const playlistHash = localStorage.getItem("playlistHash");
-  
+
       if (
         playlistHash !==
         CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString()
       ) {
-        localStorage?.setItem("playlistHash", CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString());
+        localStorage?.setItem(
+          "playlistHash",
+          CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString()
+        );
         window.location.reload();
-      }      
+      }
     }
   };
 
