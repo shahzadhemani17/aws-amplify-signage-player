@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import SamplePlayer from "./SamplePlayer";
 
 import {
   getVengoEntriesByIntegrations,
   convertVengoEntries
 } from "./modules/player/helpers/player.helper";
+import { duration } from "moment";
 
 const SamplePlayerContainer = ({ entries, vengoEntries }: any) => {
   const [playlistEntries, setPlaylistEntries] = useState(entries);
   const [currentEntryIndex, setCurrentEntryIndex] = useState(0);
+
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
     if (currentEntryIndex === 0) {
@@ -44,6 +47,24 @@ const SamplePlayerContainer = ({ entries, vengoEntries }: any) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentEntryIndex, vengoEntries]);
 
+  function isNegative(num) {
+    return num <= 0;
+  }
+
+  const handleImpression = useCallback((previousEntry) => {
+    if (
+      previousEntry.entryType === "vengo" &&
+      !isNegative(previousEntry.duration)
+    ) {
+      console.log(
+        "Callback triggered impression",
+        previousEntry.entryType,
+        previousEntry.tag,
+        previousEntry.duration
+      );
+    }
+  }, []);
+
   useEffect(() => {
     console.log("playlistEntries", playlistEntries);
     const interval = setInterval(() => {
@@ -52,8 +73,19 @@ const SamplePlayerContainer = ({ entries, vengoEntries }: any) => {
       );
     }, playlistEntries[currentEntryIndex].duration);
 
-    return () => clearInterval(interval);
-  }, [currentEntryIndex, playlistEntries]);
+    // return () => clearInterval(interval);
+
+    return () => {
+      clearInterval(interval);
+
+      if (isFirstRender.current) {
+        console.log("Callback triggered for the first time");
+        isFirstRender.current = false;
+      } else {
+        handleImpression(playlistEntries[currentEntryIndex]);
+      }
+    };
+  }, [currentEntryIndex, handleImpression, playlistEntries]);
 
   return (
     <div>
