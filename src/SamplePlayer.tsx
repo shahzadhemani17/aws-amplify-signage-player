@@ -4,8 +4,11 @@ import {
   SKIframe,
   SKVideo
 } from "@playerComponents/SKPlayer/components/index";
+import InlineWorker from "lib/InlineWorker";
+import { useEffect } from "react";
 
 const SamplePlayer = ({ entry }: any) => {
+
   switch (entry?.tag) {
     case HtmlEnum.VIDEO:
       return (

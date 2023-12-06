@@ -29,6 +29,10 @@ export default class InlineWorker {
   }
 
   postMessage(data: any) {
+    if (data === "stop") {
+      console.log("worker - terminated");
+      this.worker.terminate();
+    }
     this.worker.postMessage(data);
   }
   terminate() {
