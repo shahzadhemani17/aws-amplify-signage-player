@@ -428,9 +428,9 @@ export type KeyValuePair = {
 export const createObjectFromArray = (array: KeyValuePair[]) => {
   const result = {};
 
-  // for (const item of array) {
-  //   result[item.key] = item.value;
-  // }
+  for (const item of array) {
+    result[item.key] = item.value;
+  }
 
   return result;
 };

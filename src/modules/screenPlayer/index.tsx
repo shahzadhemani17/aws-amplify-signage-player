@@ -199,8 +199,8 @@ export const ScreenPlayer = ({
   // };
   return (
     <SamplePlayerContainer
-      entries={samplePlayerData}
-      vengoEntries={filterVengoIntegrationEntries(samplePlayerData)}
+      entries={convertedEntries}
+      vengoEntries={filterVengoIntegrationEntries(convertedEntries)}
     />
   );
 };
