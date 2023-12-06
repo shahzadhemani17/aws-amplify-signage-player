@@ -11,6 +11,8 @@ import InlineWorker from "../../../lib/InlineWorker";
 import { getPlaylistData, getScreenDetails } from "lib/scoop.repo";
 import CryptoJS from "crypto-js";
 import moment from "moment-timezone";
+import { plainToInstance } from "class-transformer";
+import { PlaylistModel } from "../../../models/new.playerModel";
 
 export const Player = ({
   playlistData,
@@ -19,6 +21,7 @@ export const Player = ({
   backendUrl,
 }: any) => {
   let screenDetail = screenData?.data;
+  console.log("playlistData...........in here 2", playlistData);
   let playlistToSave = Object.assign(playlistData?.data);
   const [screenRefreshDuration, setScreenRefreshDuration] = useState(
     screenDetail?.refresh_duration
@@ -67,6 +70,11 @@ export const Player = ({
         screenId
       );
       const playlistResponse = await playlistDataRsponse.json();
+
+      // const dataOfPlaylist = plainToInstance(
+      //   PlaylistModel,
+      //   playlistResponse.data
+      // );
 
       const playlistHash = localStorage.getItem("playlistHash");
 

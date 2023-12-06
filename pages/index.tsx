@@ -23,7 +23,7 @@ const Home: NextPage = (props: any) => {
   const [playlistData] = useState(
     plainToInstance(PlaylistModel, props.playlistData.data)
   );
-  console.log("playlistData...........in here", playlistData);
+  console.log("playlistData...........in here 1", playlistData);
   return (
     <div>
       <Head>
@@ -35,7 +35,10 @@ const Home: NextPage = (props: any) => {
       <main className={styles.main}>
         {/* <Player playlistData={props.playlistData} /> */}
         <Player
-          playlistData={{ data: playlistData, ...props.playlistData }}
+          playlistData={{
+            data: playlistData,
+            status: props?.playlistData?.status,
+          }}
           screenId={props.screenId}
           backendUrl={props.backendUrl}
           screenData={props.screenData}
