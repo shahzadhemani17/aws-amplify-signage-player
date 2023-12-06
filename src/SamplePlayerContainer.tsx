@@ -51,6 +51,10 @@ const SamplePlayerContainer = ({ entries, vengoEntries }: any) => {
     return num <= 0;
   }
 
+  /* 
+    This impression is only configured for the vengo
+    For other items we need to fix the first entry issue
+  */
   const handleImpression = useCallback((previousEntry) => {
     if (
       previousEntry.entryType === "vengo" &&
