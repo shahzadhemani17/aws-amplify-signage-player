@@ -10,6 +10,7 @@ import {
   postPulse,
 } from "lib/scoop.repo";
 import CryptoJS from "crypto-js";
+import { EntryModel } from "../../../../models/playlist.model";
 
 const populatePlayer = (
   index: number,
@@ -203,14 +204,15 @@ const checkValidMomentDates = (type: string, dates: any) => {
   }
 };
 
-export const getEntrySchedule = (entry: any) => {
-  const { scheduled_criteria } = entry;
-  if (scheduled_criteria === "") {
+export const getEntrySchedule = (entry: PlayerModel) => {
+  const { scheduledCriteria } = entry;
+  if (scheduledCriteria === "") {
     entry.isValidScheduled = true;
-  } else if (scheduled_criteria && scheduled_criteria !== "") {
-    const scheduledCriteria = JSON.parse(scheduled_criteria);
-    if (scheduledCriteria) {
-      const { date_from, date_to, day, time_from, time_to } = scheduledCriteria;
+  } else if (scheduledCriteria && scheduledCriteria !== "") {
+    const parsedScheduledCriteria = JSON.parse(scheduledCriteria);
+    if (parsedScheduledCriteria) {
+      const { date_from, date_to, day, time_from, time_to } =
+        parsedScheduledCriteria;
       if (date_from && date_to && (day === "" || !day.length)) {
         const inBetween = checkValidMomentDates("inBetween", {
           date_from,

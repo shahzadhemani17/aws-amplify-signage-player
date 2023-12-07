@@ -27,6 +27,7 @@ export interface PlayerModel {
   cancel?: any;
   vengoEntry?: any;
   scheduledCriteria: string;
+  isValidScheduled?: boolean;
 }
 
 // export interface AdIntegration {

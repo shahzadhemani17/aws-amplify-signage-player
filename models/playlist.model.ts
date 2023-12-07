@@ -26,6 +26,7 @@ export class EntryModel {
   impression?: any;
   vengoEntry?: any;
   weburl?: any;
+  isValidScheduled?: boolean;
   @Expose({ name: "ad_integration" })
   adIntegration?: any;
   @Expose({ name: "scheduled_criteria" })
