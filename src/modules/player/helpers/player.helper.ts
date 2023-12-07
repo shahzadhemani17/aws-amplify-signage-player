@@ -41,7 +41,6 @@ const populatePlayer = (
 };
 
 export const convertJSON = (playlistData1: any) => {
-  console.log("how are you?", playlistData1);
   const result: PlayerModel[] = [];
   playlistData1?.entries?.sort(
     (a: any, b: any) => parseFloat(a.position) - parseFloat(b.position)

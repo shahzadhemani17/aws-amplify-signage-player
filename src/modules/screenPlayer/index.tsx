@@ -7,10 +7,6 @@ import {
   isScreenScheduleValid,
   uplodPulse,
 } from "../player/helpers/player.helper";
-import { ErrorTypes } from "../../../pages";
-import InlineWorker from "../../../lib/InlineWorker";
-import { getPlaylistData, getScreenDetails } from "lib/scoop.repo";
-import CryptoJS from "crypto-js";
 import moment from "moment-timezone";
 import { ScreenModel } from "../../../models/screen.model";
 import "reflect-metadata";
@@ -23,6 +19,7 @@ import SamplePlayer from "../../SamplePlayer";
 import SamplePlayerContainer from "../../SamplePlayerContainer";
 import { HtmlEnum, PlayerModel } from "../../../models/playerModel";
 import { samplePlayerData } from "../../seed-data";
+import { getScreenDetailsById, setLocalStorageForScreenPlayer } from "./helpers/screen.helper";
 
 export const ScreenPlayer = ({
   playlistData,
@@ -33,21 +30,21 @@ export const ScreenPlayer = ({
   const [playlistDetails] = useState(
     plainToInstance(PlaylistModel, playlistData?.data)
   );
+  let playlistToSave = Object.assign(plainToInstance(PlaylistModel, playlistData?.data));
+
 
   console.log("playlistDetails.........0", playlistData?.data);
 
   console.log("playlistDetails.........1", playlistDetails);
 
-  const [screenDetail] = useState(
-    plainToInstance(ScreenModel, screenData?.data)
-  );
+  const [screenDetail, setScreenDetailData] = useState( plainToInstance(ScreenModel, screenData?.data));
+
 
   console.log("screenDetail.........1", screenDetail);
 
-  // let playlistToSave = Object.assign(playlistData?.data);
-  // const [screenRefreshDuration, setScreenRefreshDuration] = useState(
-  //   screenDetail?.refreshDuration
-  // );
+  const [screenRefreshDuration, setScreenRefreshDuration] = useState(
+    screenDetail?.refreshDuration
+  );
 
   const [convertedEntries] = useState(convertJSON(playlistDetails));
 
@@ -61,7 +58,7 @@ export const ScreenPlayer = ({
       screenDetail?.screenOffTime
     )
   );
-  const [screenDetailData, setScreenDetailData] = useState(screenDetail);
+
 
   if (screenId) {
     moment.tz.setDefault(screenDetail?.timezoneIdentifier);
@@ -75,50 +72,26 @@ export const ScreenPlayer = ({
     });
   };
 
-  // const refreshScreenDataAfterDuration = async () => {
-  //   const localScreenDetails = localStorage.getItem("screenDetail");
-  //   const screenDetailResponse = await getScreenDetails(screenId, backendUrl);
-  //   const screenResponse = await screenDetailResponse.json();
-  //   const screenDetail = screenResponse.data;
-  //   setScreenDetailData(screenDetail);
-  //   setScreenRefreshDuration(screenDetail.refresh_duration);
-  //   setScreenToOn(
-  //     isScreenScheduleValid(
-  //       screenDetail.screen_on_time,
-  //       screenDetail.screen_off_time
-  //     )
-  //   );
-  //   if (
-  //     localScreenDetails &&
-  //     localScreenDetails !== JSON.stringify(screenDetail)
-  //   ) {
-  //     const parsedScreenDetail = JSON.parse(localScreenDetails as string);
-  //     if (parsedScreenDetail.playlist_id !== screenDetail.playlist_id) {
-  //       window.location.reload();
-  //     }
-  //   }
-  //   if (screenDetail.playlist_id) {
-  //     const playlistDataRsponse = await getPlaylistData(
-  //       screenDetail?.playlist_id ?? screenDetail?.data?.playlist_id,
-  //       backendUrl,
-  //       screenId
-  //     );
-  //     const playlistResponse = await playlistDataRsponse.json();
+  const refreshScreenDataAfterDuration = async () => {
+    const screenDetail = await getScreenDetailsById(screenId, backendUrl);
+    setScreenDetailData(screenDetail);
+    setScreenRefreshDuration(screenDetail.refreshDuration);
+    setScreenToOn(
+      isScreenScheduleValid(
+        screenDetail.screenOnTime,
+        screenDetail.screenOffTime
+      )
+    );
+  };
 
-  //     const playlistHash = localStorage.getItem("playlistHash");
-
-  //     if (
-  //       playlistHash !==
-  //       CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString()
-  //     ) {
-  //       localStorage?.setItem(
-  //         "playlistHash",
-  //         CryptoJS.SHA256(JSON.stringify(playlistResponse)).toString()
-  //       );
-  //       window.location.reload();
-  //     }
-  //   }
-  // };
+  useEffect(() => {
+    if (screenDetail) {
+      const intervalId = setInterval(() => {
+        refreshScreenDataAfterDuration();
+      }, refreshDuration * 1000);
+      return () => clearInterval(intervalId);
+    }
+  }, [refreshDuration]);
 
   // useEffect(() => {
   //   setRefreshDuration(screenRefreshDuration);
@@ -148,29 +121,14 @@ export const ScreenPlayer = ({
   //   }
   // }, [screenRefreshDuration]);
 
-  // useEffect(() => {
-  //   if (screenId && screenDetail) {
-  //     const intervalId = setInterval(() => {
-  //       refreshScreenDataAfterDuration();
-  //     }, refreshDuration * 1000);
-
-  //     return () => clearInterval(intervalId);
-  //   }
-  // }, [refreshDuration]);
-
   // const response = getPlaylistEntries(playlistData);
 
-  // useEffect(() => {
-  //   if (window.Worker && navigator.onLine && screenId) {
-  //     screenId && new InlineWorker(uplodPulse(screenId, backendUrl));
-  //     const sha256Hash = CryptoJS.SHA256(
-  //       JSON.stringify(playlistToSave)
-  //     ).toString();
-  //     localStorage?.setItem("playlistHash", sha256Hash);
-  //     screenData &&
-  //       localStorage?.setItem("screenDetail", JSON.stringify(screenData?.data));
-  //   }
-  // }, []);
+  useEffect(() => {
+    // if (window.Worker && navigator.onLine) {
+      // new InlineWorker(uplodPulse(screenId, backendUrl));
+      setLocalStorageForScreenPlayer(playlistToSave, screenDetail)
+    // }
+  }, []);
 
   //   return (
   //     <Fragment>
