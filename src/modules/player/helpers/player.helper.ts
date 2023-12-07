@@ -439,7 +439,7 @@ export const createObjectFromArray = (array: KeyValuePair[]) => {
 };
 
 export const getVengoEntriesByIntegrations = async (vengoIntegrations: any) => {
-  if (!vengoIntegrations.length) {
+  if (!vengoIntegrations || !vengoIntegrations.length) {
     return;
   }
   const vengoEntries = await Promise.all(
