@@ -10,6 +10,8 @@ const SamplePlayerContainer = ({ entries, vengoEntries }: any) => {
   // const [storedEntries, setStoredEntries] = useState(entries);
   const [playlistEntries, setPlaylistEntries] = useState(entries);
   const [currentEntryIndex, setCurrentEntryIndex] = useState(0);
+  const [isScheduleValid, setIsScheduledValid] = useState<boolean>(false);
+
   const isFirstRender = useRef(true);
 
   const updateEntryDurationBySchedule = (entry) => {
@@ -82,7 +84,12 @@ const SamplePlayerContainer = ({ entries, vengoEntries }: any) => {
   }, []);
 
   useEffect(() => {
-    console.log("playlistEntries", playlistEntries);
+    const entrySchedule = getEntrySchedule(playlistEntries[currentEntryIndex]);
+    setIsScheduledValid(entrySchedule.isValidScheduled as boolean);
+    if (!entrySchedule.isValidScheduled) {
+      playlistEntries[currentEntryIndex].isValidScheduled = false;
+      playlistEntries[currentEntryIndex].duration = 0;
+    }
     const interval = setInterval(() => {
       setCurrentEntryIndex(
         (prevIndex) => (prevIndex + 1) % playlistEntries.length
@@ -102,11 +109,9 @@ const SamplePlayerContainer = ({ entries, vengoEntries }: any) => {
 
   return (
     <div>
-      <SamplePlayer
-        entry={updateEntryDurationBySchedule(
-          playlistEntries[currentEntryIndex]
-        )}
-      />
+      {isScheduleValid &&
+        <SamplePlayer entry={playlistEntries[currentEntryIndex]} />
+      }
     </div>
   );
 };
