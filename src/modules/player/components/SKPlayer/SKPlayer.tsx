@@ -161,9 +161,11 @@ export const SKPlayer = ({
   // isScreenOn flag should be true which means screen is scheduled
   // Note: if both screenOnTime and screenOffTime are empty it means screen will be played 24/7 on player
   if (
-    (!isScreenOn && screenId && screenOnTime && screenOffTime) ||
-    (!isScreenOn && screenId && screenOnTime && !screenOffTime) ||
-    (!isScreenOn && screenId && !screenOnTime && screenOffTime)
+    !isScreenOn &&
+    screenId &&
+    ((screenOnTime && screenOffTime) ||
+      (screenOnTime && !screenOffTime) ||
+      (!screenOnTime && screenOffTime))
   ) {
     return (
       <EmptyPlayer
