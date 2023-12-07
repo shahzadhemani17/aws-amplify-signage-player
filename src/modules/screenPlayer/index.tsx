@@ -5,40 +5,45 @@ import {
   getDifferenceOfOnOffTimeByCurrentTime,
   getPlaylistEntries,
   isScreenScheduleValid,
-  uplodPulse,
+  uplodPulse
 } from "../player/helpers/player.helper";
 import moment from "moment-timezone";
 import { ScreenModel } from "../../../models/screen.model";
 import "reflect-metadata";
 import {
   PlaylistEntryModel,
-  PlaylistModel,
+  PlaylistModel
 } from "../../../models/playlist.model";
 import { plainToInstance } from "class-transformer";
 import SamplePlayer from "../../SamplePlayer";
 import SamplePlayerContainer from "../../SamplePlayerContainer";
 import { HtmlEnum, PlayerModel } from "../../../models/playerModel";
 import { samplePlayerData } from "../../seed-data";
-import { getScreenDetailsById, setLocalStorageForScreenPlayer } from "./helpers/screen.helper";
+import {
+  getScreenDetailsById,
+  setLocalStorageForScreenPlayer
+} from "./helpers/screen.helper";
 
 export const ScreenPlayer = ({
   playlistData,
   screenData,
   screenId,
-  backendUrl,
+  backendUrl
 }: any) => {
   const [playlistDetails] = useState(
     plainToInstance(PlaylistModel, playlistData?.data)
   );
-  let playlistToSave = Object.assign(plainToInstance(PlaylistModel, playlistData?.data));
-
+  let playlistToSave = Object.assign(
+    plainToInstance(PlaylistModel, playlistData?.data)
+  );
 
   console.log("playlistDetails.........0", playlistData?.data);
 
   console.log("playlistDetails.........1", playlistDetails);
 
-  const [screenDetail, setScreenDetailData] = useState( plainToInstance(ScreenModel, screenData?.data));
-
+  const [screenDetail, setScreenDetailData] = useState(
+    plainToInstance(ScreenModel, screenData?.data)
+  );
 
   console.log("screenDetail.........1", screenDetail);
 
@@ -58,7 +63,6 @@ export const ScreenPlayer = ({
       screenDetail?.screenOffTime
     )
   );
-
 
   if (screenId) {
     moment.tz.setDefault(screenDetail?.timezoneIdentifier);
@@ -125,8 +129,8 @@ export const ScreenPlayer = ({
 
   useEffect(() => {
     // if (window.Worker && navigator.onLine) {
-      // new InlineWorker(uplodPulse(screenId, backendUrl));
-      setLocalStorageForScreenPlayer(playlistToSave, screenDetail)
+    // new InlineWorker(uplodPulse(screenId, backendUrl));
+    setLocalStorageForScreenPlayer(playlistToSave, screenDetail);
     // }
   }, []);
 
@@ -156,9 +160,15 @@ export const ScreenPlayer = ({
   //   );
   // };
   return (
-    <SamplePlayerContainer
-      entries={convertedEntries}
-      vengoEntries={filterVengoIntegrationEntries(convertedEntries)}
-    />
+    <>
+      {isScreenOn ? (
+        <SamplePlayerContainer
+          entries={convertedEntries}
+          vengoEntries={filterVengoIntegrationEntries(convertedEntries)}
+        />
+      ) : (
+        "Empty player"
+      )}
+    </>
   );
 };
