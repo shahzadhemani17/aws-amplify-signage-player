@@ -63,14 +63,12 @@ const SamplePlayerContainer = ({ entries, vengoEntries }: any) => {
   let worker;
 
   useEffect(() => {
-      worker = new InlineWorker(
-        runWorker()
-      );
-
-      // Terminate the worker when the component is unmounted
-      return () => {
-        worker.terminate();
-      };
+    worker = new InlineWorker(runWorker); // Pass the function reference, don't execute it immediately
+  
+    // Terminate the worker when the component is unmounted
+    return () => {
+      worker.terminate();
+    };
   }, []);
 
   const runWorker = async () => {
@@ -96,15 +94,19 @@ const SamplePlayerContainer = ({ entries, vengoEntries }: any) => {
       setScreenInterval((prev) => {
         return prev + 1;
       });
-      worker.terminate();
     }, 20 * 1000);
   }
 
   console.log("screenInterval::", screenInterval);
 
+  const handleScreenClick = () => {
+    worker.terminate();
+  }
+
   return (
     <div>
-      <ChildWorker interval={screenInterval}/>
+      <ChildWorker interval={screenInterval} />
+      <button onClick={() => handleScreenClick()}>HERE</button>
       {/* <SamplePlayer entry={playlistEntries[currentEntryIndex]} /> */}
     </div>
   );
