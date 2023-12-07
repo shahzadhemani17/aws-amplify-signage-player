@@ -12,6 +12,7 @@ import { PlaylistModel, PlaylistEntryModel } from "../models/playlist.model";
 import { plainToInstance } from "class-transformer";
 import { useState } from "react";
 import { ScreenPlayer } from "../src/modules/screenPlayer";
+import { PlaylistPlayer } from "../src/modules/playlistPlayer";
 
 // configure amplify for cloud communication
 // Amplify.configure(awsConfig);
@@ -33,6 +34,7 @@ const Home: NextPage = (props: any) => {
       </Head>
 
       <main className={styles.main}>
+        {/* Conditionally render Screen Player if screen is attached */}
         {props.screenId && (
           <ScreenPlayer
             playlistData={props.playlistData}
@@ -40,6 +42,11 @@ const Home: NextPage = (props: any) => {
             backendUrl={props.backendUrl}
             screenData={props.screenData}
           />
+        )}
+
+        {/* Conditionally render Playlist Player if screen is attached */}
+        {props.playlistId && (
+          <PlaylistPlayer playlistData={props.playlistData} />
         )}
       </main>
     </div>
@@ -52,7 +59,8 @@ const setPagePropsData = async (
   playlistDataRsponse,
   screenDataResponse,
   screenId,
-  backendUrl
+  backendUrl,
+  playlistId
 ) => {
   const apiResponse = await playlistDataRsponse.json();
   const playlistResponse: PlaylistResponse = {
@@ -65,6 +73,7 @@ const setPagePropsData = async (
       screenData: screenDataResponse,
       screenId,
       backendUrl,
+      playlistId: playlistId ? playlistId : null,
     },
   };
 };
@@ -115,7 +124,8 @@ export const getServerSideProps = async (context: NextPageContext) => {
         playlistDataRsponse,
         screenApiResponse,
         context.query.screen_id,
-        backendUrl
+        backendUrl,
+        context?.query?.playlist_id
       );
       // improve this
       if (typeof playlistJsonResponse.props.playlistData?.data === "string") {
@@ -151,7 +161,13 @@ export const getServerSideProps = async (context: NextPageContext) => {
         context?.query.playlist_id,
         backendUrl
       );
-      return setPagePropsData(playlistDataResponse, null, null, null);
+      return setPagePropsData(
+        playlistDataResponse,
+        null,
+        null,
+        null,
+        context?.query?.playlist_id
+      );
     } catch (err) {
       console.log("crash ");
       return {

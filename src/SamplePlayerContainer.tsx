@@ -10,35 +10,34 @@ const SamplePlayerContainer = ({ entries, vengoEntries }: any) => {
   const [playlistEntries, setPlaylistEntries] = useState(entries);
   const [currentEntryIndex, setCurrentEntryIndex] = useState(0);
 
-  console.log("entries.............8", entries);
-  console.log("vengoEntries.............8", vengoEntries);
-
   useEffect(() => {
-    if (currentEntryIndex === 0) {
-      console.log("vengo-data 1", vengoEntries, currentEntryIndex);
-      getVengoEntriesByIntegrations(vengoEntries).then((data) => {
-        let dataArray = convertVengoEntries(data);
-        if (dataArray?.length) {
-          const entries1 = playlistEntries.map((entry1) => {
-            if (entry1.entryType === "vengo") {
-              const vengoEntry = dataArray?.find(
-                (entry2) => entry2?.position === entry1?.position
-              );
-              console.log("vengoEntry", vengoEntry);
-              entry1 = vengoEntry;
+    if (vengoEntries?.length) {
+      if (currentEntryIndex === 0) {
+        console.log("vengo-data 1", vengoEntries, currentEntryIndex);
+        getVengoEntriesByIntegrations(vengoEntries).then((data) => {
+          let dataArray = convertVengoEntries(data);
+          if (dataArray?.length) {
+            const entries1 = playlistEntries.map((entry1) => {
+              if (entry1.entryType === "vengo") {
+                const vengoEntry = dataArray?.find(
+                  (entry2) => entry2?.position === entry1?.position
+                );
+                console.log("vengoEntry", vengoEntry);
+                entry1 = vengoEntry;
 
-              if (vengoEntry?.url) {
-                entry1.duration = vengoEntry?.duration;
-              } else {
-                entry1.duration = 0;
+                if (vengoEntry?.url) {
+                  entry1.duration = vengoEntry?.duration;
+                } else {
+                  entry1.duration = 0;
+                }
               }
-            }
-            return entry1;
-          });
-          setPlaylistEntries([...entries1]); // update state
-        }
-        console.log("vengo-data 2", data, dataArray);
-      });
+              return entry1;
+            });
+            setPlaylistEntries([...entries1]); // update state
+          }
+          console.log("vengo-data 2", data, dataArray);
+        });
+      }
     }
     /*
       To avoid rendering with setPlaylistEntries dependency
