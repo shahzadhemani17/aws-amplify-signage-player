@@ -78,7 +78,7 @@ export class PlaylistEntryModel {
   @Expose({ name: "is_menu" })
   isMenu?: boolean;
   @Expose({ name: "is_web_url" })
-  iswebUrl?: boolean;
+  isWebUrl?: boolean;
 }
 
 // From main app

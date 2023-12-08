@@ -12,7 +12,7 @@ export const SKIframe = (props: PlayerPropsModel) => {
 
   useEffect(() => {
     // Check if the 'entry' is a web URL or a menu
-    if (entry.is_web_url === true || entry.is_menu === true) {
+    if (entry.isWebUrl === true || entry.isMenu === true) {
       const { refreshCacheDuration } = getQueryParams();
       /* 
         Only add refresh param for 2 extension app
@@ -20,7 +20,7 @@ export const SKIframe = (props: PlayerPropsModel) => {
         Multi Playlist: APP ID:  12
       */
       playlistEntry.url =
-        [2, 12].includes(entry.app_id) && refreshCacheDuration !== null
+        [2, 12].includes(entry.appId) && refreshCacheDuration !== null
           ? `${entry.weburl.url}&refresh=${refreshCacheDuration}`
           : entry.weburl.url;
     }

@@ -23,7 +23,10 @@ const populatePlayer = (
   adIntegration?: any,
   position?: any,
   impression?: any,
-  appId?: any
+  appId?: any,
+  isWebUrl?: boolean,
+  isMenu?: boolean,
+  weburl?: string
 ) => {
   const player: PlayerModel = {
     id: id,
@@ -36,6 +39,10 @@ const populatePlayer = (
     position,
     impression,
     scheduledCriteria: scheduledCriteria || "",
+    isWebUrl,
+    isMenu,
+    weburl, 
+    appId
   };
   return player;
 };
@@ -59,7 +66,10 @@ export const convertJSON = (playlistData1: any) => {
           entry?.adIntegration,
           entry.position,
           entry?.impression,
-          entry?.appId
+          entry?.appId,
+          entry.isWebUrl,
+          entry.isMenu,
+          entry.weburl
         )
       );
     } else if (entry?.media?.hash) {
@@ -126,6 +136,9 @@ export const convertVengoEntries = (entries: any) => {
 };
 
 export const isScreenScheduleValid = (screenOnTime, screenOffTime) => {
+  if (!screenOnTime && !screenOffTime) {
+    return true;
+  }
   const format = "hh:mm:ss"; // Use 'HH' for 24-hour format
   const time = moment();
   const beforeTime = moment(screenOnTime, format);

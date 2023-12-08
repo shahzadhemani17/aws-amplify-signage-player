@@ -28,6 +28,10 @@ export interface PlayerModel {
   vengoEntry?: any;
   scheduledCriteria: string;
   isValidScheduled?: boolean;
+  isWebUrl?: boolean;
+  isMenu?: boolean;
+  weburl?: string;
+  appId?: number;
 }
 
 // export interface AdIntegration {

@@ -26,6 +26,7 @@ import {
   showPlayerMessage,
   showSplashScreen
 } from "./helpers/screen.helper";
+import InlineWorker from "lib/InlineWorker";
 
 export const ScreenPlayer = ({
   playlistData,
@@ -123,26 +124,46 @@ export const ScreenPlayer = ({
   }, [screenRefreshDuration]);
 
   // const response = getPlaylistEntries(playlistData);
+  let worker: any = null;
+
+  useEffect(() => {
+    // Start the worker if isScreenOn is true
+      // Assuming uplodPulse returns a function
+    worker = new InlineWorker(uplodPulse(screenId, backendUrl));
+
+    // Clean up the worker when the component unmounts or isScreenOn becomes false
+    return () => {
+      if (worker) {
+        worker.terminate();
+        // Additional cleanup logic if needed
+      }
+    };
+  }, [isScreenOn, screenId, backendUrl]);
 
   useEffect(() => {
     // if (window.Worker && navigator.onLine) {
-    // new InlineWorker(uplodPulse(screenId, backendUrl));
     setLocalStorageForScreenPlayer(playlistToSave, screenDetail);
     // }
   }, []);
 
-  return (
-    <Fragment>
-      { showSplashScreen(playlistDetails, playlistData.data.message) ? (
-        <SplashScreen />
-      ) : isScreenOn ? (
-          <SamplePlayerContainer
+  const renderPlayer = () => {
+    if (showSplashScreen(playlistDetails, playlistData.data.message)) {
+      return <SplashScreen />;
+    }
+  
+    if (isScreenOn) {
+      return (
+        <SamplePlayerContainer
           entries={convertedEntries}
           vengoEntries={filterVengoIntegrationEntries(convertedEntries)}
         />
-      ) : (
-        <EmptyPlayer message={showPlayerMessage(screenDetail, playlistDetails, isScreenOn)} />
-      )}
-    </Fragment>
+      );
+    }
+  
+    return <EmptyPlayer message={showPlayerMessage(screenDetail, playlistDetails, isScreenOn)} />;
+  };
+
+  return (
+    renderPlayer()
   );
 };
