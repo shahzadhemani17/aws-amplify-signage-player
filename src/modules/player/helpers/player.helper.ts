@@ -6,6 +6,7 @@ import moment from "moment-timezone";
 import {
   getPlaylistData,
   getQueryParams,
+  getScreenDetails,
   getVengoEntries,
   postPulse,
 } from "lib/scoop.repo";
@@ -512,6 +513,39 @@ export const getDifferenceOfOnOffTimeByCurrentTime = (offTime, onTime) => {
   return {
     offTimeDifference: givenOffDateTime.diff(currentTime, "seconds"),
     onTimeDifference: givenOnDateTime.diff(currentTime, "seconds"),
+  };
+};
+
+export const getScreenJsonApiResponse = async (backendUrl, context) => {
+  const screenDetailResponse = await getScreenDetails(
+    context.query.screen_id,
+    backendUrl
+  );
+
+  const screenApiResponse = await screenDetailResponse.json();
+  return screenApiResponse;
+}
+
+export const setPagePropsData = async (
+  playlistDataRsponse,
+  screenDataResponse,
+  screenId,
+  backendUrl,
+  playlistId
+) => {
+  const apiResponse = await playlistDataRsponse.json();
+  const playlistResponse: PlaylistResponse = {
+    status: ResponseType.SUCCESS,
+    data: apiResponse,
+  };
+  return {
+    props: {
+      playlistData: playlistResponse,
+      screenData: screenDataResponse,
+      screenId,
+      backendUrl,
+      playlistId: playlistId ? playlistId : null,
+    },
   };
 };
 
