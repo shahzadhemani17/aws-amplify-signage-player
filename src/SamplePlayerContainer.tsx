@@ -69,7 +69,7 @@ const SamplePlayerContainer = ({ entries, vengoEntries }: any) => {
     This impression is only configured for the vengo
     For other items we need to fix the first entry issue
   */
-  const handleImpression = useCallback((previousEntry) => {
+  const handleImpression = useCallback(async (previousEntry) => {
     if (
       previousEntry.entryType === "vengo" &&
       !isNegative(previousEntry.duration)
@@ -80,6 +80,9 @@ const SamplePlayerContainer = ({ entries, vengoEntries }: any) => {
         previousEntry.tag,
         previousEntry.duration
       );
+      await fetch(previousEntry.impression);
+      console.log("vengooo", previousEntry);
+
     }
   }, []);
 
