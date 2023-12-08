@@ -501,3 +501,18 @@ export const getDifferenceOfOnOffTimeByCurrentTime = (offTime, onTime) => {
     onTimeDifference: givenOnDateTime.diff(currentTime, "seconds"),
   };
 };
+
+export const isPlaylistValidMessage = (playlistData: any) => {
+  let message: string = "";
+  if (playlistData?.code === "not-found") {
+    message = PlaylistMessages.PLAYLIST_NOT_EXISTS;
+  } else if (
+    Object.keys(playlistData || {}).length === 0 &&
+    playlistData.status === ResponseType.ERROR
+  ) {
+    message = PlaylistMessages.SOMETHING_WENT_WRONG;
+  } else if (Object.keys(playlistData || {}).length === 0) {
+    message = PlaylistMessages.PROVIDE_PLAYLIST_ID;
+  }
+  return message
+};
