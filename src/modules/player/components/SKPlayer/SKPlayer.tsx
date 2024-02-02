@@ -12,7 +12,7 @@ import { HtmlEnum, EntriesModel } from "@models/playerModel";
 import {
   SKImage,
   SKIframe,
-  SKVideo,
+  SKVideo
 } from "@playerComponents/SKPlayer/components/index";
 /* @ts-ignore */
 import Modal from "react-modal";
@@ -47,7 +47,7 @@ export const SKPlayer = ({
   );
 
   const [vengoIntegrationEntries] = useState([
-    ...filterVengoIntegrationEntries(entries),
+    ...filterVengoIntegrationEntries(entries)
   ]);
 
   const [, setVengoPlaylistEntries] = useState<any>([]);
@@ -70,13 +70,24 @@ export const SKPlayer = ({
     setScreenToOn(isScreenScheduleValid(screenOnTime, screenOffTime));
   }, [screenOnTime, screenOffTime]);
 
+  /*
+  We're facing issues with the cookie check in IOS and Safari (signage app)
+  That's why we decided to disable the cookie check for now.
+  The preview feature should work fine with this change but there can be some ripple
+  with the player usage with screen id.
+*/
+
+  // useEffect(() => {
+  //   if (navigator.cookieEnabled && typeof window.localStorage !== "undefined") {
+  //     setVisiblePlaylist();
+  //   } else {
+  //     setPlaylistEntries([]);
+  //     setIsOpen(true);
+  //   }
+  // }, []);
+
   useEffect(() => {
-    if (navigator.cookieEnabled && typeof window.localStorage !== "undefined") {
-      setVisiblePlaylist();
-    } else {
-      setPlaylistEntries([]);
-      setIsOpen(true);
-    }
+    setVisiblePlaylist();
   }, []);
 
   const setVisiblePlaylist = async () => {
@@ -88,7 +99,7 @@ export const SKPlayer = ({
           ...playlistEntries[i],
           visibility: false,
           duration: 0
-        } 
+        };
       }
       if (i === 0) {
         getVengoEntriesByIntegrations(vengoIntegrationEntries).then((data) => {
@@ -204,7 +215,9 @@ export const SKPlayer = ({
                 index={index}
                 transition={transition}
                 key={index}
-                entry={originalEntries.find((entryObj) => entryObj.id === entry.id)}
+                entry={originalEntries.find(
+                  (entryObj) => entryObj.id === entry.id
+                )}
               />
             );
           default:
