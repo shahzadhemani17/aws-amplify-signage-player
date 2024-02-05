@@ -12,6 +12,7 @@ export const SKVideo = (props: PlayerPropsModel) => {
         ref={videoRef}
         autoPlay
         loop
+        playsInline
         muted
         key={index}
         style={{
