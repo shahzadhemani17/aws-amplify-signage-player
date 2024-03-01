@@ -1,6 +1,7 @@
 import type { NextPage, NextPageContext } from "next";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
+import { Buffer } from "buffer";
 import { ResponseType, PlaylistResponse } from "@models/playlistResponseModel";
 import { Player } from "src/modules/player";
 import {
@@ -15,6 +16,14 @@ export enum ErrorTypes {
   Screen_Not_Found_Error = "Screen_Not_Found_Error",
   Playlist_Not_Attached_Error = "Playlist_Not_Attached_Error"
 }
+
+const encodeBase64 = (data) => {
+  return Buffer.from(data).toString("base64");
+};
+const decodeBase64 = (data) => {
+  return Buffer.from(data, "base64").toString("ascii");
+};
+
 const Home: NextPage = (props: any) => {
   console.log("API: Screen or Playlist Data Response", props);
   return (
@@ -66,9 +75,14 @@ export const getServerSideProps = async (context: NextPageContext) => {
     ? context?.query.backend_url
     : process.env.NEXT_PUBLIC_API_URL;
   if (context?.query.screen_id) {
+    const screenIDFromQuery =
+      context?.query.cyp === "true"
+        ? decodeBase64(context?.query.screen_id)
+        : context?.query.screen_id;
+
     try {
       const screenDetailResponse = await getScreenDetails(
-        context?.query.screen_id,
+        screenIDFromQuery,
         backendUrl
       );
 
@@ -80,7 +94,7 @@ export const getServerSideProps = async (context: NextPageContext) => {
       ) {
         return {
           props: {
-            screen_id: context.query.screen_id,
+            screen_id: screenIDFromQuery,
             backend_url: backendUrl,
             screenData: screenApiResponse,
             playlistData: {
@@ -95,7 +109,7 @@ export const getServerSideProps = async (context: NextPageContext) => {
       const playlistDataRsponse = await getPlaylistData(
         screenApiResponse?.playlist_id ?? screenApiResponse?.data?.playlist_id,
         backendUrl,
-        context?.query.screen_id as string
+        screenIDFromQuery as string
       );
 
       // const playlistJsonResponse = await playlistResponse(
@@ -106,14 +120,14 @@ export const getServerSideProps = async (context: NextPageContext) => {
       const playlistJsonResponse = await playlistResponse(
         playlistDataRsponse,
         screenApiResponse,
-        context.query.screen_id,
+        screenIDFromQuery,
         backendUrl
       );
       // improve this
       if (typeof playlistJsonResponse.props.playlistData?.data === "string") {
         return {
           props: {
-            screen_id: context.query.screen_id,
+            screen_id: screenIDFromQuery,
             backend_url: backendUrl,
             playlistData: {
               status: ResponseType.ERROR,
@@ -131,7 +145,7 @@ export const getServerSideProps = async (context: NextPageContext) => {
       console.log("crash ");
       return {
         props: {
-          screen_id: context.query.screen_id,
+          screen_id: screenIDFromQuery,
           backend_url: backendUrl,
           playlistData: { status: ResponseType.ERROR, data: {} }
         }
