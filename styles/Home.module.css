@@ -126,7 +126,8 @@
   height: 100vh;
   overflow: hidden !important;
   border: none !important;
-  object-fit: contain;
+  /* Commented this property because height wasn't working on ios devices */
+  /* object-fit: contain; */
   width: 100%;
 }
 .textPadding {

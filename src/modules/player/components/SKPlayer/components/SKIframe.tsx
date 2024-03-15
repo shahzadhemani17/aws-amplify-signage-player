@@ -47,7 +47,7 @@ export const SKIframe = (props: PlayerPropsModel) => {
             onLoad={() => {
               setIframeDisplay("visible");
             }}
-            scrolling="no"
+            scrolling={entry.app_id === 3 ? "yes" : "no"}
             style={{
               border: 0,
               overflow: "hidden",
